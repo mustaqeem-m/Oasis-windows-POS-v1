@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:pos_2/helpers/toast_helper.dart';
 import 'package:search_choices/search_choices.dart';
 
 import '../apis/contact.dart';
@@ -245,9 +246,10 @@ class _CustomerState extends State<Customer> {
                       .then((value) {
                     Navigator.pushNamedAndRemoveUntil(
                         context, '/products', ModalRoute.withName('/home'));
-                    Fluttertoast.showToast(
-                        msg: AppLocalizations.of(context)
-                            .translate('quotation_added'));
+                    // Fluttertoast.showToast(
+                    //     msg: AppLocalizations.of(context)
+                    //         .translate('quotation_added'));
+                    ToastHelper.show(context, "Customer created successfully");
                   });
                 });
               },

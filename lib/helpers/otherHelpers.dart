@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -17,7 +16,6 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:printing/printing.dart';
-import 'package:share_plus/share_plus.dart';
 // import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -270,41 +268,69 @@ class Helper {
   //   //to get file path use generatedPdfFile.path
   // }
 
+  
+
     //share invoice
-  savePdf(sellId, taxId, context, invoiceNo, {invoice}) async {
-    String _invoice = (invoice != null)
-        ? invoice
-        : await InvoiceFormatter().generateInvoice(sellId, taxId, context);
+  // savePdf(sellId, taxId, context, invoiceNo, {invoice}) async {
+  //   String _invoice = (invoice != null)
+  //       ? invoice
+  //       : await InvoiceFormatter().generateInvoice(sellId, taxId, context);
 
-    final pdf = pw.Document();
+  //   final pdf = pw.Document();
 
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text('Invoice - $invoiceNo',
-                  style: pw.TextStyle(
-                      fontSize: 18, fontWeight: pw.FontWeight.bold)),
-              pw.SizedBox(height: 16),
-              pw.Text(_invoice), // raw HTML text output, optional parsing
-            ],
-          );
-        },
-      ),
-    );
+  //   pdf.addPage(
+  //     pw.Page(
+  //       build: (pw.Context context) {
+  //         return pw.Column(
+  //           crossAxisAlignment: pw.CrossAxisAlignment.start,
+  //           children: [
+  //             pw.Text('Invoice - $invoiceNo',
+  //                 style: pw.TextStyle(
+  //                     fontSize: 18, fontWeight: pw.FontWeight.bold)),
+  //             pw.SizedBox(height: 16),
+  //             pw.Text(_invoice), // raw HTML text output, optional parsing
+  //           ],
+  //         );
+  //       },
+  //     ),
+  //   );
 
-    final outputDir = await getTemporaryDirectory();
-    final fileName = "invoice_no_${Random().nextInt(100)}.pdf";
-    final filePath = "${outputDir.path}/$fileName";
+  //   final outputDir = await getTemporaryDirectory();
+  //   final fileName = "invoice_no_${Random().nextInt(100)}.pdf";
+  //   final filePath = "${outputDir.path}/$fileName";
 
-    final file = File(filePath);
-    await file.writeAsBytes(await pdf.save());
+  //   final file = File(filePath);
+  //   await file.writeAsBytes(await pdf.save());
 
-    await Share.shareXFiles([XFile(file.path)],
-        text: 'Invoice - $invoiceNo');
-  }
+  //   await Share.shareXFiles([XFile(file.path)],
+  //       text: 'Invoice - $invoiceNo');
+  // }
+
+  Future<String> savePdf(sellId, taxId, context, invoiceNo, {invoice}) async {
+  // Step 1: Generate invoice HTML if not provided
+  String _invoice = (invoice != null)
+      ? invoice
+      : await InvoiceFormatter().generateInvoice(sellId, taxId, context);
+
+  // Step 2: Convert HTML to PDF bytes (forced to A4 size)
+  final pdfBytes = await Printing.convertHtml(
+    format: PdfPageFormat.a4,
+    html: _invoice,
+  );
+
+  // Step 3: Get system's temporary directory
+  final dir = await getTemporaryDirectory();
+
+  // Step 4: Define file path and create file
+  final filePath = '${dir.path}/Invoice_$invoiceNo.pdf';
+  final file = File(filePath);
+
+  // Step 5: Save the bytes to the file
+  await file.writeAsBytes(pdfBytes);
+
+  // Step 6: Return file path (useful for sharing/opening later)
+  return filePath;
+}
 
 
   //fetch formatted business details

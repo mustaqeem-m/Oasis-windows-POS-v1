@@ -6,12 +6,13 @@ import 'dart:io';
 // import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+// import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:pos_2/helpers/toast_helper.dart';
 
 import '../apis/field_force.dart';
 import '../apis/follow_up.dart';
@@ -613,16 +614,18 @@ class _VisitFormState extends State<VisitForm> {
                           if (await Helper().checkConnectivity()) {
                             if (visitStatus == "assigned") {
                               validated = false;
-                              Fluttertoast.showToast(
-                                  msg: AppLocalizations.of(context)
-                                      .translate('please_enter_visit_status'));
+                              // Fluttertoast.showToast(
+                              //     msg: AppLocalizations.of(context)
+                              //         .translate('please_enter_visit_status'));
+                              ToastHelper.show(context, AppLocalizations.of(context).translate('please_enter_visit_status'));
                             }
 
                             if (_image == null) {
                               validated = false;
-                              Fluttertoast.showToast(
-                                  msg: AppLocalizations.of(context).translate(
-                                      'please_upload_image_of_visited_place'));
+                              // Fluttertoast.showToast(
+                              //     msg: AppLocalizations.of(context).translate(
+                              //         'please_upload_image_of_visited_place'));
+                              ToastHelper.show(context, AppLocalizations.of(context).translate('please_upload_image_of_visited_place'));
                             } else {
                               File imageFile = new File(_image!.path);
                               List<int> imageBytes =
@@ -632,9 +635,10 @@ class _VisitFormState extends State<VisitForm> {
 
                             if (currentLoc == null) {
                               validated = false;
-                              Fluttertoast.showToast(
-                                  msg: AppLocalizations.of(context).translate(
-                                      'please_add_current_location'));
+                              // Fluttertoast.showToast(
+                              //     msg: AppLocalizations.of(context).translate(
+                              //         'please_add_current_location'));
+                              ToastHelper.show(context, AppLocalizations.of(context).translate('please_add_current_location'));
                             }
 
                             if (_formKey.currentState!.validate() &&
@@ -667,9 +671,10 @@ class _VisitFormState extends State<VisitForm> {
                                   .update(visitDetails, widget.visit['id'])
                                   .then((value) {
                                 if (value != null) {
-                                  Fluttertoast.showToast(
-                                      msg: AppLocalizations.of(context)
-                                          .translate('status_updated'));
+                                  // Fluttertoast.showToast(
+                                  //     msg: AppLocalizations.of(context)
+                                  //         .translate('status_updated'));
+                                  ToastHelper.show(context, AppLocalizations.of(context).translate('status_updated'));                                  
                                 }
                                 Navigator.pop(context);
                               });
@@ -1240,9 +1245,10 @@ class _FollowUpFormState extends State<FollowUpForm> {
             ? Navigator.pushReplacementNamed(context, '/followUp')
             : Navigator.pushReplacementNamed(context, '/leads');
       } else {
-        Fluttertoast.showToast(
-            msg:
-                "${AppLocalizations.of(context).translate('something_went_wrong')}");
+        // Fluttertoast.showToast(
+        //     msg:
+        //         "${AppLocalizations.of(context).translate('something_went_wrong')}");
+        ToastHelper.show(context, AppLocalizations.of(context).translate('something_went_wrong'));
       }
     }
   }

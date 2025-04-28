@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:pos_2/helpers/toast_helper.dart';
 
 import '../helpers/AppTheme.dart';
 import '../helpers/SizeConfig.dart';
@@ -548,10 +549,10 @@ class CartState extends State<Cart> {
               product, (argument != null) ? argument!['sellId'] : null);
           cartList();
         } else {
-          Fluttertoast.showToast(msg: "Out of Stock");
+          ToastHelper.show(context, "Out of Stock");
         }
       } else {
-        Fluttertoast.showToast(msg: "No product found");
+        ToastHelper.show(context, "No product found");
       }
     });
   }

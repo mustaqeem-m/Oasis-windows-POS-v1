@@ -120,6 +120,7 @@ dependencies:
   intl: any
   path: any
   flutter_html: any
+  sqflite_common_ffi: ^2.3.5
 
 
 

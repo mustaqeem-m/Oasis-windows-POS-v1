@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:badges/badges.dart' as custom_badge;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:pos_2/helpers/toast_helper.dart';
 
 import '../helpers/AppTheme.dart';
 import '../helpers/SizeConfig.dart';
@@ -113,8 +113,9 @@ class _ProductsState extends State<Products> {
         canMakeSell = true;
       });
     } else {
-      Fluttertoast.showToast(
-          msg: AppLocalizations.of(context).translate('no_subscription_found'));
+      // Fluttertoast.showToast(
+      //     msg: AppLocalizations.of(context).translate('no_subscription_found'));
+      ToastHelper.show(context, AppLocalizations.of(context).translate('no_subscription_found'));
     }
     await Helper().getFormattedBusinessDetails().then((value) {
       symbol = value['symbol'] + ' ';
@@ -352,9 +353,10 @@ class _ProductsState extends State<Products> {
                       }
 
                       if (cartCount == 0) {
-                        Fluttertoast.showToast(
-                            msg: AppLocalizations.of(context)
-                                .translate('no_items_added_to_cart'));
+                        // Fluttertoast.showToast(
+                        //     msg: AppLocalizations.of(context)
+                        //         .translate('no_items_added_to_cart'));
+                        ToastHelper.show(context, AppLocalizations.of(context).translate('no_items_added_to_cart'));
                       }
                     }
                   }),
@@ -912,32 +914,37 @@ class _ProductsState extends State<Products> {
               product = ProductModel().product(value[0], price);
             });
             if (product != null && product['stock_available'] > 0) {
-              Fluttertoast.showToast(
-                  msg: AppLocalizations.of(context).translate('added_to_cart'));
+              // Fluttertoast.showToast(
+              //     msg: AppLocalizations.of(context).translate('added_to_cart'));
+              ToastHelper.show(context, AppLocalizations.of(context).translate('added_to_cart'));
               await Sell().addToCart(
                   product, argument != null ? argument!['sellId'] : null);
               if (argument != null) {
                 selectedLocationId = argument!['locationId'];
               }
             } else {
-              Fluttertoast.showToast(
-                  msg:
-                      "${AppLocalizations.of(context).translate("out_of_stock")}");
+              // Fluttertoast.showToast(
+              //     msg:
+              //         "${AppLocalizations.of(context).translate("out_of_stock")}");
+              ToastHelper.show(context, AppLocalizations.of(context).translate('out_of_stock'));
             }
           } else {
-            Fluttertoast.showToast(
-                msg:
-                    "${AppLocalizations.of(context).translate("no_product_found")}");
+            // Fluttertoast.showToast(
+            //     msg:
+            //         "${AppLocalizations.of(context).translate("no_product_found")}");
+            ToastHelper.show(context, AppLocalizations.of(context).translate('no_product_found'));
           }
         } else {
-          Fluttertoast.showToast(
-              msg:
-                  "${AppLocalizations.of(context).translate("no_sells_permission")}");
+          // Fluttertoast.showToast(
+          //     msg:
+          //         "${AppLocalizations.of(context).translate("no_sells_permission")}");
+          ToastHelper.show(context, AppLocalizations.of(context).translate('no_sells_permission'));
         }
       });
     } else {
-      Fluttertoast.showToast(
-          msg: AppLocalizations.of(context).translate('no_subscription_found'));
+      // Fluttertoast.showToast(
+      //     msg: AppLocalizations.of(context).translate('no_subscription_found'));
+      ToastHelper.show(context, AppLocalizations.of(context).translate('no_subscription_found'));
     }
   }
 
@@ -1018,25 +1025,29 @@ class _ProductsState extends State<Products> {
     if (canAddSell) {
       if (canMakeSell) {
         if (products[index]['stock_available'] > 0) {
-          Fluttertoast.showToast(
-              msg: AppLocalizations.of(context).translate('added_to_cart'));
+          // Fluttertoast.showToast(
+          //     msg: AppLocalizations.of(context).translate('added_to_cart'));
+          ToastHelper.show(context, AppLocalizations.of(context).translate('added_to_cart'));
           await Sell().addToCart(
               products[index], argument != null ? argument!['sellId'] : null);
           if (argument != null) {
             selectedLocationId = argument!['locationId'];
           }
         } else {
-          Fluttertoast.showToast(
-              msg: "${AppLocalizations.of(context).translate("out_of_stock")}");
+          // Fluttertoast.showToast(
+          //     msg: "${AppLocalizations.of(context).translate("out_of_stock")}");
+              ToastHelper.show(context, AppLocalizations.of(context).translate('out_of_stock'));
         }
       } else {
-        Fluttertoast.showToast(
-            msg:
-                "${AppLocalizations.of(context).translate("no_sells_permission")}");
+        // Fluttertoast.showToast(
+        //     msg:
+        //         "${AppLocalizations.of(context).translate("no_sells_permission")}");
+                ToastHelper.show(context, AppLocalizations.of(context).translate('no_sale_permission'));
       }
     } else {
-      Fluttertoast.showToast(
-          msg: AppLocalizations.of(context).translate('no_subscription_found'));
+      // Fluttertoast.showToast(
+      //     msg: AppLocalizations.of(context).translate('no_subscription_found'));
+          ToastHelper.show(context, AppLocalizations.of(context).translate('no_subscription_found'));
     }
   }
 
@@ -1124,9 +1135,10 @@ class _ProductsState extends State<Products> {
                 }
               });
             } else {
-              Fluttertoast.showToast(
-                  msg: AppLocalizations.of(context)
-                      .translate('cannot_change_location'));
+              // Fluttertoast.showToast(
+              //     msg: AppLocalizations.of(context)
+              //         .translate('cannot_change_location'));
+              ToastHelper.show(context, AppLocalizations.of(context).translate('cannot_change_location'));
             }
           }),
     );

@@ -3,10 +3,10 @@ import 'dart:async';
 // import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:pos_2/helpers/toast_helper.dart';
 
 import '../helpers/AppTheme.dart';
 import '../helpers/SizeConfig.dart';
@@ -272,7 +272,8 @@ class CheckOutState extends State<CheckOut> {
                                       muted: true)),
                               DropdownButtonHideUnderline(
                                 child: DropdownButton(
-                                    dropdownColor: themeData.colorScheme.surface,
+                                    dropdownColor:
+                                        themeData.colorScheme.surface,
                                     icon: Icon(
                                       Icons.arrow_drop_down,
                                     ),
@@ -325,7 +326,8 @@ class CheckOutState extends State<CheckOut> {
                                       muted: true)),
                               DropdownButtonHideUnderline(
                                 child: DropdownButton(
-                                    dropdownColor: themeData.colorScheme.surface,
+                                    dropdownColor:
+                                        themeData.colorScheme.surface,
                                     icon: Icon(
                                       Icons.arrow_drop_down,
                                     ),
@@ -556,8 +558,7 @@ class CheckOutState extends State<CheckOut> {
                                         ' : ',
                                     style: AppTheme.getTextStyle(
                                         themeData.textTheme.bodyLarge,
-                                        color:
-                                            themeData.colorScheme.onSurface,
+                                        color: themeData.colorScheme.onSurface,
                                         fontWeight: 600,
                                         muted: true)),
                                 SizedBox(
@@ -598,8 +599,8 @@ class CheckOutState extends State<CheckOut> {
                                         maxLines: 2,
                                         style: AppTheme.getTextStyle(
                                             themeData.textTheme.bodyMedium,
-                                            color: themeData
-                                                .colorScheme.onSurface,
+                                            color:
+                                                themeData.colorScheme.onSurface,
                                             fontWeight: 600),
                                       ),
                                     ),
@@ -621,8 +622,13 @@ class CheckOutState extends State<CheckOut> {
                                             printWebInvoice = true;
                                           });
                                         } else {
-                                          Fluttertoast.showToast(
-                                              msg: AppLocalizations.of(context)
+                                          // Fluttertoast.showToast(
+                                          //     msg: AppLocalizations.of(context)
+                                          //         .translate(
+                                          //             'check_connectivity'));
+                                          ToastHelper.show(
+                                              context,
+                                              AppLocalizations.of(context)
                                                   .translate(
                                                       'check_connectivity'));
                                         }
@@ -636,8 +642,8 @@ class CheckOutState extends State<CheckOut> {
                                         maxLines: 2,
                                         style: AppTheme.getTextStyle(
                                             themeData.textTheme.bodyMedium,
-                                            color: themeData
-                                                .colorScheme.onSurface,
+                                            color:
+                                                themeData.colorScheme.onSurface,
                                             fontWeight: 600),
                                       ),
                                     ),
@@ -654,7 +660,8 @@ class CheckOutState extends State<CheckOut> {
                               flex: 1,
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                    backgroundColor: themeData.colorScheme.onPrimary,
+                                    backgroundColor:
+                                        themeData.colorScheme.onPrimary,
                                     elevation: 5),
                                 onPressed: () {
                                   _printInvoice = false;
@@ -685,7 +692,8 @@ class CheckOutState extends State<CheckOut> {
                               flex: 1,
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                    backgroundColor: themeData.colorScheme.primary,
+                                    backgroundColor:
+                                        themeData.colorScheme.primary,
                                     elevation: 5),
                                 onPressed: () {
                                   _printInvoice = true;
@@ -971,7 +979,8 @@ class CheckOutState extends State<CheckOut> {
       actions: <Widget>[
         TextButton(
             style: TextButton.styleFrom(
-                foregroundColor: themeData.colorScheme.onPrimary, backgroundColor: themeData.colorScheme.primary),
+                foregroundColor: themeData.colorScheme.onPrimary,
+                backgroundColor: themeData.colorScheme.primary),
             onPressed: () {
               Navigator.pop(context);
               if (!saleCreated) {
@@ -981,7 +990,8 @@ class CheckOutState extends State<CheckOut> {
             child: Text(AppLocalizations.of(context).translate('ok'))),
         TextButton(
             style: TextButton.styleFrom(
-                foregroundColor: themeData.colorScheme.primary, backgroundColor: themeData.colorScheme.onPrimary),
+                foregroundColor: themeData.colorScheme.primary,
+                backgroundColor: themeData.colorScheme.onPrimary),
             onPressed: () {
               Navigator.pop(context);
             },
@@ -1014,14 +1024,16 @@ class CheckOutState extends State<CheckOut> {
       actions: <Widget>[
         TextButton(
             style: TextButton.styleFrom(
-                foregroundColor: themeData.colorScheme.primary, backgroundColor: themeData.colorScheme.onPrimary),
+                foregroundColor: themeData.colorScheme.primary,
+                backgroundColor: themeData.colorScheme.onPrimary),
             onPressed: () {
               Navigator.pop(context);
             },
             child: Text(AppLocalizations.of(context).translate('cancel'))),
         TextButton(
             style: TextButton.styleFrom(
-                foregroundColor: themeData.colorScheme.onError, backgroundColor: Colors.red),
+                foregroundColor: themeData.colorScheme.onError,
+                backgroundColor: Colors.red),
             onPressed: () {
               Navigator.pop(context);
               if (sellId != null && payments[index]['id'] != null) {

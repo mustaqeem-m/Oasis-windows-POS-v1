@@ -3,12 +3,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 // import 'package:call_log/call_log.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+// import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get_ip_address/get_ip_address.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pos_2/helpers/toast_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -144,9 +145,10 @@ class _HomeState extends State<Home> {
               onPressed: () async {
                 (await Helper().checkConnectivity())
                     ? await sync()
-                    : Fluttertoast.showToast(
-                        msg: AppLocalizations.of(context)
-                            .translate('check_connectivity'));
+                    // : Fluttertoast.showToast(
+                    //     msg: AppLocalizations.of(context)
+                    //         .translate('check_connectivity'));
+                    : ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
               },
               child: Text(
                 AppLocalizations.of(context).translate('sync'),
@@ -164,9 +166,10 @@ class _HomeState extends State<Home> {
                     prefs.remove('userId');
                     Navigator.pushReplacementNamed(context, '/login');
                   } else {
-                    Fluttertoast.showToast(
-                        msg: AppLocalizations.of(context)
-                            .translate('sync_all_sales_before_logout'));
+                    // Fluttertoast.showToast(
+                    //     msg: AppLocalizations.of(context)
+                    //         .translate('sync_all_sales_before_logout'));
+                    ToastHelper.show(context, AppLocalizations.of(context).translate('sync_all_sales_before_logout'));
                   }
                 });
               },
@@ -261,9 +264,10 @@ class _HomeState extends State<Home> {
                         if (await Helper().checkConnectivity()) {
                           Navigator.pushNamed(context, '/expense');
                         } else {
-                          Fluttertoast.showToast(
-                              msg: AppLocalizations.of(context)
-                                  .translate('check_connectivity'));
+                          // Fluttertoast.showToast(
+                          //     msg: AppLocalizations.of(context)
+                          //         .translate('check_connectivity'));
+                          ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
                         }
                       },
                       title: Text(
@@ -289,9 +293,10 @@ class _HomeState extends State<Home> {
                       if (await Helper().checkConnectivity()) {
                         Navigator.pushNamed(context, '/contactPayment');
                       } else {
-                        Fluttertoast.showToast(
-                            msg: AppLocalizations.of(context)
-                                .translate('check_connectivity'));
+                        // Fluttertoast.showToast(
+                        //     msg: AppLocalizations.of(context)
+                        //         .translate('check_connectivity'));
+                        ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
                       }
                     },
                   ),
@@ -312,9 +317,10 @@ class _HomeState extends State<Home> {
                         // await CallLog.get().then((value) =>
                         //     Navigator.pushNamed(context, '/followUp'));
                       } else {
-                        Fluttertoast.showToast(
-                            msg: AppLocalizations.of(context)
-                                .translate('check_connectivity'));
+                        // Fluttertoast.showToast(
+                        //     msg: AppLocalizations.of(context)
+                        //         .translate('check_connectivity'));
+                        ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
                       }
                     },
                   ),
@@ -329,9 +335,10 @@ class _HomeState extends State<Home> {
                         if (await Helper().checkConnectivity()) {
                           Navigator.pushNamed(context, '/fieldForce');
                         } else {
-                          Fluttertoast.showToast(
-                              msg: AppLocalizations.of(context)
-                                  .translate('check_connectivity'));
+                          // Fluttertoast.showToast(
+                          //     msg: AppLocalizations.of(context)
+                          //         .translate('check_connectivity'));
+                          ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
                         }
                       },
                       title: Text(
@@ -361,9 +368,10 @@ class _HomeState extends State<Home> {
                         //         (value) =>
                         //         Navigator.pushNamed(context, '/leads'));
                       } else {
-                        Fluttertoast.showToast(
-                            msg: AppLocalizations.of(context)
-                                .translate('check_connectivity'));
+                        // Fluttertoast.showToast(
+                        //     msg: AppLocalizations.of(context)
+                        //         .translate('check_connectivity'));
+                         ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
                       }
                     },
                   ),
@@ -412,9 +420,10 @@ class _HomeState extends State<Home> {
                               context, ModalRoute.withName('/home'));
                         });
                       } else {
-                        Fluttertoast.showToast(
-                            msg: AppLocalizations.of(context)
-                                .translate('check_connectivity'));
+                        // Fluttertoast.showToast(
+                        //     msg: AppLocalizations.of(context)
+                        //         .translate('check_connectivity'));
+                         ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
                       }
                     },
                     title: Text(
@@ -762,7 +771,8 @@ class _HomeState extends State<Home> {
                                       longitude: (currentLoc != null)
                                           ? currentLoc!.longitude
                                           : '');
-                                  Fluttertoast.showToast(msg: checkInMap);
+                                  // Fluttertoast.showToast(msg: checkInMap);
+                                   ToastHelper.show(context, checkInMap);
                                   note.clear();
                                 } else {
                                   //get current location
@@ -785,7 +795,8 @@ class _HomeState extends State<Home> {
                                               ? currentLoc!.longitude
                                               : '',
                                           checkOutNote: note.text);
-                                  Fluttertoast.showToast(msg: checkOutMap);
+                                  // Fluttertoast.showToast(msg: checkOutMap);
+                                  ToastHelper.show(context, checkOutMap);
                                   note.clear();
                                 }
                                 checkedIn = await Attendance()
@@ -799,9 +810,11 @@ class _HomeState extends State<Home> {
                                 });
                                 setState(() {});
                               } else
-                                Fluttertoast.showToast(
-                                    msg: AppLocalizations.of(context)
-                                        .translate('check_connectivity'));
+                                // Fluttertoast.showToast(
+                                //     msg: AppLocalizations.of(context)
+                                //         .translate('check_connectivity'));
+                                ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
+
                             },
                             child: Text(
                                 AppLocalizations.of(context).translate('ok')),

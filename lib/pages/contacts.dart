@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:pos_2/helpers/toast_helper.dart';
 
 import '../apis/api.dart';
 import '../apis/contact.dart';
@@ -1403,9 +1403,10 @@ class _ContactsState extends State<Contacts> {
                               });
                             }
                           } else {
-                            Fluttertoast.showToast(
-                                msg: AppLocalizations.of(context)
-                                    .translate('check_connectivity'));
+                            // Fluttertoast.showToast(
+                            //     msg: AppLocalizations.of(context)
+                            //         .translate('check_connectivity'));
+                            ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
                           }
                         },
                         child: Text(

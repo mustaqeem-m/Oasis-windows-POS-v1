@@ -2,8 +2,8 @@ import 'dart:convert';
 
 // import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:pos_2/helpers/toast_helper.dart';
 import 'package:search_choices/search_choices.dart';
 
 import '../apis/field_force.dart';
@@ -320,9 +320,10 @@ class _NewVisitFormState extends State<NewVisitForm> {
                             bool validated = true;
                             if (fromContact && selectedCustomer['id'] == 0) {
                               validated = false;
-                              Fluttertoast.showToast(
-                                  msg: AppLocalizations.of(context)
-                                      .translate('please_set_contact'));
+                              // Fluttertoast.showToast(
+                              //     msg: AppLocalizations.of(context)
+                              //         .translate('please_set_contact'));
+                              ToastHelper.show(context, AppLocalizations.of(context).translate('please_set_contact'));
                             }
 
                             if (await Helper().checkConnectivity()) {
@@ -347,9 +348,10 @@ class _NewVisitFormState extends State<NewVisitForm> {
                                     .create(visitDetails)
                                     .then((value) {
                                   if (value != null) {
-                                    Fluttertoast.showToast(
-                                        msg: AppLocalizations.of(context)
-                                            .translate('status_updated'));
+                                    // Fluttertoast.showToast(
+                                    //     msg: AppLocalizations.of(context)
+                                    //         .translate('status_updated'));
+                                    ToastHelper.show(context, AppLocalizations.of(context).translate('status_updated'));
                                   }
                                   Navigator.pop(context);
                                 });

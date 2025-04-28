@@ -2,8 +2,9 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+// import 'package:fluttertoast/fluttertoast.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:pos_2/helpers/toast_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../apis/api.dart';
@@ -247,9 +248,10 @@ class _LoginState extends State<Login> {
                                       isLoading = false;
                                     });
 
-                                    Fluttertoast.showToast(
-                                        msg: AppLocalizations.of(context)
-                                            .translate('invalid_credentials'));
+                                    // Fluttertoast.showToast(
+                                    //     msg: AppLocalizations.of(context)
+                                    //         .translate('invalid_credentials'));
+                                    ToastHelper.show(context, AppLocalizations.of(context).translate('invalid_credentials'));
                                   }
                                 }
                               }
@@ -269,9 +271,10 @@ class _LoginState extends State<Login> {
   loadAllData(loginResponse, context) async {
     timer = Timer.periodic(Duration(seconds: 30), (Timer t) {
       (context != null)
-          ? Fluttertoast.showToast(
-              msg: AppLocalizations.of(context)
-                  .translate('It_may_take_some_more_time_to_load'))
+          // ? Fluttertoast.showToast(
+          //     msg: AppLocalizations.of(context)
+          //         .translate('It_may_take_some_more_time_to_load'))
+          ? ToastHelper.show(context, AppLocalizations.of(context).translate('It_may_take_some_more_time_to_load'))
           : t.cancel();
       t.cancel();
     });

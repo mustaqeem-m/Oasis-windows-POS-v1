@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:pos_2/helpers/toast_helper.dart';
 import 'package:search_choices/search_choices.dart';
 
 import '../apis/contact_payment.dart';
@@ -214,19 +214,23 @@ class _ContactPaymentState extends State<ContactPayment> {
               .postContactPayment(paymentMap)
               .then((value) {
             Navigator.popUntil(context, ModalRoute.withName('/home'));
-            Fluttertoast.showToast(
-                msg: AppLocalizations.of(context)
-                    .translate('payment_successful'));
+            // Fluttertoast.showToast(
+            //     msg: AppLocalizations.of(context)
+            //         .translate('payment_successful'));
+            ToastHelper.show(context, AppLocalizations.of(context).translate('payment_successful'));
           });
         } else {
-          Fluttertoast.showToast(
-              msg: AppLocalizations.of(context)
-                  .translate('error_invalid_location'));
+          // Fluttertoast.showToast(
+          //     msg: AppLocalizations.of(context)
+          //         .translate('error_invalid_location'));
+                  ToastHelper.show(context, AppLocalizations.of(context).translate('error_invalid_location'));
         }
       }
     } else {
-      Fluttertoast.showToast(
-          msg: AppLocalizations.of(context).translate('check_connectivity'));
+      // Fluttertoast.showToast(
+      //     msg: AppLocalizations.of(context).translate('check_connectivity'));
+      ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
+
     }
   }
 
@@ -300,9 +304,11 @@ class _ContactPaymentState extends State<ContactPayment> {
                   Navigator.pop(context);
                 });
               } else {
-                Fluttertoast.showToast(
-                    msg: AppLocalizations.of(context)
-                        .translate('check_connectivity'));
+                // Fluttertoast.showToast(
+                //     msg: AppLocalizations.of(context)
+                //         .translate('check_connectivity'));
+                ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
+
               }
             }
           },

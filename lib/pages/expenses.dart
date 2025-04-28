@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:pos_2/helpers/toast_helper.dart';
 
 import '../apis/expenses.dart';
 import '../helpers/AppTheme.dart';
@@ -242,9 +242,10 @@ class _ExpenseState extends State<Expense> {
                       onSubmit();
                     }
                   } else {
-                    Fluttertoast.showToast(
-                        msg: AppLocalizations.of(context)
-                            .translate('check_connectivity'));
+                    // Fluttertoast.showToast(
+                    //     msg: AppLocalizations.of(context)
+                    //         .translate('check_connectivity'));
+                    ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
                   }
                 },
                 child: Text(
@@ -296,14 +297,17 @@ class _ExpenseState extends State<Expense> {
           note: expenseNote.text);
       await ExpenseApi().create(expenseMap).then((value) {
         Navigator.pop(context);
-        Fluttertoast.showToast(
-            msg: AppLocalizations.of(context)
-                .translate('expense_added_successfully'));
+        // Fluttertoast.showToast(
+        //     msg: AppLocalizations.of(context)
+        //         .translate('expense_added_successfully'));
+                ToastHelper.show(context, AppLocalizations.of(context).translate('expense_added_successfully'));
+
       });
     } else {
-      Fluttertoast.showToast(
-          msg:
-              AppLocalizations.of(context).translate('error_invalid_location'));
+      // Fluttertoast.showToast(
+      //     msg:
+      //         AppLocalizations.of(context).translate('error_invalid_location'));
+      ToastHelper.show(context, AppLocalizations.of(context).translate('error_invalid_location'));
     }
   }
 
