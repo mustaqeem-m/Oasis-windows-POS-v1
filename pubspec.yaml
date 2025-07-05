@@ -3,7 +3,7 @@ description: The ultimate Billinmg application for all kinds of retail businesse
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -25,11 +25,8 @@ environment:
 #     sdk: flutter
 #   flutter_localizations:
 #     sdk: flutter
-
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-
+# The following adds the Cupertino Icons font to your application.
+# Use with the CupertinoIcons class for iOS style icons.
 #  android_alarm_manager: any
 #   app_settings: any
 #   badges: any
@@ -41,7 +38,7 @@ environment:
 #   cron: any
 #   cupertino_icons: any
 #   # date_time_picker: any
-#   flutter_datetime_picker_plus: 
+#   flutter_datetime_picker_plus:
 #   dio: any
 #   flutter_html_to_pdf: any
 #   # flutter_kurdish_localization: 0.0.9
@@ -70,18 +67,10 @@ environment:
 #   syncfusion_flutter_datepicker: any
 #   url_launcher: any
 #   video_player: any
-
-
-
 #   intl: any
 #   path: any
 #   # date_time_picker: any
 dependencies:
-  flutter:
-    sdk: flutter
-  flutter_localizations:
-    sdk: flutter
-
   app_settings: any
   badges: any
   barcode_scan2: any
@@ -91,9 +80,14 @@ dependencies:
   cron: any
   cupertino_icons: any
 
-  flutter_datetime_picker: ^1.5.1
-
   dio: any
+  flutter:
+    sdk: flutter
+
+  flutter_datetime_picker: ^1.5.1
+  flutter_html: any
+  flutter_localizations:
+    sdk: flutter
   # flutter_html_to_pdf: any
   fluttertoast: any
   geolocator: ^10.1.0
@@ -102,32 +96,31 @@ dependencies:
   google_maps_flutter: ^2.5.0
   http: any
   image_picker: any
+  intl: any
   material_design_icons_flutter: any
+  path: any
   path_provider: any
   pdf: any
   permission_handler: ^11.3.1
   printing: ^5.11.0
   provider: any
   qr: any
-  sqflite: any
-  shared_preferences: any
   search_choices: any
   # share: any
   share_plus: ^7.2.1
+  shared_preferences: any
+  sqflite: any
+  sqflite_common_ffi: ^2.3.5
   syncfusion_flutter_datepicker: any
   url_launcher: any
   video_player: any
-  intl: any
-  path: any
-  flutter_html: any
-  sqflite_common_ffi: ^2.3.5
-
-
 
 dev_dependencies:
+  flutter_launcher_icons: any
+  flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: any
+  google_fonts: ^6.2.1
 
 flutter_icons:
   android: "launcher_icon"
@@ -135,10 +128,8 @@ flutter_icons:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
-
 # The following section is specific to Flutter.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -147,13 +138,10 @@ flutter:
     - assets/images/
     - i18n/
   # To add assets to your application, add an assets section, like this:
-
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
-
   # For details regarding adding assets from package dependencies, see
   # https://flutter.dev/assets-and-images/#from-packages
-
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
   # "family" key with the font family name, and a "fonts" key with a

@@ -201,18 +201,20 @@ class AppTheme {
         color: Color(0xff495057),
       ),
       color: Color(0xffffffff),
-      iconTheme: IconThemeData(color: Color(0xff495057), size: 24), toolbarTextStyle: lightAppBarTextTheme.bodyMedium, titleTextStyle: lightAppBarTextTheme.titleLarge,
+      iconTheme: IconThemeData(color: Color(0xff495057), size: 24),
+      toolbarTextStyle: lightAppBarTextTheme.bodyMedium,
+      titleTextStyle: lightAppBarTextTheme.titleLarge,
     ),
     navigationRailTheme: NavigationRailThemeData(
         selectedIconTheme:
-        IconThemeData(color: Color(0xff3d63ff), opacity: 1, size: 24),
+            IconThemeData(color: Color(0xff3d63ff), opacity: 1, size: 24),
         unselectedIconTheme:
-        IconThemeData(color: Color(0xff495057), opacity: 1, size: 24),
+            IconThemeData(color: Color(0xff495057), opacity: 1, size: 24),
         backgroundColor: Color(0xffffffff),
         elevation: 3,
         selectedLabelTextStyle: TextStyle(color: Color(0xff3d63ff)),
         unselectedLabelTextStyle: TextStyle(color: Color(0xff495057))),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: Colors.white,
       shadowColor: Colors.black.withOpacity(0.4),
       elevation: 1,
@@ -256,8 +258,8 @@ class AppTheme {
           lightTextTheme.bodyMedium!.merge(TextStyle(color: Color(0xff495057))),
     ),
     bottomAppBarTheme:
-    BottomAppBarTheme(color: Color(0xffffffff), elevation: 2),
-    tabBarTheme: TabBarTheme(
+        BottomAppBarTheme(color: Color(0xffffffff), elevation: 2),
+    tabBarTheme: TabBarThemeData(
       unselectedLabelColor: Color(0xff495057),
       labelColor: Color(0xff3d63ff),
       indicatorSize: TabBarIndicatorSize.label,
@@ -279,14 +281,17 @@ class AppTheme {
       valueIndicatorTextStyle: TextStyle(
         color: Colors.white,
       ),
-    ), colorScheme: ColorScheme.light(
+    ),
+    colorScheme: ColorScheme.light(
             primary: Color(0xff3d63ff),
             onPrimary: Colors.white,
             secondary: Color(0xff495057),
             onSecondary: Colors.white,
             surface: Color(0xffe2e7f1),
             onSurface: Color(0xff495057))
-        .copyWith(secondary: Color(0xff3d63ff)).copyWith(surface: Colors.white).copyWith(error: Color(0xfff0323c)),
+        .copyWith(secondary: Color(0xff3d63ff))
+        .copyWith(surface: Colors.white)
+        .copyWith(error: Color(0xfff0323c)),
   );
   static ThemeData darkTheme = ThemeData(
       brightness: Brightness.dark,
@@ -298,9 +303,11 @@ class AppTheme {
           color: Color(0xffffffff),
         ),
         color: Color(0xff2e343b),
-        iconTheme: IconThemeData(color: Color(0xffffffff), size: 24), toolbarTextStyle: darkAppBarTextTheme.bodyMedium, titleTextStyle: darkAppBarTextTheme.titleLarge,
+        iconTheme: IconThemeData(color: Color(0xffffffff), size: 24),
+        toolbarTextStyle: darkAppBarTextTheme.bodyMedium,
+        titleTextStyle: darkAppBarTextTheme.titleLarge,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: Color(0xff37404a),
         shadowColor: Color(0xff000000),
         elevation: 1,
@@ -343,8 +350,8 @@ class AppTheme {
             .merge(TextStyle(color: Color(0xffffffff))),
       ),
       bottomAppBarTheme:
-      BottomAppBarTheme(color: Color(0xff464c52), elevation: 2),
-      tabBarTheme: TabBarTheme(
+          BottomAppBarTheme(color: Color(0xff464c52), elevation: 2),
+      tabBarTheme: TabBarThemeData(
         unselectedLabelColor: Color(0xff495057),
         labelColor: Color(0xff3d63ff),
         indicatorSize: TabBarIndicatorSize.label,
@@ -367,14 +374,18 @@ class AppTheme {
           color: Colors.white,
         ),
       ),
-      cupertinoOverrideTheme: CupertinoThemeData(), colorScheme: ColorScheme.dark(
+      cupertinoOverrideTheme: CupertinoThemeData(),
+      colorScheme: ColorScheme.dark(
         primary: Color(0xff3d63ff),
         secondary: Color(0xff00cc77),
         onPrimary: Colors.white,
         onSurface: Colors.white,
         onSecondary: Colors.white,
         surface: Color(0xff585e63),
-      ).copyWith(secondary: Color(0xff3d63ff)).copyWith(surface: Color(0xff464c52)).copyWith(error: Colors.orange));
+      )
+          .copyWith(secondary: Color(0xff3d63ff))
+          .copyWith(surface: Color(0xff464c52))
+          .copyWith(error: Colors.orange));
 
   static ThemeData getThemeFromThemeMode(int themeMode) {
     if (themeMode == themeLight) {
@@ -390,8 +401,6 @@ class AppTheme {
     bgLayer2: Color(0xfff9f9f9),
     bgLayer3: Color(0xffe8ecf4),
     bgLayer4: Color(0xffdcdee3),
-
-
     disabledColor: Color(0xff636363),
     onDisabled: Color(0xffffffff),
     colorInfo: Color(0xffff784b),
@@ -402,7 +411,8 @@ class AppTheme {
     onSuccess: Color(0xffffffff),
     onWarning: Color(0xffffffff),
     colorError: Color(0xfff0323c),
-    onError: Color(0xffffffff),);
+    onError: Color(0xffffffff),
+  );
   static final CustomAppTheme darkCustomAppTheme = CustomAppTheme(
       bgLayer1: Color(0xff212429),
       bgLayer2: Color(0xff282930),

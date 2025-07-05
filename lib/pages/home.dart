@@ -148,7 +148,10 @@ class _HomeState extends State<Home> {
                     // : Fluttertoast.showToast(
                     //     msg: AppLocalizations.of(context)
                     //         .translate('check_connectivity'));
-                    : ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
+                    : ToastHelper.show(
+                        context,
+                        AppLocalizations.of(context)
+                            .translate('check_connectivity'));
               },
               child: Text(
                 AppLocalizations.of(context).translate('sync'),
@@ -169,7 +172,10 @@ class _HomeState extends State<Home> {
                     // Fluttertoast.showToast(
                     //     msg: AppLocalizations.of(context)
                     //         .translate('sync_all_sales_before_logout'));
-                    ToastHelper.show(context, AppLocalizations.of(context).translate('sync_all_sales_before_logout'));
+                    ToastHelper.show(
+                        context,
+                        AppLocalizations.of(context)
+                            .translate('sync_all_sales_before_logout'));
                   }
                 });
               },
@@ -267,7 +273,10 @@ class _HomeState extends State<Home> {
                           // Fluttertoast.showToast(
                           //     msg: AppLocalizations.of(context)
                           //         .translate('check_connectivity'));
-                          ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
+                          ToastHelper.show(
+                              context,
+                              AppLocalizations.of(context)
+                                  .translate('check_connectivity'));
                         }
                       },
                       title: Text(
@@ -296,7 +305,10 @@ class _HomeState extends State<Home> {
                         // Fluttertoast.showToast(
                         //     msg: AppLocalizations.of(context)
                         //         .translate('check_connectivity'));
-                        ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
+                        ToastHelper.show(
+                            context,
+                            AppLocalizations.of(context)
+                                .translate('check_connectivity'));
                       }
                     },
                   ),
@@ -320,7 +332,10 @@ class _HomeState extends State<Home> {
                         // Fluttertoast.showToast(
                         //     msg: AppLocalizations.of(context)
                         //         .translate('check_connectivity'));
-                        ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
+                        ToastHelper.show(
+                            context,
+                            AppLocalizations.of(context)
+                                .translate('check_connectivity'));
                       }
                     },
                   ),
@@ -338,7 +353,10 @@ class _HomeState extends State<Home> {
                           // Fluttertoast.showToast(
                           //     msg: AppLocalizations.of(context)
                           //         .translate('check_connectivity'));
-                          ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
+                          ToastHelper.show(
+                              context,
+                              AppLocalizations.of(context)
+                                  .translate('check_connectivity'));
                         }
                       },
                       title: Text(
@@ -371,7 +389,10 @@ class _HomeState extends State<Home> {
                         // Fluttertoast.showToast(
                         //     msg: AppLocalizations.of(context)
                         //         .translate('check_connectivity'));
-                         ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
+                        ToastHelper.show(
+                            context,
+                            AppLocalizations.of(context)
+                                .translate('check_connectivity'));
                       }
                     },
                   ),
@@ -423,7 +444,10 @@ class _HomeState extends State<Home> {
                         // Fluttertoast.showToast(
                         //     msg: AppLocalizations.of(context)
                         //         .translate('check_connectivity'));
-                         ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
+                        ToastHelper.show(
+                            context,
+                            AppLocalizations.of(context)
+                                .translate('check_connectivity'));
                       }
                     },
                     title: Text(
@@ -525,8 +549,7 @@ class _HomeState extends State<Home> {
         color: backgroundColor,
         height: MySize.size120,
         child: Container(
-          padding:
-              EdgeInsets.all(MySize.size16!),
+          padding: EdgeInsets.all(MySize.size16!),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -772,7 +795,7 @@ class _HomeState extends State<Home> {
                                           ? currentLoc!.longitude
                                           : '');
                                   // Fluttertoast.showToast(msg: checkInMap);
-                                   ToastHelper.show(context, checkInMap);
+                                  ToastHelper.show(context, checkInMap);
                                   note.clear();
                                 } else {
                                   //get current location
@@ -813,8 +836,10 @@ class _HomeState extends State<Home> {
                                 // Fluttertoast.showToast(
                                 //     msg: AppLocalizations.of(context)
                                 //         .translate('check_connectivity'));
-                                ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
-
+                                ToastHelper.show(
+                                    context,
+                                    AppLocalizations.of(context)
+                                        .translate('check_connectivity'));
                             },
                             child: Text(
                                 AppLocalizations.of(context).translate('ok')),
