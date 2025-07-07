@@ -114,6 +114,7 @@ dependencies:
   syncfusion_flutter_datepicker: any
   url_launcher: any
   video_player: any
+  fl_chart: ^1.0.0
 
 dev_dependencies:
   flutter_launcher_icons: any

@@ -39,7 +39,8 @@ class Splash extends StatelessWidget {
                     Image.asset('assets/images/splash_screen.png'),
               ),
               Text(AppLocalizations.of(context).translate('welcome'),
-                  style: AppTheme.getTextStyle(themeData.textTheme.headlineMedium,
+                  style: AppTheme.getTextStyle(
+                      themeData.textTheme.headlineMedium,
                       color: themeData.colorScheme.onSurface)),
               ElevatedButton.icon(
                 onPressed: () async {

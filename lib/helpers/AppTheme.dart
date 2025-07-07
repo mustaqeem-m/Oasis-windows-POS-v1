@@ -193,38 +193,38 @@ class AppTheme {
   //Color Themes
   static final ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
-    primaryColor: Color(0xff3d63ff),
+    primaryColor: const Color(0xFF004080), // Deep corporate blue
     canvasColor: Colors.transparent,
-    scaffoldBackgroundColor: Color(0xffffffff),
+    scaffoldBackgroundColor: const Color(0xffffffff),
     appBarTheme: AppBarTheme(
-      actionsIconTheme: IconThemeData(
+      actionsIconTheme: const IconThemeData(
         color: Color(0xff495057),
       ),
-      color: Color(0xffffffff),
-      iconTheme: IconThemeData(color: Color(0xff495057), size: 24),
+      color: const Color(0xffffffff),
+      iconTheme: const IconThemeData(color: Color(0xff495057), size: 24),
       toolbarTextStyle: lightAppBarTextTheme.bodyMedium,
       titleTextStyle: lightAppBarTextTheme.titleLarge,
     ),
     navigationRailTheme: NavigationRailThemeData(
         selectedIconTheme:
-            IconThemeData(color: Color(0xff3d63ff), opacity: 1, size: 24),
+            const IconThemeData(color: Color(0xFF004080), opacity: 1, size: 24),
         unselectedIconTheme:
-            IconThemeData(color: Color(0xff495057), opacity: 1, size: 24),
-        backgroundColor: Color(0xffffffff),
+            const IconThemeData(color: Color(0xff495057), opacity: 1, size: 24),
+        backgroundColor: const Color(0xffffffff),
         elevation: 3,
-        selectedLabelTextStyle: TextStyle(color: Color(0xff3d63ff)),
-        unselectedLabelTextStyle: TextStyle(color: Color(0xff495057))),
+        selectedLabelTextStyle: const TextStyle(color: Color(0xFF004080)),
+        unselectedLabelTextStyle: const TextStyle(color: Color(0xff495057))),
     cardTheme: CardThemeData(
       color: Colors.white,
       shadowColor: Colors.black.withOpacity(0.4),
       elevation: 1,
       margin: EdgeInsets.all(0),
     ),
-    inputDecorationTheme: InputDecorationTheme(
+    inputDecorationTheme: const InputDecorationTheme(
       hintStyle: TextStyle(fontSize: 15, color: Color(0xaa495057)),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(4)),
-        borderSide: BorderSide(width: 1, color: Color(0xff3d63ff)),
+        borderSide: BorderSide(width: 1, color: Color(0xFF004080)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(4)),
@@ -235,95 +235,94 @@ class AppTheme {
           borderSide: BorderSide(width: 1, color: Colors.black54)),
     ),
     splashColor: Colors.white.withAlpha(100),
-    iconTheme: IconThemeData(
-      color: Colors.white,
+    iconTheme: const IconThemeData(
+      color: Color(0xff495057), // Darker icons for light theme
     ),
     textTheme: lightTextTheme,
-    indicatorColor: Colors.white,
-    disabledColor: Color(0xffdcc7ff),
+    disabledColor: const Color(0xffdcc7ff),
     highlightColor: Colors.white,
     floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: Color(0xff3d63ff),
+        backgroundColor: const Color(0xFF004080),
         splashColor: Colors.white.withAlpha(100),
         highlightElevation: 8,
         elevation: 4,
-        focusColor: Color(0xff3d63ff),
-        hoverColor: Color(0xff3d63ff),
+        focusColor: const Color(0xFF004080),
+        hoverColor: const Color(0xFF004080),
         foregroundColor: Colors.white),
-    dividerColor: Color(0xffd1d1d1),
+    dividerColor: const Color(0xffd1d1d1),
     cardColor: Colors.white,
     popupMenuTheme: PopupMenuThemeData(
-      color: Color(0xffffffff),
-      textStyle:
-          lightTextTheme.bodyMedium!.merge(TextStyle(color: Color(0xff495057))),
+      color: const Color(0xffffffff),
+      textStyle: lightTextTheme.bodyMedium!
+          .merge(const TextStyle(color: Color(0xff495057))),
     ),
     bottomAppBarTheme:
-        BottomAppBarTheme(color: Color(0xffffffff), elevation: 2),
-    tabBarTheme: TabBarThemeData(
+        const BottomAppBarTheme(color: Color(0xffffffff), elevation: 2),
+    tabBarTheme: const TabBarThemeData(
       unselectedLabelColor: Color(0xff495057),
-      labelColor: Color(0xff3d63ff),
+      labelColor: Color(0xFF004080),
       indicatorSize: TabBarIndicatorSize.label,
       indicator: UnderlineTabIndicator(
-        borderSide: BorderSide(color: Color(0xff3d63ff), width: 2.0),
+        borderSide: BorderSide(color: Color(0xFF004080), width: 2.0),
       ),
     ),
     sliderTheme: SliderThemeData(
-      activeTrackColor: Color(0xff3d63ff),
-      inactiveTrackColor: Color(0xff3d63ff).withAlpha(140),
-      trackShape: RoundedRectSliderTrackShape(),
+      activeTrackColor: const Color(0xFF004080),
+      inactiveTrackColor: const Color(0xFF004080).withAlpha(140),
+      trackShape: const RoundedRectSliderTrackShape(),
       trackHeight: 4.0,
-      thumbColor: Color(0xff3d63ff),
-      thumbShape: RoundSliderThumbShape(enabledThumbRadius: 10.0),
-      overlayShape: RoundSliderOverlayShape(overlayRadius: 24.0),
-      tickMarkShape: RoundSliderTickMarkShape(),
+      thumbColor: const Color(0xFF004080),
+      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0),
+      overlayShape: const RoundSliderOverlayShape(overlayRadius: 24.0),
+      tickMarkShape: const RoundSliderTickMarkShape(),
       inactiveTickMarkColor: Colors.red[100],
-      valueIndicatorShape: PaddleSliderValueIndicatorShape(),
-      valueIndicatorTextStyle: TextStyle(
+      valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
+      valueIndicatorTextStyle: const TextStyle(
         color: Colors.white,
       ),
     ),
-    colorScheme: ColorScheme.light(
-            primary: Color(0xff3d63ff),
-            onPrimary: Colors.white,
+    colorScheme: const ColorScheme.light(
+            primary: Color(0xFF004080),
+            onPrimary: Color(0xff495057), // Darker text for light theme buttons
             secondary: Color(0xff495057),
             onSecondary: Colors.white,
             surface: Color(0xffe2e7f1),
             onSurface: Color(0xff495057))
-        .copyWith(secondary: Color(0xff3d63ff))
+        .copyWith(secondary: const Color(0xFF004080))
         .copyWith(surface: Colors.white)
-        .copyWith(error: Color(0xfff0323c)),
+        .copyWith(error: const Color(0xfff0323c)),
   );
   static ThemeData darkTheme = ThemeData(
       brightness: Brightness.dark,
       canvasColor: Colors.transparent,
-      primaryColor: Color(0xff3d63ff),
-      scaffoldBackgroundColor: Color(0xff464c52),
+      primaryColor: const Color(0xFF004080), // Deep corporate blue
+      scaffoldBackgroundColor:
+          const Color(0xFF2C3E50), // Darker professional grey-blue
       appBarTheme: AppBarTheme(
-        actionsIconTheme: IconThemeData(
+        actionsIconTheme: const IconThemeData(
           color: Color(0xffffffff),
         ),
-        color: Color(0xff2e343b),
-        iconTheme: IconThemeData(color: Color(0xffffffff), size: 24),
+        color: const Color(0xFF2C3E50), // Matching scaffold background
+        iconTheme: const IconThemeData(color: Color(0xffffffff), size: 24),
         toolbarTextStyle: darkAppBarTextTheme.bodyMedium,
         titleTextStyle: darkAppBarTextTheme.titleLarge,
       ),
-      cardTheme: CardThemeData(
-        color: Color(0xff37404a),
+      cardTheme: const CardThemeData(
+        color: Color(0xFF34495E), // Slightly lighter than scaffold for cards
         shadowColor: Color(0xff000000),
         elevation: 1,
         margin: EdgeInsets.all(0),
       ),
-      iconTheme: IconThemeData(
+      iconTheme: const IconThemeData(
         color: Colors.white,
       ),
       textTheme: darkTextTheme,
-      indicatorColor: Colors.white,
-      disabledColor: Color(0xffa3a3a3),
+      disabledColor: const Color(0xffa3a3a3),
       highlightColor: Colors.white,
-      inputDecorationTheme: InputDecorationTheme(
+      inputDecorationTheme: const InputDecorationTheme(
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(4)),
-          borderSide: BorderSide(width: 1, color: Color(0xff3d63ff)),
+          borderSide: BorderSide(width: 1, color: Color(0xFF004080)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(4)),
@@ -333,58 +332,60 @@ class AppTheme {
             borderRadius: BorderRadius.all(Radius.circular(4)),
             borderSide: BorderSide(width: 1, color: Colors.white70)),
       ),
-      dividerColor: Color(0xffd1d1d1),
-      cardColor: Color(0xff282a2b),
+      dividerColor: const Color(0xffd1d1d1),
+      cardColor: const Color(0xFF34495E), // Matching cardTheme.color
       splashColor: Colors.white.withAlpha(100),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-          backgroundColor: Color(0xff3d63ff),
+          backgroundColor: const Color(0xFF004080),
           splashColor: Colors.white.withAlpha(100),
           highlightElevation: 8,
           elevation: 4,
-          focusColor: Color(0xff3d63ff),
-          hoverColor: Color(0xff3d63ff),
+          focusColor: const Color(0xFF004080),
+          hoverColor: const Color(0xFF004080),
           foregroundColor: Colors.white),
       popupMenuTheme: PopupMenuThemeData(
-        color: Color(0xff37404a),
+        color: const Color(0xFF34495E), // Matching cardTheme.color
         textStyle: lightTextTheme.bodyMedium!
-            .merge(TextStyle(color: Color(0xffffffff))),
+            .merge(const TextStyle(color: Color(0xffffffff))),
       ),
-      bottomAppBarTheme:
-          BottomAppBarTheme(color: Color(0xff464c52), elevation: 2),
-      tabBarTheme: TabBarThemeData(
+      bottomAppBarTheme: const BottomAppBarTheme(
+          color: Color(0xFF2C3E50),
+          elevation: 2), // Matching scaffold background
+      tabBarTheme: const TabBarThemeData(
         unselectedLabelColor: Color(0xff495057),
-        labelColor: Color(0xff3d63ff),
+        labelColor: Color(0xFF004080),
         indicatorSize: TabBarIndicatorSize.label,
         indicator: UnderlineTabIndicator(
-          borderSide: BorderSide(color: Color(0xff3d63ff), width: 2.0),
+          borderSide: BorderSide(color: Color(0xFF004080), width: 2.0),
         ),
       ),
       sliderTheme: SliderThemeData(
-        activeTrackColor: Color(0xff3d63ff),
-        inactiveTrackColor: Color(0xff3d63ff).withAlpha(100),
-        trackShape: RoundedRectSliderTrackShape(),
+        activeTrackColor: const Color(0xFF004080),
+        inactiveTrackColor: const Color(0xFF004080).withAlpha(100),
+        trackShape: const RoundedRectSliderTrackShape(),
         trackHeight: 4.0,
-        thumbColor: Color(0xff3d63ff),
-        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 10.0),
-        overlayShape: RoundSliderOverlayShape(overlayRadius: 24.0),
-        tickMarkShape: RoundSliderTickMarkShape(),
+        thumbColor: const Color(0xFF004080),
+        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0),
+        overlayShape: const RoundSliderOverlayShape(overlayRadius: 24.0),
+        tickMarkShape: const RoundSliderTickMarkShape(),
         inactiveTickMarkColor: Colors.red[100],
-        valueIndicatorShape: PaddleSliderValueIndicatorShape(),
-        valueIndicatorTextStyle: TextStyle(
+        valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
+        valueIndicatorTextStyle: const TextStyle(
           color: Colors.white,
         ),
       ),
-      cupertinoOverrideTheme: CupertinoThemeData(),
-      colorScheme: ColorScheme.dark(
-        primary: Color(0xff3d63ff),
-        secondary: Color(0xff00cc77),
+      cupertinoOverrideTheme: const CupertinoThemeData(),
+      colorScheme: const ColorScheme.dark(
+        primary: Color(0xFF004080),
+        secondary: Color(0xFF004080), // Matching primary for consistency
         onPrimary: Colors.white,
         onSurface: Colors.white,
         onSecondary: Colors.white,
-        surface: Color(0xff585e63),
+        surface: Color(0xFF34495E), // Matching card/surface color
       )
-          .copyWith(secondary: Color(0xff3d63ff))
-          .copyWith(surface: Color(0xff464c52))
+          .copyWith(secondary: const Color(0xFF004080))
+          .copyWith(
+              surface: const Color(0xFF2C3E50)) // Matching scaffold background
           .copyWith(error: Colors.orange));
 
   static ThemeData getThemeFromThemeMode(int themeMode) {
@@ -414,21 +415,21 @@ class AppTheme {
     onError: Color(0xffffffff),
   );
   static final CustomAppTheme darkCustomAppTheme = CustomAppTheme(
-      bgLayer1: Color(0xff212429),
-      bgLayer2: Color(0xff282930),
-      bgLayer3: Color(0xff303138),
-      bgLayer4: Color(0xff383942),
-      disabledColor: Color(0xffbababa),
-      onDisabled: Color(0xff000000),
-      colorInfo: Color(0xffff784b),
-      colorWarning: Color(0xffffc837),
-      colorSuccess: Color(0xff3cd278),
-      shadowColor: Color(0xff1a1a1a),
-      onInfo: Color(0xffffffff),
-      onSuccess: Color(0xffffffff),
-      onWarning: Color(0xffffffff),
-      colorError: Color(0xfff0323c),
-      onError: Color(0xffffffff));
+      bgLayer1: const Color(0xFF2C3E50), // Matching scaffold background
+      bgLayer2: const Color(0xFF34495E), // Matching card color
+      bgLayer3: const Color(0xFF3D566E), // Slightly lighter for depth
+      bgLayer4: const Color(0xFF476380), // Even lighter for more depth
+      disabledColor: const Color(0xffbababa),
+      onDisabled: const Color(0xff000000),
+      colorInfo: const Color(0xffff784b),
+      colorWarning: const Color(0xffffc837),
+      colorSuccess: const Color(0xff3cd278),
+      shadowColor: const Color(0xff1a1a1a),
+      onInfo: const Color(0xffffffff),
+      onSuccess: const Color(0xffffffff),
+      onWarning: const Color(0xffffffff),
+      colorError: const Color(0xfff0323c),
+      onError: const Color(0xffffffff));
 }
 
 class CustomAppTheme {

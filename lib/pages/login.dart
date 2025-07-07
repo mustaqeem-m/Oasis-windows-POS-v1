@@ -112,16 +112,16 @@ class _LoginState extends State<Login> {
           Positioned.fill(
             child: Image.asset(
               'assets/images/oasis_pos_logo_.1-1.png',
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
             ),
           ),
 
           // Blur overlay for glass effect
           Positioned.fill(
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
               child: Container(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withOpacity(0.3),
               ),
             ),
           ),
@@ -130,10 +130,10 @@ class _LoginState extends State<Login> {
           Align(
             alignment: Alignment(0, 0.6), // Position just above bottom
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 380),
+              constraints: BoxConstraints(maxWidth: 400),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.12),
+                  color: Colors.white.withOpacity(0.62),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: Colors.white.withOpacity(0.3)),
                 ),
@@ -145,19 +145,18 @@ class _LoginState extends State<Login> {
                     children: [
                       TextFormField(
                         controller: usernameController,
-                        style: GoogleFonts.orbitron(color: Colors.white),
+                        style: GoogleFonts.orbitron(color: Colors.black),
                         decoration: InputDecoration(
                           prefixIcon:
-                              Icon(Icons.email_outlined, color: Colors.white70),
+                              Icon(Icons.email_outlined, color: Colors.black),
                           hintText: "Username",
-                          hintStyle:
-                              GoogleFonts.orbitron(color: Colors.white54),
+                          hintStyle: GoogleFonts.orbitron(color: Colors.black),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white30),
+                            borderSide: BorderSide(color: Colors.white),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.blueAccent),
+                            borderSide: BorderSide(color: Colors.black),
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
@@ -168,19 +167,18 @@ class _LoginState extends State<Login> {
                       TextFormField(
                         controller: passwordController,
                         obscureText: !_passwordVisible,
-                        style: GoogleFonts.orbitron(color: Colors.white),
+                        style: GoogleFonts.orbitron(color: Colors.black),
                         decoration: InputDecoration(
                           prefixIcon:
-                              Icon(Icons.lock_outline, color: Colors.white70),
+                              Icon(Icons.lock_outline, color: Colors.black),
                           hintText: "Password",
-                          hintStyle:
-                              GoogleFonts.orbitron(color: Colors.white54),
+                          hintStyle: GoogleFonts.orbitron(color: Colors.black),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _passwordVisible
                                   ? Icons.visibility
                                   : Icons.visibility_off,
-                              color: Colors.white70,
+                              color: Colors.black,
                             ),
                             onPressed: () {
                               setState(() {
@@ -189,11 +187,11 @@ class _LoginState extends State<Login> {
                             },
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.white30),
+                            borderSide: BorderSide(color: Colors.white),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.blueAccent),
+                            borderSide: BorderSide(color: Colors.black),
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
