@@ -198,7 +198,19 @@ class _LoginState extends State<Login> {
                         validator: (value) =>
                             value!.isEmpty ? "Enter password" : null,
                       ),
-                      SizedBox(height: 24),
+                      if (_errorMessage != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 12),
+                          child: Text(
+                            _errorMessage!,
+                            style: TextStyle(
+                                color: Colors.redAccent,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      SizedBox(
+                        height: 10,
+                      ),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -216,16 +228,6 @@ class _LoginState extends State<Login> {
                               style: GoogleFonts.orbitron(letterSpacing: 1.5)),
                         ),
                       ),
-                      if (_errorMessage != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 12),
-                          child: Text(
-                            _errorMessage!,
-                            style: TextStyle(
-                                color: Colors.redAccent,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
                     ],
                   ),
                 ),
@@ -237,6 +239,7 @@ class _LoginState extends State<Login> {
     );
   }
 
+//! process after user login
   Future<void> loadAllData(loginResponse, context) async {
     timer = Timer.periodic(Duration(seconds: 30), (Timer t) {
       (context != null)
@@ -285,6 +288,7 @@ class _LoginState extends State<Login> {
     Navigator.of(context).pop();
   }
 
+//! Loading spinner
   Future<void> showLoadingDialogue() async {
     return showDialog<void>(
       context: context,

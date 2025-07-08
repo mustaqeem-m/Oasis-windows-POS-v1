@@ -1,30 +1,28 @@
-import 'package:app_settings/app_settings.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:get_ip_address/get_ip_address.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-
 import 'package:permission_handler/permission_handler.dart';
-import 'package:pos_2/helpers/toast_helper.dart';
-import 'package:provider/provider.dart';
+import 'package:pos_2/pages/elements.dart';
+import 'package:pos_2/pages/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../config.dart';
-import '../helpers/AppTheme.dart';
-import '../helpers/SizeConfig.dart';
-import '../helpers/otherHelpers.dart';
-import '../locale/MyLocalizations.dart';
-import '../models/attendance.dart';
-import '../models/paymentDatabase.dart';
-import '../models/sell.dart';
-import '../models/sellDatabase.dart';
-import '../models/system.dart';
-import '../models/variations.dart';
-import '../pages/login.dart';
-import 'elements.dart';
+import '../../components/home/check_io.dart';
+import '../../components/home/home_drawer.dart';
+import '../../components/home/payment_details.dart';
+import '../../components/home/statistics.dart';
+import '../../config.dart';
+import '../../helpers/AppTheme.dart';
+import '../../helpers/SizeConfig.dart';
+import '../../helpers/otherHelpers.dart';
+import '../../helpers/toast_helper.dart';
+import '../../locale/MyLocalizations.dart';
+import '../../models/attendance.dart';
+import '../../models/paymentDatabase.dart';
+import '../../models/sell.dart';
+import '../../models/sellDatabase.dart';
+import '../../models/system.dart';
+import '../../models/variations.dart';
+// import '../elements.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -130,7 +128,18 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        drawer: homePageDrawer(),
+        drawer: HomePageDrawer(
+          businessLogo: businessLogo,
+          defaultImage: defaultImage,
+          notPermitted: notPermitted,
+          accessExpenses: accessExpenses,
+          selectedLanguage: selectedLanguage ?? 'en',
+          onLanguageChanged: (newValue) {
+            setState(() {
+              selectedLanguage = newValue;
+            });
+          },
+        ),
         appBar: AppBar(
           elevation: 0,
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
@@ -186,325 +195,43 @@ class _HomeState extends State<Home> {
               Container(
                 padding: EdgeInsets.all(MySize.size16!),
                 child: Text(
-                    '${AppLocalizations.of(context).translate('welcome')} $userName',
+                    '${AppLocalizations.of(context).translate('welcome')} ${userName ?? ''}',
                     style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                         color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 24,
                         fontWeight: FontWeight.bold)),
               ),
-              statistics(),
-              checkIO(),
-              paymentDetails(),
+              Statistics(
+                totalSales: totalSales,
+                totalSalesAmount: totalSalesAmount,
+                totalReceivedAmount: totalReceivedAmount,
+                totalDueAmount: totalDueAmount,
+                businessSymbol: businessSymbol,
+              ),
+              CheckIO(
+                checkedIn: checkedIn,
+                clockInTime: clockInTime,
+                onCheckInOut: (newCheckedIn) async {
+                  setState(() {
+                    checkedIn = newCheckedIn;
+                  });
+                  await Attendance().getCheckInTime(USERID).then((value) {
+                    if (value != null) {
+                      setState(() {
+                        clockInTime = DateTime.parse(value);
+                      });
+                    }
+                  });
+                },
+              ),
+              PaymentDetails(
+                method: method,
+                businessSymbol: businessSymbol,
+              ),
             ],
           ),
         ),
         bottomNavigationBar: posBottomBar('home', context));
-  }
-
-  Widget homePageDrawer() {
-    return Drawer(
-      child: Container(
-        color: Theme.of(context).drawerTheme.backgroundColor,
-        child: Column(
-          children: <Widget>[
-            SizedBox(
-              height: MySize.scaleFactorHeight! * 250,
-              child: DrawerHeader(
-                decoration:
-                    BoxDecoration(color: Theme.of(context).colorScheme.primary),
-                child: CachedNetworkImage(
-                    fit: BoxFit.fill,
-                    errorWidget: (context, url, error) =>
-                        Image.asset(defaultImage),
-                    placeholder: (context, url) => Image.asset(defaultImage),
-                    imageUrl: businessLogo),
-              ),
-            ),
-            Expanded(
-              flex: 9,
-              child: ListView(
-                shrinkWrap: true,
-                padding: EdgeInsets.zero,
-                children: <Widget>[
-                  Visibility(
-                    visible: (notPermitted),
-                    child: GestureDetector(
-                      onTap: () {
-                        AppSettings.openAppSettings();
-                      },
-                      child: Text(
-                        "Allow permissions",
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                            color: Theme.of(context).colorScheme.error,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                  ListTile(
-                    leading: Icon(
-                      Icons.language,
-                      color: Theme.of(context).iconTheme.color,
-                    ),
-                    title: changeAppLanguage(),
-                  ),
-                  Visibility(
-                    visible: accessExpenses,
-                    child: ListTile(
-                      leading: Icon(
-                        MdiIcons.googleSpreadsheet,
-                        color: Theme.of(context).iconTheme.color,
-                      ),
-                      onTap: () async {
-                        if (await Helper().checkConnectivity()) {
-                          Navigator.pushNamed(context, '/expense');
-                        } else {
-                          ToastHelper.show(
-                              context,
-                              AppLocalizations.of(context)
-                                  .translate('check_connectivity'));
-                        }
-                      },
-                      title: Text(
-                        AppLocalizations.of(context).translate('expenses'),
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium!
-                            .copyWith(
-                                color: Theme.of(context).colorScheme.onSurface,
-                                fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                  ListTile(
-                    leading: Icon(
-                      MdiIcons.cardAccountDetailsOutline,
-                      color: Theme.of(context).iconTheme.color,
-                    ),
-                    title: Text(
-                      AppLocalizations.of(context).translate('contact_payment'),
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    onTap: () async {
-                      if (await Helper().checkConnectivity()) {
-                        Navigator.pushNamed(context, '/contactPayment');
-                      } else {
-                        ToastHelper.show(
-                            context,
-                            AppLocalizations.of(context)
-                                .translate('check_connectivity'));
-                      }
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(
-                      MdiIcons.faceAgent,
-                      color: Theme.of(context).iconTheme.color,
-                    ),
-                    title: Text(
-                      AppLocalizations.of(context).translate('follow_ups'),
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    onTap: () async {
-                      if (await Helper().checkConnectivity()) {
-                        Navigator.pushNamed(context, '/followUp');
-                      } else {
-                        ToastHelper.show(
-                            context,
-                            AppLocalizations.of(context)
-                                .translate('check_connectivity'));
-                      }
-                    },
-                  ),
-                  Visibility(
-                    visible: Config().showFieldForce,
-                    child: ListTile(
-                      leading: Icon(
-                        MdiIcons.humanMale,
-                        color: Theme.of(context).iconTheme.color,
-                      ),
-                      onTap: () async {
-                        if (await Helper().checkConnectivity()) {
-                          Navigator.pushNamed(context, '/fieldForce');
-                        } else {
-                          ToastHelper.show(
-                              context,
-                              AppLocalizations.of(context)
-                                  .translate('check_connectivity'));
-                        }
-                      },
-                      title: Text(
-                        AppLocalizations.of(context)
-                            .translate('field_force_visits'),
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium!
-                            .copyWith(
-                                color: Theme.of(context).colorScheme.onSurface,
-                                fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                  ListTile(
-                    leading: Icon(
-                      Icons.contact_phone_outlined,
-                      color: Theme.of(context).iconTheme.color,
-                    ),
-                    title: Text(
-                      AppLocalizations.of(context).translate('contacts'),
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    onTap: () async {
-                      if (await Helper().checkConnectivity()) {
-                        Navigator.pushNamed(context, '/leads');
-                      } else {
-                        ToastHelper.show(
-                            context,
-                            AppLocalizations.of(context)
-                                .translate('check_connectivity'));
-                      }
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(
-                      Icons.local_shipping_outlined,
-                      color: Theme.of(context).iconTheme.color,
-                    ),
-                    title: Text(
-                      AppLocalizations.of(context).translate('shipment'),
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    onTap: () {
-                      Navigator.pushNamed(context, '/shipment');
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(
-                      MdiIcons.syncIcon,
-                      color: Theme.of(context).iconTheme.color,
-                    ),
-                    onTap: () async {
-                      if (await Helper().checkConnectivity()) {
-                        showDialog(
-                          barrierDismissible: false,
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              backgroundColor: Theme.of(context).cardColor,
-                              content: Row(
-                                children: [
-                                  CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        Theme.of(context).colorScheme.primary),
-                                  ),
-                                  Container(
-                                      margin: const EdgeInsets.only(left: 15),
-                                      child: Text(
-                                          AppLocalizations.of(context)
-                                              .translate('loading_data'),
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium!
-                                              .copyWith(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .onSurface))),
-                                ],
-                              ),
-                            );
-                          },
-                        );
-                        await Variations().refresh();
-                        System().refresh().then((value) {
-                          Navigator.popUntil(
-                              context, ModalRoute.withName('/home'));
-                        });
-                      } else {
-                        ToastHelper.show(
-                            context,
-                            AppLocalizations.of(context)
-                                .translate('check_connectivity'));
-                      }
-                    },
-                    title: Text(
-                      AppLocalizations.of(context).translate('refresh'),
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-                flex: 1,
-                child: Container(
-                    alignment: Alignment.bottomCenter,
-                    margin: const EdgeInsets.all(10),
-                    child: Text(
-                      "${Config().copyright}  ${Config().appName}  ${Config().version}",
-                      style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withOpacity(0.5),
-                          fontWeight: FontWeight.normal),
-                    )))
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget changeAppLanguage() {
-    return ChangeNotifierProvider(
-      create: (context) => AppLanguage(),
-      child: Consumer<AppLanguage>(
-        builder: (context, appLanguage, child) {
-          return DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              dropdownColor: Theme.of(context).cardColor,
-              onChanged: (String? newValue) {
-                final selectedLangMap = Config().lang.firstWhere(
-                      (element) => element['languageCode'] == newValue,
-                      orElse: () => {
-                        'languageCode': 'en',
-                        'countryCode': 'US'
-                      }, // Fallback to English if not found
-                    );
-                appLanguage.changeLanguage(Locale(
-                    selectedLangMap['languageCode']!,
-                    selectedLangMap['countryCode']));
-                setState(() {
-                  selectedLanguage = newValue;
-                });
-                Navigator.pushReplacementNamed(context, '/splash');
-              },
-              value: selectedLanguage,
-              items: Config().lang.map<DropdownMenuItem<String>>((Map locale) {
-                return DropdownMenuItem<String>(
-                  value: locale['languageCode'],
-                  child: Text(
-                    locale['name'],
-                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontWeight: FontWeight.bold),
-                  ),
-                );
-              }).toList(),
-            ),
-          );
-        },
-      ),
-    );
   }
 
   Future<void> sync() async {
@@ -540,147 +267,6 @@ class _HomeState extends State<Home> {
     }
   }
 
-  Widget infoCard(
-      {required IconData icon,
-      required String subject,
-      required String amount,
-      required Color color}) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: Theme.of(context).cardColor,
-      child: Padding(
-        padding: EdgeInsets.all(MySize.size16!),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Icon(icon, size: 48, color: color),
-            const SizedBox(height: 8),
-            Text(subject,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface)),
-            const SizedBox(height: 8),
-            Text(amount,
-                style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w500,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(0.9))),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget statistics() {
-    if (totalSales.toString() == 'null') {
-      totalSales = 0;
-    }
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: MySize.size16!),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: infoCard(
-              icon: MdiIcons.chartLine,
-              amount: Helper().formatQuantity(totalSales),
-              subject:
-                  AppLocalizations.of(context).translate('number_of_sales'),
-              color: const Color(0xff00c6ff),
-            ),
-          ),
-          SizedBox(width: MySize.size16!),
-          Expanded(
-            child: infoCard(
-              icon: MdiIcons.cashMultiple,
-              amount:
-                  '$businessSymbol ${Helper().formatCurrency(totalSalesAmount)}',
-              subject: AppLocalizations.of(context).translate('sales_amount'),
-              color: const Color(0xffF85032),
-            ),
-          ),
-          SizedBox(width: MySize.size16!),
-          Expanded(
-            child: infoCard(
-              icon: MdiIcons.cashCheck,
-              amount:
-                  '$businessSymbol ${Helper().formatCurrency(totalReceivedAmount)}',
-              subject: AppLocalizations.of(context).translate('paid_amount'),
-              color: const Color(0xff11998e),
-            ),
-          ),
-          SizedBox(width: MySize.size16!),
-          Expanded(
-            child: infoCard(
-              icon: MdiIcons.cashRemove,
-              amount:
-                  '$businessSymbol ${Helper().formatCurrency(totalDueAmount)}',
-              subject: AppLocalizations.of(context).translate('due_amount'),
-              color: const Color(0xfff7971e),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget paymentDetails() {
-    return Container(
-      padding: EdgeInsets.all(MySize.size16!),
-      margin: EdgeInsets.all(MySize.size16!),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.all(Radius.circular(MySize.size12!)),
-        border: Border.all(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
-            width: 1),
-      ),
-      child: Column(
-        children: <Widget>[
-          Text(AppLocalizations.of(context).translate('payment_details'),
-              style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold)),
-          const SizedBox(height: 10),
-          ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(10),
-              itemCount: method.length,
-              shrinkWrap: true,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text(method[index]['key'],
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium!
-                              .copyWith(
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
-                                  fontSize: 14)),
-                      Text(
-                          '$businessSymbol ${Helper().formatCurrency(method[index]['value'])}',
-                          style: GoogleFonts.robotoMono(
-                              color: Colors.white, fontSize: 14)),
-                    ],
-                  ),
-                );
-              })
-        ],
-      ),
-    );
-  }
-
   Future<void> getPermission() async {
     List<PermissionStatus> status = [
       await Permission.location.status,
@@ -709,192 +295,6 @@ class _HomeState extends State<Home> {
         accessExpenses = true;
       });
     }
-  }
-
-  Widget checkIO() {
-    if (checkedIn != null) {
-      return Padding(
-        padding: EdgeInsets.only(top: MySize.size20!),
-        child: Column(
-          children: <Widget>[
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: (!checkedIn!)
-                    ? Theme.of(context).colorScheme.primary
-                    : Colors.transparent,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  side:
-                      BorderSide(color: Theme.of(context).colorScheme.primary),
-                ),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-              ),
-              onPressed: () async {
-                Helper().syncCallLogs();
-                showDialog(
-                    barrierDismissible: true,
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        backgroundColor: Theme.of(context).cardColor,
-                        title: Text(
-                            (!checkedIn!)
-                                ? AppLocalizations.of(context)
-                                    .translate('check_in_note')
-                                : AppLocalizations.of(context)
-                                    .translate('check_out_note'),
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge!
-                                .copyWith(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                    fontWeight: FontWeight.bold)),
-                        content: TextFormField(
-                            controller: note,
-                            autofocus: true,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium!
-                                .copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurface)),
-                        actions: <Widget>[
-                          TextButton(
-                            onPressed: () async {
-                              Navigator.pop(context);
-                              if (await Helper().checkConnectivity()) {
-                                try {
-                                  await Geolocator.getCurrentPosition(
-                                          desiredAccuracy:
-                                              LocationAccuracy.high)
-                                      .then((Position position) {});
-                                } catch (e) {}
-                                if (checkedIn == false) {
-                                  var ipAddress =
-                                      IpAddress(type: RequestType.json);
-                                  dynamic data = await ipAddress.getIpAddress();
-                                  String iP = data.toString();
-
-                                  try {
-                                    await Geolocator.getCurrentPosition(
-                                            desiredAccuracy:
-                                                LocationAccuracy.high)
-                                        .then((Position position) {
-                                      currentLoc = LatLng(position.latitude,
-                                          position.longitude);
-                                    });
-                                  } catch (e) {}
-
-                                  var checkInMap = await Attendance().doCheckIn(
-                                      checkInNote: note.text,
-                                      iPAddress: iP,
-                                      latitude: (currentLoc != null)
-                                          ? currentLoc!.latitude
-                                          : '',
-                                      longitude: (currentLoc != null)
-                                          ? currentLoc!.longitude
-                                          : '');
-                                  ToastHelper.show(context, checkInMap);
-                                  note.clear();
-                                } else {
-                                  try {
-                                    await Geolocator.getCurrentPosition(
-                                            desiredAccuracy:
-                                                LocationAccuracy.high)
-                                        .then((Position position) {
-                                      currentLoc = LatLng(position.latitude,
-                                          position.longitude);
-                                    });
-                                  } catch (e) {}
-
-                                  var checkOutMap = await Attendance()
-                                      .doCheckOut(
-                                          latitude: (currentLoc != null)
-                                              ? currentLoc!.latitude
-                                              : '',
-                                          longitude: (currentLoc != null)
-                                              ? currentLoc!.longitude
-                                              : '',
-                                          checkOutNote: note.text);
-                                  ToastHelper.show(context, checkOutMap);
-                                  note.clear();
-                                }
-                                checkedIn = await Attendance()
-                                    .getAttendanceStatus(USERID);
-                                await Attendance()
-                                    .getCheckInTime(USERID)
-                                    .then((value) {
-                                  if (value != null) {
-                                    clockInTime = DateTime.parse(value);
-                                  }
-                                });
-                                setState(() {});
-                              } else
-                                ToastHelper.show(
-                                    context,
-                                    AppLocalizations.of(context)
-                                        .translate('check_connectivity'));
-                            },
-                            child: Text(
-                                AppLocalizations.of(context).translate('ok'),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelLarge!
-                                    .copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary)),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: Text(
-                                AppLocalizations.of(context)
-                                    .translate('cancel'),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelLarge!
-                                    .copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary)),
-                          )
-                        ],
-                      );
-                    });
-              },
-              child: Text(
-                  (!checkedIn!)
-                      ? AppLocalizations.of(context).translate('check_in')
-                      : AppLocalizations.of(context).translate('check_out'),
-                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                      color: (!checkedIn!)
-                          ? Theme.of(context).colorScheme.onPrimary
-                          : Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16)),
-            ),
-            const SizedBox(height: 10),
-            Text(
-                (!checkedIn!)
-                    ? ''
-                    : DateTime.now().difference(clockInTime).toString(),
-                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withOpacity(0.7),
-                    )),
-          ],
-        ),
-      );
-    } else
-      return Container();
   }
 
   Future<List> loadStatistics() async {

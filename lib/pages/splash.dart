@@ -16,6 +16,8 @@ class Splash extends StatelessWidget {
   ThemeData themeData = AppTheme.getThemeFromThemeMode(themeType);
   CustomAppTheme customAppTheme = AppTheme.getCustomAppTheme(themeType);
 
+  Splash({super.key});
+
   @override
   Widget build(BuildContext context) {
     MySize().init(context);
@@ -62,8 +64,8 @@ class Splash extends StatelessWidget {
                     style: AppTheme.getTextStyle(themeData.textTheme.bodyLarge,
                         color: themeData.colorScheme.primary, fontWeight: 600)),
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: themeData.colorScheme.onPrimary,
-                    shadowColor: themeData.colorScheme.primary),
+                    backgroundColor: themeData.colorScheme.onSecondary,
+                    shadowColor: themeData.colorScheme.primaryContainer),
               ),
               Visibility(
                 visible: Config().showRegister,
