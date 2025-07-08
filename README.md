@@ -83,3 +83,23 @@ samples, guidance on mobile development, and a full API reference.
 
 - padding: EdgeInsets.all(24) -> Internal spacing inside the card.
 - Form Flutter’s built-in form validator wrapper.
+
+# Home
+
+## Function s in Home
+
+### initState(): Initializes the state and calls other data-loading functions.
+
+- homepageData(): Fetches user data, business details, and language preferences.
+- checkIOButtonDisplay(): Determines the visibility of the check-in/check-out button.
+- build(): Builds the UI, which is now cleaner but still has some logic.
+- sync(): Handles the data synchronization process.
+- getPermission(): Manages permissions for location, storage, and camera.
+- loadStatistics(): Loads sales statistics from the local database.
+- loadPaymentDetails(): Loads payment methods and details.\
+
+## ryt now out home page is responsible for
+
+- State management
+- Buisness logic
+- Building UI
