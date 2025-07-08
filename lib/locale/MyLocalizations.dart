@@ -39,7 +39,7 @@ class AppLocalizations {
 
   // This method will be called from every widget which needs a localized text
   String translate(String key) {
-    return _localizedStrings![key]!;
+    return _localizedStrings?[key] ?? key;
   }
 }
 
@@ -70,11 +70,12 @@ class _AppLocalizationsDelegate
 }
 
 class AppLanguage extends ChangeNotifier {
-  Locale _appLocale = Locale(Config().defaultLanguage, Config().defaultLanguage == 'en' ? 'US' : '');
+  Locale _appLocale = Locale(
+      Config().defaultLanguage, Config().defaultLanguage == 'en' ? 'US' : '');
 
   Locale get appLocal => _appLocale;
 
-  fetchLocale() async {
+  Future<void> fetchLocale() async {
     var prefs = await SharedPreferences.getInstance();
     String? languageCode = prefs.getString('language_code');
     String? countryCode = prefs.getString('countryCode');
@@ -91,9 +92,8 @@ class AppLanguage extends ChangeNotifier {
       if (languageCode == 'en') {
         countryCode = 'US';
         await prefs.setString('countryCode', 'US'); // Persist the fix
-      } else if (countryCode == null) {
-        countryCode = ''; // Default to empty string for other languages if null
-      }
+      } else
+        countryCode ??= '';
       _appLocale = Locale(languageCode, countryCode);
     }
   }

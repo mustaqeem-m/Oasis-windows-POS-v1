@@ -186,8 +186,8 @@ class _CheckIOState extends State<CheckIO> {
                       : AppLocalizations.of(context).translate('check_out'),
                   style: Theme.of(context).textTheme.titleMedium!.copyWith(
                       color: (!widget.checkedIn!)
-                          ? Theme.of(context).colorScheme.onPrimary
-                          : Theme.of(context).colorScheme.primary,
+                          ? Theme.of(context).colorScheme.onSecondary
+                          : Theme.of(context).colorScheme.onSecondary,
                       fontWeight: FontWeight.bold,
                       fontSize: 16)),
             ),

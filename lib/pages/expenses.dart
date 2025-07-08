@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:pos_2/helpers/toast_helper.dart';
 
 import '../apis/expenses.dart';
@@ -12,50 +11,67 @@ import '../models/expenses.dart';
 import '../models/system.dart';
 
 class Expense extends StatefulWidget {
+  const Expense({super.key});
+
   @override
   _ExpenseState createState() => _ExpenseState();
 }
 
 class _ExpenseState extends State<Expense> {
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = true;
 
   List<Map<String, dynamic>> expenseCategories = [],
       expenseSubCategories = [],
       paymentMethods = [],
       paymentAccounts = [],
-      locationListMap = [
-        {'id': 0, 'name': 'set location'}
-      ],
-      taxListMap = [
-        {'id': 0, 'name': 'Tax rate', 'amount': 0}
-      ];
-  Map<String, dynamic> selectedLocation = {'id': 0, 'name': 'set location'},
-      selectedTax = {'id': 0, 'name': 'Tax rate', 'amount': 0},
-      selectedExpenseCategoryId = {'id': 0, 'name': 'Select'},
-      selectedExpenseSubCategoryId = {'id': 0, 'name': 'Select'};
-  TextEditingController expenseAmount = new TextEditingController(),
-      expenseNote = new TextEditingController(),
-      payingAmount = new TextEditingController();
+      locationListMap = [],
+      taxListMap = [];
 
-  Map<String, dynamic> selectedPaymentAccount = {'id': null, 'name': "None"},
-      selectedPaymentMethod = {
-        'name': 'name',
-        'value': 'value',
-        'account_id': null
-      };
+  Map<String, dynamic> selectedLocation = {'id': 0, 'name': 'set location'};
+  Map<String, dynamic> selectedTax = {'id': 0, 'name': 'Tax rate', 'amount': 0};
+  Map<String, dynamic> selectedExpenseCategoryId = {'id': 0, 'name': 'Select'};
+  Map<String, dynamic> selectedExpenseSubCategoryId = {
+    'id': 0,
+    'name': 'Select'
+  };
+  Map<String, dynamic> selectedPaymentAccount = {'id': null, 'name': "None"};
+  Map<String, dynamic> selectedPaymentMethod = {
+    'name': 'name',
+    'value': 'value',
+    'account_id': null
+  };
+
+  TextEditingController expenseAmount = TextEditingController(),
+      expenseNote = TextEditingController(),
+      payingAmount = TextEditingController();
+
   String symbol = '';
-
-  static int themeType = 1;
-  ThemeData themeData = AppTheme.getThemeFromThemeMode(themeType);
-  CustomAppTheme customAppTheme = AppTheme.getCustomAppTheme(themeType);
 
   @override
   void initState() {
     super.initState();
-    setLocationMap();
-    setTaxMap();
-    setPaymentDetails(selectedLocation['id']);
+    _fetchInitialData();
     Helper().syncCallLogs();
+  }
+
+  Future<void> _fetchInitialData() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    await setLocationMap();
+    await setTaxMap();
+    await setExpenseCategories();
+
+    if (selectedLocation['id'] != 0) {
+      // Check if a valid location is selected
+      await setPaymentDetails(selectedLocation['id']);
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -68,6 +84,11 @@ class _ExpenseState extends State<Expense> {
 
   @override
   Widget build(BuildContext context) {
+    ThemeData themeData = Theme.of(context);
+    CustomAppTheme customAppTheme = AppTheme.getCustomAppTheme(
+        themeData.brightness == Brightness.dark
+            ? AppTheme.themeDark
+            : AppTheme.themeLight);
     return Scaffold(
       appBar: AppBar(
         elevation: 0.0,
@@ -75,214 +96,436 @@ class _ExpenseState extends State<Expense> {
             style: AppTheme.getTextStyle(themeData.textTheme.titleLarge,
                 fontWeight: 600)),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(MySize.size20!),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Column(
-                    children: <Widget>[
-                      Text(
-                        AppLocalizations.of(context).translate('location') +
-                            ' : ',
-                        style: AppTheme.getTextStyle(
-                            themeData.textTheme.titleLarge,
-                            fontWeight: 700,
-                            letterSpacing: -0.2),
-                      ),
-                      locations(),
-                    ],
-                  ),
-                  Column(
-                    children: <Widget>[
-                      Text(
-                        AppLocalizations.of(context).translate('tax') + ' : ',
-                        style: AppTheme.getTextStyle(
-                            themeData.textTheme.titleLarge,
-                            fontWeight: 700,
-                            letterSpacing: -0.2),
-                      ),
-                      taxes(),
-                    ],
-                  ),
-                ],
-              ),
-              Padding(
-                padding: EdgeInsets.all(MySize.size8!),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  SizedBox(
-                    width: MySize.screenWidth! * 0.4,
-                    child: Text(
-                      "${AppLocalizations.of(context).translate('expense_categories')} : ",
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 2,
-                      style: AppTheme.getTextStyle(
-                          themeData.textTheme.titleLarge,
-                          fontWeight: 700,
-                          letterSpacing: -0.2),
-                    ),
-                  ),
-                  SizedBox(
-                      width: MySize.screenWidth! * 0.45,
-                      child: expenseCategory()),
-                ],
-              ),
-              Padding(
-                padding: EdgeInsets.all(MySize.size8!),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  SizedBox(
-                    width: MySize.screenWidth! * 0.4,
-                    child: Text(
-                      "${AppLocalizations.of(context).translate('sub_categories')} : ",
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 2,
-                      style: AppTheme.getTextStyle(
-                          themeData.textTheme.titleLarge,
-                          fontWeight: 700,
-                          letterSpacing: -0.2),
-                    ),
-                  ),
-                  SizedBox(
-                      width: MySize.screenWidth! * 0.45,
-                      child: expenseSubCategory()),
-                ],
-              ),
-              Padding(
-                padding: EdgeInsets.all(MySize.size8!),
-              ),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: TextFormField(
-                      validator: (value) {
-                        if (value!.length < 1) {
-                          return AppLocalizations.of(context)
-                              .translate('please_enter_expense_amount');
-                        } else {
-                          return null;
-                        }
-                      },
-                      decoration: InputDecoration(
-                        prefix: Text(symbol),
-                        labelText: AppLocalizations.of(context)
-                            .translate('expense_amount'),
-                        border: themeData.inputDecorationTheme.border,
-                        enabledBorder: themeData.inputDecorationTheme.border,
-                        focusedBorder:
-                            themeData.inputDecorationTheme.focusedBorder,
-                      ),
-                      controller: expenseAmount,
-                      style: AppTheme.getTextStyle(
-                          themeData.textTheme.titleSmall,
-                          fontWeight: 400,
-                          letterSpacing: -0.2),
-                      textAlign: TextAlign.end,
-                      inputFormatters: [
-                        FilteringTextInputFormatter(
-                            RegExp(r'^(\d+)?\.?\d{0,2}'),
-                            allow: true)
-                      ],
-                      keyboardType: TextInputType.number,
-                    ),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: EdgeInsets.all(MySize.size8!),
-              ),
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)
-                            .translate('expense_note'),
-                        border: themeData.inputDecorationTheme.border,
-                        enabledBorder: themeData.inputDecorationTheme.border,
-                        focusedBorder:
-                            themeData.inputDecorationTheme.focusedBorder,
-                      ),
-                      controller: expenseNote,
-                      style: AppTheme.getTextStyle(
-                          themeData.textTheme.titleSmall,
-                          fontWeight: 400,
-                          letterSpacing: -0.2),
-                    ),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: EdgeInsets.all(MySize.size8!),
-              ),
-              payment(),
-              Padding(
-                padding: EdgeInsets.all(MySize.size8!),
-              ),
-              paymentAccount(),
-              Padding(
-                padding: EdgeInsets.all(MySize.size8!),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: themeData.colorScheme.primary,
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: EdgeInsets.all(MySize.size16!),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    _buildLocationAndTaxSection(themeData),
+                    SizedBox(height: MySize.size24!),
+                    _buildExpenseDetailsCard(themeData),
+                    SizedBox(height: MySize.size24!),
+                    _buildPaymentCard(themeData),
+                    SizedBox(height: MySize.size24!),
+                    _buildSubmitButton(themeData),
+                  ],
                 ),
-                onPressed: () async {
-                  if (await Helper().checkConnectivity()) {
-                    if (_formKey.currentState!.validate()) {
-                      onSubmit();
+              ),
+            ),
+    );
+  }
+
+  Widget _buildLocationAndTaxSection(ThemeData themeData) {
+    return Row(
+      children: [
+        Expanded(
+          child: DropdownButtonFormField<Map<String, dynamic>>(
+            value: selectedLocation,
+            dropdownColor: themeData.colorScheme.surface,
+            items: locationListMap.map((item) {
+              return DropdownMenuItem<Map<String, dynamic>>(
+                value: item,
+                child: Text(item['name'],
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: Colors.black)),
+              );
+            }).toList(),
+            onChanged: (item) {
+              if (item != null) {
+                setState(() {
+                  selectedLocation = item;
+                  setExpenseCategories();
+                  setPaymentDetails(selectedLocation['id']).then((_) {
+                    if (paymentMethods.isNotEmpty) {
+                      selectedPaymentMethod = paymentMethods[0];
+                    } else {
+                      selectedPaymentMethod = {
+                        'name': 'name',
+                        'value': 'value',
+                        'account_id': null
+                      };
                     }
-                  } else {
-                    // Fluttertoast.showToast(
-                    //     msg: AppLocalizations.of(context)
-                    //         .translate('check_connectivity'));
-                    ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
-                  }
-                },
-                child: Text(
-                  AppLocalizations.of(context).translate('submit'),
-                  style: AppTheme.getTextStyle(themeData.textTheme.titleLarge,
-                      color: themeData.colorScheme.onPrimary,
-                      fontWeight: 700,
-                      letterSpacing: -0.2),
-                ),
-              )
-            ],
+                    if (paymentAccounts.isNotEmpty) {
+                      selectedPaymentAccount = paymentAccounts[0];
+                      for (var element in paymentAccounts) {
+                        if (selectedPaymentMethod['account_id'] ==
+                            element['id']) {
+                          selectedPaymentAccount = element;
+                        }
+                      }
+                    } else {
+                      selectedPaymentAccount = {'id': null, 'name': "None"};
+                    }
+                  });
+                });
+              }
+            },
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context).translate('location'),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(MySize.size8!),
+              ),
+              prefixIcon: Icon(Icons.location_on),
+              filled: true,
+              fillColor: themeData.colorScheme.surface,
+            ),
           ),
+        ),
+        SizedBox(width: MySize.size16!),
+        Expanded(
+          child: DropdownButtonFormField<Map<String, dynamic>>(
+            value: selectedTax,
+            dropdownColor: themeData.colorScheme.surface,
+            items: taxListMap.map((item) {
+              return DropdownMenuItem<Map<String, dynamic>>(
+                value: item,
+                child: Text(
+                  item['name'],
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: Colors.black),
+                ),
+              );
+            }).toList(),
+            onChanged: (item) {
+              if (item != null) {
+                setState(() {
+                  selectedTax = item;
+                });
+              }
+            },
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context).translate('tax'),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(MySize.size8!),
+              ),
+              prefixIcon: Icon(Icons.receipt),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildExpenseDetailsCard(ThemeData themeData) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(MySize.size12!)),
+      child: Padding(
+        padding: EdgeInsets.all(MySize.size16!),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildCardHeader(
+                AppLocalizations.of(context).translate('expense_details'),
+                themeData),
+            SizedBox(height: MySize.size16!),
+            DropdownButtonFormField<Map<String, dynamic>>(
+              value: selectedExpenseCategoryId,
+              dropdownColor: themeData.colorScheme.surface,
+              items: expenseCategories.map((item) {
+                return DropdownMenuItem<Map<String, dynamic>>(
+                  value: item,
+                  child: Text(
+                    item['name'],
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: Colors.black),
+                  ),
+                );
+              }).toList(),
+              onChanged: (item) {
+                if (item != null) {
+                  setState(() {
+                    selectedExpenseCategoryId = item;
+                    expenseSubCategories = [
+                      {'id': 0, 'name': 'Select'}
+                    ];
+                    selectedExpenseSubCategoryId = expenseSubCategories[0];
+
+                    if (item.containsKey('sub_categories') &&
+                        item['sub_categories'] is List &&
+                        (item['sub_categories'] as List).isNotEmpty) {
+                      var subCategoriesData = item['sub_categories'] as List;
+                      for (var element in subCategoriesData) {
+                        if (element is Map) {
+                          expenseSubCategories
+                              .add(Map<String, dynamic>.from(element));
+                        }
+                      }
+                    }
+                  });
+                }
+              },
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context)
+                    .translate('expense_categories'),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(MySize.size8!),
+                ),
+                prefixIcon: Icon(Icons.category),
+              ),
+            ),
+            SizedBox(height: MySize.size16!),
+            DropdownButtonFormField<Map<String, dynamic>>(
+              value: selectedExpenseSubCategoryId,
+              dropdownColor: themeData.colorScheme.surface,
+              items: expenseSubCategories.map((item) {
+                return DropdownMenuItem<Map<String, dynamic>>(
+                  value: item,
+                  child: Text(
+                    item['name'],
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: Colors.black),
+                  ),
+                );
+              }).toList(),
+              onChanged: (item) {
+                if (item != null) {
+                  setState(() {
+                    selectedExpenseSubCategoryId = item;
+                  });
+                }
+              },
+              decoration: InputDecoration(
+                labelText:
+                    AppLocalizations.of(context).translate('sub_categories'),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(MySize.size8!),
+                ),
+                prefixIcon: Icon(Icons.subdirectory_arrow_right),
+              ),
+            ),
+            SizedBox(height: MySize.size16!),
+            TextFormField(
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return AppLocalizations.of(context)
+                      .translate('please_enter_expense_amount');
+                }
+                return null;
+              },
+              decoration: InputDecoration(
+                prefixText: symbol,
+                labelText:
+                    AppLocalizations.of(context).translate('expense_amount'),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(MySize.size8!),
+                ),
+                prefixIcon: Icon(Icons.currency_rupee),
+              ),
+              controller: expenseAmount,
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d{0,2}')),
+              ],
+              textAlign: TextAlign.start,
+            ),
+            SizedBox(height: MySize.size16!),
+            TextFormField(
+              decoration: InputDecoration(
+                labelText:
+                    AppLocalizations.of(context).translate('expense_note'),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(MySize.size8!),
+                ),
+                prefixIcon: Icon(Icons.note),
+              ),
+              controller: expenseNote,
+            ),
+          ],
         ),
       ),
     );
   }
 
-  setLocationMap() async {
-    locationListMap = [];
-    await System().get('location').then((value) {
-      value.forEach((element) {
-        setState(() {
-          locationListMap.add({
-            'id': element['id'],
-            'name': element['name'],
-          });
-        });
-      });
+  Widget _buildPaymentCard(ThemeData themeData) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(MySize.size12!)),
+      child: Padding(
+        padding: EdgeInsets.all(MySize.size16!),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildCardHeader(
+                AppLocalizations.of(context).translate('payment'), themeData),
+            SizedBox(height: MySize.size16!),
+            TextFormField(
+              validator: (value) {
+                if (value == null || value.isEmpty) value = '0.00';
+                if (expenseAmount.text.isEmpty ||
+                    double.tryParse(value) == null ||
+                    double.parse(value) > double.parse(expenseAmount.text)) {
+                  return AppLocalizations.of(context)
+                      .translate('enter_valid_payment_amount');
+                }
+                return null;
+              },
+              decoration: InputDecoration(
+                prefixText: symbol,
+                labelText:
+                    AppLocalizations.of(context).translate('payment_amount'),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(MySize.size8!),
+                ),
+                prefixIcon: Icon(Icons.payment),
+              ),
+              controller: payingAmount,
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d{0,2}')),
+              ],
+              textAlign: TextAlign.start,
+            ),
+            SizedBox(height: MySize.size16!),
+            DropdownButtonFormField<Map<String, dynamic>>(
+              value: selectedPaymentMethod,
+              dropdownColor: themeData.colorScheme.surface,
+              items: paymentMethods.map((item) {
+                return DropdownMenuItem<Map<String, dynamic>>(
+                  value: item,
+                  child: Text(item['value'],
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: Colors.black)),
+                );
+              }).toList(),
+              onChanged: (item) {
+                if (item != null) {
+                  setState(() {
+                    selectedPaymentMethod = item;
+                    selectedPaymentAccount = paymentAccounts.firstWhere(
+                        (element) => element['id'] == item['account_id'],
+                        orElse: () => paymentAccounts.isNotEmpty
+                            ? paymentAccounts[0]
+                            : {'id': null, 'name': "None"});
+                  });
+                }
+              },
+              decoration: InputDecoration(
+                labelText:
+                    AppLocalizations.of(context).translate('payment_method'),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(MySize.size8!),
+                ),
+                prefixIcon: Icon(Icons.credit_card),
+              ),
+            ),
+            SizedBox(height: MySize.size16!),
+            DropdownButtonFormField<Map<String, dynamic>>(
+              value: selectedPaymentAccount,
+              dropdownColor: themeData.colorScheme.surface,
+              items: paymentAccounts.map((item) {
+                return DropdownMenuItem<Map<String, dynamic>>(
+                  value: item,
+                  child: Text(
+                    item['name'],
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: Colors.black),
+                  ),
+                );
+              }).toList(),
+              onChanged: (item) {
+                if (item != null) {
+                  setState(() {
+                    selectedPaymentAccount = item;
+                    selectedPaymentMethod['account_id'] = item['id'];
+                  });
+                }
+              },
+              decoration: InputDecoration(
+                labelText:
+                    AppLocalizations.of(context).translate('payment_account'),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(MySize.size8!),
+                ),
+                prefixIcon: Icon(Icons.account_balance),
+                filled: true,
+                fillColor: themeData.colorScheme.surface,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCardHeader(String title, ThemeData themeData) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+          vertical: MySize.size8!, horizontal: MySize.size12!),
+      decoration: BoxDecoration(
+        color: themeData.colorScheme.primary.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(MySize.size8!),
+      ),
+      child: Text(
+        title,
+        style: AppTheme.getTextStyle(themeData.textTheme.titleMedium,
+            fontWeight: 700, color: themeData.colorScheme.primary),
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton(ThemeData themeData) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: themeData.colorScheme.primary,
+          padding: EdgeInsets.symmetric(vertical: MySize.size16!),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(MySize.size12!),
+          ),
+        ),
+        onPressed: () async {
+          if (await Helper().checkConnectivity()) {
+            if (_formKey.currentState!.validate()) {
+              onSubmit();
+            }
+          } else {
+            ToastHelper.show(context,
+                AppLocalizations.of(context).translate('check_connectivity'));
+          }
+        },
+        child: Text(
+          AppLocalizations.of(context).translate('submit'),
+          style: AppTheme.getTextStyle(themeData.textTheme.titleMedium,
+              color: themeData.colorScheme.onSecondary, fontWeight: 700),
+        ),
+      ),
+    );
+  }
+
+  Future<void> setLocationMap() async {
+    var locations = await System().get('location');
+    var newLocationList = <Map<String, dynamic>>[];
+    if (locations is List) {
+      for (var loc in locations) {
+        if (loc is Map) {
+          newLocationList.add(Map<String, dynamic>.from(loc));
+        }
+      }
+    }
+    setState(() {
+      locationListMap = newLocationList;
+      if (locationListMap.isNotEmpty) {
+        selectedLocation = locationListMap[0];
+      } else {
+        selectedLocation = {'id': 0, 'name': 'set location'};
+      }
     });
   }
 
-  onSubmit() async {
+  Future<void> onSubmit() async {
     if (selectedLocation['id'] != 0) {
-      if (expenseAmount.text == '') {
+      if (expenseAmount.text.isEmpty) {
         expenseAmount.text = '0.00';
       }
-      if (payingAmount.text == '') {
+      if (payingAmount.text.isEmpty) {
         payingAmount.text = '0.00';
       }
       var expenseMap = ExpenseManagement().createExpense(
@@ -297,506 +540,115 @@ class _ExpenseState extends State<Expense> {
           note: expenseNote.text);
       await ExpenseApi().create(expenseMap).then((value) {
         Navigator.pop(context);
-        // Fluttertoast.showToast(
-        //     msg: AppLocalizations.of(context)
-        //         .translate('expense_added_successfully'));
-                ToastHelper.show(context, AppLocalizations.of(context).translate('expense_added_successfully'));
-
+        ToastHelper.show(
+            context,
+            AppLocalizations.of(context)
+                .translate('expense_added_successfully'));
       });
     } else {
-      // Fluttertoast.showToast(
-      //     msg:
-      //         AppLocalizations.of(context).translate('error_invalid_location'));
-      ToastHelper.show(context, AppLocalizations.of(context).translate('error_invalid_location'));
+      ToastHelper.show(context,
+          AppLocalizations.of(context).translate('error_invalid_location'));
     }
   }
 
-  Widget locations() {
-    return PopupMenuButton(
-        onSelected: (Map<String, dynamic> item) {
-          setState(() {
-            selectedLocation = item;
-            setExpenseCategories();
-            setPaymentDetails(selectedLocation['id']).then((value) {
-              selectedPaymentMethod = paymentMethods[0];
-              selectedPaymentAccount = paymentAccounts[0];
-              paymentAccounts.forEach((element) {
-                if (selectedPaymentMethod['account_id'] == element['id']) {
-                  selectedPaymentAccount = element;
-                }
-              });
-            });
-          });
-        },
-        itemBuilder: (BuildContext context) {
-          return locationListMap.map((Map<String, dynamic> value) {
-            return PopupMenuItem(
-              value: value,
-              height: MySize.size36!,
-              child: Text(value['name'],
-                  style: AppTheme.getTextStyle(themeData.textTheme.bodyMedium,
-                      color: themeData.colorScheme.onSurface)),
-            );
-          }).toList();
-        },
-        color: themeData.colorScheme.surface,
-        child: Container(
-          padding: EdgeInsets.only(
-              left: MySize.size12!,
-              right: MySize.size12!,
-              top: MySize.size8!,
-              bottom: MySize.size8!),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(MySize.size8!)),
-            color: customAppTheme.bgLayer1,
-            border: Border.all(color: customAppTheme.bgLayer3, width: 1),
-          ),
-          child: Row(
-            children: <Widget>[
-              Text(
-                selectedLocation['name'],
-                style: AppTheme.getTextStyle(
-                  themeData.textTheme.bodyLarge,
-                  color: themeData.colorScheme.onSurface,
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.only(left: MySize.size4!),
-                child: Icon(
-                  MdiIcons.chevronDown,
-                  size: MySize.size22,
-                  color: themeData.colorScheme.onSurface,
-                ),
-              )
-            ],
-          ),
-        ));
-  }
-
-  setTaxMap() {
-    System().get('tax').then((value) {
-      value.forEach((element) {
-        taxListMap.add({
-          'id': element['id'],
-          'name': element['name'],
-          'amount': element['amount']
-        });
-      });
-    });
-  }
-
-  //dropdown tax widget
-  Widget taxes() {
-    return PopupMenuButton(
-      onSelected: (Map<String, dynamic> item) {
-        setState(() {
-          selectedTax = item;
-        });
-      },
-      itemBuilder: (BuildContext context) {
-        return taxListMap.map((Map<String, dynamic> value) {
-          return PopupMenuItem(
-            value: value,
-            height: MySize.size36!,
-            child: Text(value['name'],
-                style: AppTheme.getTextStyle(themeData.textTheme.bodyMedium,
-                    color: themeData.colorScheme.onSurface)),
-          );
-        }).toList();
-      },
-      color: themeData.colorScheme.surface,
-      child: Container(
-        padding: EdgeInsets.only(
-            left: MySize.size12!,
-            right: MySize.size12!,
-            top: MySize.size8!,
-            bottom: MySize.size8!),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(MySize.size8!)),
-          color: customAppTheme.bgLayer1,
-          border: Border.all(color: customAppTheme.bgLayer3, width: 1),
-        ),
-        child: Row(
-          children: <Widget>[
-            Text(
-              selectedTax['name'],
-              style: AppTheme.getTextStyle(
-                themeData.textTheme.bodyLarge,
-                color: themeData.colorScheme.onSurface,
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.only(left: MySize.size4!),
-              child: Icon(
-                MdiIcons.chevronDown,
-                size: MySize.size22,
-                color: themeData.colorScheme.onSurface,
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  //dropdown tax widget
-  Widget expenseCategory() {
-    return PopupMenuButton(
-      onSelected: (Map<String, dynamic> item) {
-        setState(() {
-          selectedExpenseCategoryId = item;
-          selectedExpenseSubCategoryId = {'id': 0, 'name': 'Select'};
-          if (item.containsKey('sub_categories') &&
-              item['sub_categories'].length > 0) {
-            item['sub_categories'].forEach((element) {
-              expenseSubCategories
-                  .add({'id': element['id'], 'name': element['name']});
-            });
-          } else {
-            expenseSubCategories = [];
-          }
-        });
-      },
-      itemBuilder: (BuildContext context) {
-        return expenseCategories.map((Map<String, dynamic> value) {
-          return PopupMenuItem(
-            value: value,
-            height: MySize.size36!,
-            child: Text(value['name'],
-                overflow: TextOverflow.ellipsis,
-                maxLines: 2,
-                style: AppTheme.getTextStyle(themeData.textTheme.bodyMedium,
-                    color: themeData.colorScheme.onSurface)),
-          );
-        }).toList();
-      },
-      color: themeData.colorScheme.surface,
-      child: Container(
-        padding: EdgeInsets.only(
-            left: MySize.size12!,
-            right: MySize.size12!,
-            top: MySize.size8!,
-            bottom: MySize.size8!),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(MySize.size8!)),
-          color: customAppTheme.bgLayer1,
-          border: Border.all(color: customAppTheme.bgLayer3, width: 1),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            SizedBox(
-              width: MySize.screenWidth! * 0.3,
-              child: Text(
-                selectedExpenseCategoryId['name'],
-                overflow: TextOverflow.ellipsis,
-                maxLines: 2,
-                textAlign: TextAlign.end,
-                style: AppTheme.getTextStyle(
-                  themeData.textTheme.bodyLarge,
-                  color: themeData.colorScheme.onSurface,
-                ),
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.only(left: MySize.size4!),
-              child: Icon(
-                MdiIcons.chevronDown,
-                size: MySize.size22,
-                color: themeData.colorScheme.onSurface,
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  //dropdown tax widget
-  Widget expenseSubCategory() {
-    return PopupMenuButton(
-      onSelected: (Map<String, dynamic> item) {
-        setState(() {
-          selectedExpenseSubCategoryId = item;
-        });
-      },
-      itemBuilder: (BuildContext context) {
-        return expenseSubCategories.map((Map<String, dynamic> value) {
-          return PopupMenuItem(
-            value: value,
-            height: MySize.size36!,
-            child: Text(value['name'],
-                overflow: TextOverflow.ellipsis,
-                maxLines: 2,
-                style: AppTheme.getTextStyle(themeData.textTheme.bodyMedium,
-                    color: themeData.colorScheme.onSurface)),
-          );
-        }).toList();
-      },
-      color: themeData.colorScheme.surface,
-      child: Container(
-        padding: EdgeInsets.only(
-            left: MySize.size12!,
-            right: MySize.size12!,
-            top: MySize.size8!,
-            bottom: MySize.size8!),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(MySize.size8!)),
-          color: customAppTheme.bgLayer1,
-          border: Border.all(color: customAppTheme.bgLayer3, width: 1),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            SizedBox(
-              width: MySize.screenWidth! * 0.3,
-              child: Text(
-                selectedExpenseSubCategoryId['name'],
-                textAlign: TextAlign.end,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 2,
-                style: AppTheme.getTextStyle(
-                  themeData.textTheme.bodyLarge,
-                  color: themeData.colorScheme.onSurface,
-                ),
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.only(left: MySize.size4!),
-              child: Icon(
-                MdiIcons.chevronDown,
-                size: MySize.size22,
-                color: themeData.colorScheme.onSurface,
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  setExpenseCategories() async {
-    await ExpenseApi().get().then((value) {
-      value.forEach((element) {
-        setState(() {
-          expenseCategories.add({
-            'id': element['id'],
-            'name': element['name'],
-            'sub_categories': element['sub_categories']
-          });
-        });
-      });
-    });
-  }
-
-  setPaymentDetails(int locId) async {
-    await Helper().getFormattedBusinessDetails().then((value) {
-      setState(() {
-        symbol = value['symbol'];
-      });
-    });
-    List payments =
-        await System().get('payment_method', selectedLocation['id']);
-    paymentAccounts = [
-      {'id': null, 'name': "None"}
+  Future<void> setTaxMap() async {
+    var taxes = await System().get('tax');
+    var newTaxList = <Map<String, dynamic>>[
+      {'id': 0, 'name': 'Tax rate', 'amount': 0}
     ];
-    await System().getPaymentAccounts().then((value) {
-      List<String> accIds = [];
-      value.forEach((element) {
-        payments.forEach((payment) {
-          if ((payment['account_id'].toString() == element['id'].toString()) &&
-              !accIds.contains(element['id'].toString())) {
-            accIds.add(element['id'].toString());
-            paymentAccounts.add({'id': element['id'], 'name': element['name']});
-          }
-        });
-      });
+    if (taxes is List) {
+      for (var tax in taxes) {
+        if (tax is Map) {
+          newTaxList.add(Map<String, dynamic>.from(tax));
+        }
+      }
+    }
+    setState(() {
+      taxListMap = newTaxList;
+      selectedTax = taxListMap[0];
     });
-    paymentMethods = [];
-    payments.forEach((element) {
-      setState(() {
-        paymentMethods.add({
+  }
+
+  Future<void> setExpenseCategories() async {
+    var categories = await ExpenseApi().get();
+    var newExpenseCategories = <Map<String, dynamic>>[
+      {'id': 0, 'name': 'Select'}
+    ];
+    for (var cat in categories) {
+      if (cat is Map) {
+        newExpenseCategories.add(Map<String, dynamic>.from(cat));
+      }
+    }
+    setState(() {
+      expenseCategories = newExpenseCategories;
+      selectedExpenseCategoryId = expenseCategories[0];
+
+      expenseSubCategories = [
+        {'id': 0, 'name': 'Select'}
+      ];
+      selectedExpenseSubCategoryId = expenseSubCategories[0];
+    });
+  }
+
+  Future<void> setPaymentDetails(int locId) async {
+    var businessDetails = await Helper().getFormattedBusinessDetails();
+    setState(() {
+      symbol = businessDetails['symbol'] ?? '';
+    });
+
+    List payments = await System().get('payment_method', locId);
+    var accounts = await System().getPaymentAccounts();
+
+    var newPaymentMethods = <Map<String, dynamic>>[];
+    for (var element in payments) {
+      if (element is Map) {
+        newPaymentMethods.add({
           'name': element['name'],
           'value': element['label'],
           'account_id': (element['account_id'] != null)
               ? int.parse(element['account_id'].toString())
               : null
         });
-      });
+      }
+    }
+
+    var newPaymentAccounts = <Map<String, dynamic>>[
+      {'id': null, 'name': "None"}
+    ];
+    List<String> accIds = [];
+    for (var element in accounts) {
+      if (element is Map) {
+        for (var payment in payments) {
+          if (payment is Map &&
+              (payment['account_id'].toString() == element['id'].toString()) &&
+              !accIds.contains(element['id'].toString())) {
+            accIds.add(element['id'].toString());
+            newPaymentAccounts.add(Map<String, dynamic>.from(element));
+          }
+        }
+      }
+    }
+
+    setState(() {
+      paymentMethods = newPaymentMethods;
+      if (paymentMethods.isNotEmpty) {
+        selectedPaymentMethod = paymentMethods[0];
+      } else {
+        selectedPaymentMethod = {
+          'name': 'name',
+          'value': 'value',
+          'account_id': null
+        };
+      }
+
+      paymentAccounts = newPaymentAccounts;
+      if (paymentAccounts.isNotEmpty) {
+        selectedPaymentAccount = paymentAccounts.firstWhere(
+            (element) => element['id'] == selectedPaymentMethod['account_id'],
+            orElse: () => paymentAccounts[0]);
+      } else {
+        selectedPaymentAccount = {'id': null, 'name': "None"};
+      }
     });
-  }
-
-  //payment widget
-  Widget payment() {
-    return Column(
-      children: <Widget>[
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: <
-            Widget>[
-          Expanded(
-            child: TextFormField(
-                validator: (value) {
-                  if (value == '') value = '0.00';
-                  if (expenseAmount.text == '' ||
-                      double.parse(value!) > double.parse(expenseAmount.text)) {
-                    return AppLocalizations.of(context)
-                        .translate('enter_valid_payment_amount');
-                  } else {
-                    return null;
-                  }
-                },
-                decoration: InputDecoration(
-                  prefix: Text(symbol),
-                  labelText:
-                      AppLocalizations.of(context).translate('payment_amount'),
-                  border: themeData.inputDecorationTheme.border,
-                  enabledBorder: themeData.inputDecorationTheme.border,
-                  focusedBorder: themeData.inputDecorationTheme.focusedBorder,
-                ),
-                controller: payingAmount,
-                textAlign: TextAlign.end,
-                style: AppTheme.getTextStyle(themeData.textTheme.titleSmall,
-                    fontWeight: 400, letterSpacing: -0.2),
-                inputFormatters: [
-                  FilteringTextInputFormatter(RegExp(r'^(\d+)?\.?\d{0,2}'),
-                      allow: true)
-                ],
-                keyboardType: TextInputType.number,
-                onChanged: (value) {}),
-          ),
-        ]),
-        Padding(
-          padding: EdgeInsets.all(MySize.size8!),
-        ),
-        Row(children: <Widget>[
-          Text(
-            AppLocalizations.of(context).translate('payment_method') + ' : ',
-            style: AppTheme.getTextStyle(themeData.textTheme.titleLarge,
-                fontWeight: 700, letterSpacing: -0.2),
-          ),
-          PopupMenuButton(
-            onSelected: (item) {
-              setState(() {
-                selectedPaymentMethod = item as Map<String, dynamic>;
-                selectedPaymentAccount = paymentAccounts[0];
-                paymentAccounts.forEach((element) {
-                  if (selectedPaymentMethod['account_id'] == element['id']) {
-                    selectedPaymentAccount = element;
-                  }
-                });
-              });
-            },
-            itemBuilder: (BuildContext context) {
-              return paymentMethods.map((Map value) {
-                return PopupMenuItem(
-                  value: value,
-                  height: MySize.size36!,
-                  child: Text(value['value'],
-                      style: AppTheme.getTextStyle(
-                          themeData.textTheme.bodyMedium,
-                          color: themeData.colorScheme.onSurface)),
-                );
-              }).toList();
-            },
-            color: themeData.colorScheme.surface,
-            child: Container(
-              padding: EdgeInsets.only(
-                  left: MySize.size12!,
-                  right: MySize.size12!,
-                  top: MySize.size8!,
-                  bottom: MySize.size8!),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(MySize.size8!)),
-                color: customAppTheme.bgLayer1,
-                border: Border.all(color: customAppTheme.bgLayer3, width: 1),
-              ),
-              child: Row(
-                children: <Widget>[
-                  Text(
-                    selectedPaymentMethod['value'],
-                    style: AppTheme.getTextStyle(
-                      themeData.textTheme.bodyLarge,
-                      color: themeData.colorScheme.onSurface,
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.only(left: MySize.size4!),
-                    child: Icon(
-                      MdiIcons.chevronDown,
-                      size: MySize.size22,
-                      color: themeData.colorScheme.onSurface,
-                    ),
-                  )
-                ],
-              ),
-            ),
-          ),
-        ])
-      ],
-    );
-  }
-
-  //payment account widget
-  Widget paymentAccount() {
-    return Row(
-      children: <Widget>[
-        Text(
-          AppLocalizations.of(context).translate('payment_account') + ' : ',
-          style: AppTheme.getTextStyle(themeData.textTheme.titleLarge,
-              fontWeight: 700, letterSpacing: -0.2),
-        ),
-        PopupMenuButton(
-          onSelected: (item) {
-            Map<String, dynamic> selectedItem = item as Map<String, dynamic>;
-            setState(() {
-              selectedPaymentAccount = item;
-              selectedPaymentMethod['account_id'] = selectedItem['id'];
-            });
-          },
-          itemBuilder: (BuildContext context) {
-            return paymentAccounts.map((Map value) {
-              return PopupMenuItem(
-                value: value,
-                height: MySize.size36!,
-                child: Text(value['name'],
-                    style: AppTheme.getTextStyle(themeData.textTheme.bodyMedium,
-                        color: themeData.colorScheme.onSurface)),
-              );
-            }).toList();
-          },
-          color: themeData.colorScheme.surface,
-          child: Container(
-            padding: EdgeInsets.only(
-                left: MySize.size12!,
-                right: MySize.size12!,
-                top: MySize.size8!,
-                bottom: MySize.size8!),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(MySize.size8!)),
-              color: customAppTheme.bgLayer1,
-              border: Border.all(color: customAppTheme.bgLayer3, width: 1),
-            ),
-            child: Row(
-              children: <Widget>[
-                Text(
-                  selectedPaymentAccount['name'],
-                  style: AppTheme.getTextStyle(
-                    themeData.textTheme.bodyLarge,
-                    color: themeData.colorScheme.onSurface,
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.only(left: MySize.size4!),
-                  child: Icon(
-                    MdiIcons.chevronDown,
-                    size: MySize.size22,
-                    color: themeData.colorScheme.onSurface,
-                  ),
-                )
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }

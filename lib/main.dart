@@ -98,11 +98,12 @@ class MyApp extends StatelessWidget {
       create: (_) => appLanguage!,
       child: Consumer<AppLanguage>(
         builder: (context, model, child) {
+          int themeType = AppTheme.themeLight;
           return MaterialApp(
             routes: Routes.generateRoute(),
             initialRoute: '/splash',
             debugShowCheckedModeBanner: false,
-            theme: AppTheme.getThemeFromThemeMode(1),
+            theme: AppTheme.getThemeFromThemeMode(themeType),
             locale: model.appLocal,
             supportedLocales: Config().supportedLocales,
             localizationsDelegates: [

@@ -345,8 +345,8 @@ class AppTheme {
           foregroundColor: Colors.white),
       popupMenuTheme: PopupMenuThemeData(
         color: const Color(0xFF34495E), // Matching cardTheme.color
-        textStyle: lightTextTheme.bodyMedium!
-            .merge(const TextStyle(color: Color(0xffffffff))),
+        textStyle: darkTextTheme.bodyMedium!
+            .merge(const TextStyle(color: Colors.white)),
       ),
       bottomAppBarTheme: const BottomAppBarTheme(
           color: Color(0xFF2C3E50),

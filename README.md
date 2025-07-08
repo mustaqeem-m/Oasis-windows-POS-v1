@@ -4,6 +4,8 @@ A new Flutter project.
 
 # Initiliztion
 
+## Pages
+
 - Login
 - home
 - Expenses
@@ -103,3 +105,51 @@ samples, guidance on mobile development, and a full API reference.
 - State management
 - Buisness logic
 - Building UI
+
+# Fix
+
+- Using provider for state management -> make home reactive to data changes, we r moving all our buisness logic inside Provider folder, that extends changeNotifier , from there using notifyListener() will helps home.dart to listen all changes
+- Only UI will maintained by home.dart
+- In components uner home each file ll responsibe each UI builds (Like components/home/statistics.dart ->resoponsible for build of cards in home page)
+- This ll lead us to use this functionality on the other page (Widget Reusability)
+
+# expenses.dart
+
+## Purpose:
+
+The main purpose of this screen is to allow users to input details about an expense and save it.
+
+## UI (User Interface):
+
+- It's a StatefulWidget named Expense.
+- The screen has an AppBar with the title "Expenses".
+- The body is a SingleChildScrollView containing a Form to hold the input fields.
+- Input Fields:
+  - Location: A dropdown (PopupMenuButton) to select the business location.
+  - Tax: A dropdown to select an applicable tax rate.
+  - Expense Category & Sub-Category: Two dependent dropdowns to classify the expense.
+  - Expense Amount: A text field for the total expense amount, accepting only numbers.
+  - Expense Note: A text field for any additional notes.
+  - Payment Details: A section to input the payment amount, select the payment method (e.g., cash, card), and the payment account.
+
+## State Management & Data Flow:
+
+- The \_ExpenseState class manages the screen's state, including the values from text fields and dropdowns.
+- Initialization (`initState`): When the screen loads, it fetches initial data for locations, taxes, and payment details.
+- Dynamic Data Loading:
+  - Selecting a location triggers fetching the relevant expense categories and payment methods for that location.
+  - Selecting an expense category populates the sub-category dropdown.
+- Submission (`onSubmit`):
+  1.  It first checks for an active internet connection using Helper().checkConnectivity().
+  2.  It validates the form to ensure required fields (like expense amount) are filled correctly.
+  3.  It constructs an expense data object using ExpenseManagement().createExpense().
+  4.  This data is sent to the server via an API call: ExpenseApi().create().
+  5.  Upon successful submission, it navigates back to the previous screen and shows a success message using ToastHelper.
+
+## Key Dependencies & Classes:
+
+- `ExpenseApi`: Used for making network calls to the expenses API (e.g., creating a new expense).
+- `System`: A model or helper class used to fetch system-wide data like locations, taxes, and payment methods.
+- `ExpenseManagement`: A model class used to structure the expense data before sending it to the API.
+- `Helper` & `ToastHelper`: Utility classes for common functions like checking connectivity and displaying user-friendly messages (toasts).
+- `AppTheme`, `SizeConfig`, `MyLocalizations`: Helper classes for managing UI theme, screen size responsiveness, and internationalization (text translation).
