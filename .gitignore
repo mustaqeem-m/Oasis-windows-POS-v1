@@ -43,3 +43,23 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg
+*.egg-info/
+*.pyo
+*.pyd
+*.pkl
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Trae Agent files
+*.log
+*.json
+trae_config.json
+.env
