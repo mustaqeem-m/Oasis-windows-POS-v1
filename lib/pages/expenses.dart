@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
 import 'package:pos_2/helpers/toast_helper.dart';
 
 import '../apis/expenses.dart';
+import '../components/expenses/expense_details_card.dart';
+import '../components/expenses/location_and_tax_section.dart';
+import '../components/expenses/payment_card.dart';
+import '../components/expenses/submit_button.dart';
 import '../helpers/AppTheme.dart';
 import '../helpers/SizeConfig.dart';
 import '../helpers/otherHelpers.dart';
@@ -85,10 +89,6 @@ class _ExpenseState extends State<Expense> {
   @override
   Widget build(BuildContext context) {
     ThemeData themeData = Theme.of(context);
-    CustomAppTheme customAppTheme = AppTheme.getCustomAppTheme(
-        themeData.brightness == Brightness.dark
-            ? AppTheme.themeDark
-            : AppTheme.themeLight);
     return Scaffold(
       appBar: AppBar(
         elevation: 0.0,
@@ -105,398 +105,149 @@ class _ExpenseState extends State<Expense> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    _buildLocationAndTaxSection(themeData),
+                    LocationAndTaxSection(
+                      selectedLocation: selectedLocation,
+                      locationListMap: locationListMap,
+                      onLocationChanged: (item) {
+                        if (item != null) {
+                          setState(() {
+                            selectedLocation = item;
+                            setExpenseCategories();
+                            setPaymentDetails(selectedLocation['id']).then((_) {
+                              if (paymentMethods.isNotEmpty) {
+                                selectedPaymentMethod = paymentMethods[0];
+                              } else {
+                                selectedPaymentMethod = {
+                                  'name': 'name',
+                                  'value': 'value',
+                                  'account_id': null
+                                };
+                              }
+                              if (paymentAccounts.isNotEmpty) {
+                                selectedPaymentAccount = paymentAccounts[0];
+                                for (var element in paymentAccounts) {
+                                  if (selectedPaymentMethod['account_id'] ==
+                                      element['id']) {
+                                    selectedPaymentAccount = element;
+                                  }
+                                }
+                              } else {
+                                selectedPaymentAccount = {'id': null, 'name': "None"};
+                              }
+                            });
+                          });
+                        }
+                      },
+                      selectedTax: selectedTax,
+                      taxListMap: taxListMap,
+                      onTaxChanged: (item) {
+                        if (item != null) {
+                          setState(() {
+                            selectedTax = item;
+                          });
+                        }
+                      },
+                      themeData: themeData,
+                    ),
                     SizedBox(height: MySize.size24!),
-                    _buildExpenseDetailsCard(themeData),
+                    ExpenseDetailsCard(
+                      themeData: themeData,
+                      selectedExpenseCategoryId: selectedExpenseCategoryId,
+                      expenseCategories: expenseCategories,
+                      onExpenseCategoryChanged: (item) {
+                        if (item != null) {
+                          setState(() {
+                            selectedExpenseCategoryId = item;
+                            expenseSubCategories = [
+                              {'id': 0, 'name': 'Select'}
+                            ];
+                            selectedExpenseSubCategoryId = expenseSubCategories[0];
+
+                            if (item.containsKey('sub_categories') &&
+                                item['sub_categories'] is List &&
+                                (item['sub_categories'] as List).isNotEmpty) {
+                              var subCategoriesData = item['sub_categories'] as List;
+                              for (var element in subCategoriesData) {
+                                if (element is Map) {
+                                  expenseSubCategories
+                                      .add(Map<String, dynamic>.from(element));
+                                }
+                              }
+                            }
+                          });
+                        }
+                      },
+                      selectedExpenseSubCategoryId: selectedExpenseSubCategoryId,
+                      expenseSubCategories: expenseSubCategories,
+                      onExpenseSubCategoryChanged: (item) {
+                        if (item != null) {
+                          setState(() {
+                            selectedExpenseSubCategoryId = item;
+                          });
+                        }
+                      },
+                      expenseAmount: expenseAmount,
+                      symbol: symbol,
+                      expenseNote: expenseNote,
+                    ),
                     SizedBox(height: MySize.size24!),
-                    _buildPaymentCard(themeData),
+                    PaymentCard(
+                      themeData: themeData,
+                      payingAmount: payingAmount,
+                      symbol: symbol,
+                      payingAmountValidator: (value) {
+                        if (value == null || value.isEmpty) value = '0.00';
+                        if (expenseAmount.text.isEmpty ||
+                            double.tryParse(value) == null ||
+                            double.parse(value) > double.parse(expenseAmount.text)) {
+                          return AppLocalizations.of(context)
+                              .translate('enter_valid_payment_amount');
+                        }
+                        return null;
+                      },
+                      selectedPaymentMethod: selectedPaymentMethod,
+                      paymentMethods: paymentMethods,
+                      onPaymentMethodChanged: (item) {
+                        if (item != null) {
+                          setState(() {
+                            selectedPaymentMethod = item;
+                            selectedPaymentAccount = paymentAccounts.firstWhere(
+                                (element) => element['id'] == item['account_id'],
+                                orElse: () => paymentAccounts.isNotEmpty
+                                    ? paymentAccounts[0]
+                                    : {'id': null, 'name': "None"});
+                          });
+                        }
+                      },
+                      selectedPaymentAccount: selectedPaymentAccount,
+                      paymentAccounts: paymentAccounts,
+                      onPaymentAccountChanged: (item) {
+                        if (item != null) {
+                          setState(() {
+                            selectedPaymentAccount = item;
+                            selectedPaymentMethod['account_id'] = item['id'];
+                          });
+                        }
+                      },
+                    ),
                     SizedBox(height: MySize.size24!),
-                    _buildSubmitButton(themeData),
+                    SubmitButton(
+                      themeData: themeData,
+                      onPressed: () async {
+                        if (await Helper().checkConnectivity()) {
+                          if (_formKey.currentState!.validate()) {
+                            onSubmit();
+                          }
+                        } else {
+                          ToastHelper.show(context,
+                              AppLocalizations.of(context).translate('check_connectivity'));
+                        }
+                      },
+                    ),
                   ],
                 ),
               ),
             ),
-    );
-  }
-
-  Widget _buildLocationAndTaxSection(ThemeData themeData) {
-    return Row(
-      children: [
-        Expanded(
-          child: DropdownButtonFormField<Map<String, dynamic>>(
-            value: selectedLocation,
-            dropdownColor: themeData.colorScheme.surface,
-            items: locationListMap.map((item) {
-              return DropdownMenuItem<Map<String, dynamic>>(
-                value: item,
-                child: Text(item['name'],
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.black)),
-              );
-            }).toList(),
-            onChanged: (item) {
-              if (item != null) {
-                setState(() {
-                  selectedLocation = item;
-                  setExpenseCategories();
-                  setPaymentDetails(selectedLocation['id']).then((_) {
-                    if (paymentMethods.isNotEmpty) {
-                      selectedPaymentMethod = paymentMethods[0];
-                    } else {
-                      selectedPaymentMethod = {
-                        'name': 'name',
-                        'value': 'value',
-                        'account_id': null
-                      };
-                    }
-                    if (paymentAccounts.isNotEmpty) {
-                      selectedPaymentAccount = paymentAccounts[0];
-                      for (var element in paymentAccounts) {
-                        if (selectedPaymentMethod['account_id'] ==
-                            element['id']) {
-                          selectedPaymentAccount = element;
-                        }
-                      }
-                    } else {
-                      selectedPaymentAccount = {'id': null, 'name': "None"};
-                    }
-                  });
-                });
-              }
-            },
-            decoration: InputDecoration(
-              labelText: AppLocalizations.of(context).translate('location'),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(MySize.size8!),
-              ),
-              prefixIcon: Icon(Icons.location_on),
-              filled: true,
-              fillColor: themeData.colorScheme.surface,
-            ),
-          ),
-        ),
-        SizedBox(width: MySize.size16!),
-        Expanded(
-          child: DropdownButtonFormField<Map<String, dynamic>>(
-            value: selectedTax,
-            dropdownColor: themeData.colorScheme.surface,
-            items: taxListMap.map((item) {
-              return DropdownMenuItem<Map<String, dynamic>>(
-                value: item,
-                child: Text(
-                  item['name'],
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: Colors.black),
-                ),
-              );
-            }).toList(),
-            onChanged: (item) {
-              if (item != null) {
-                setState(() {
-                  selectedTax = item;
-                });
-              }
-            },
-            decoration: InputDecoration(
-              labelText: AppLocalizations.of(context).translate('tax'),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(MySize.size8!),
-              ),
-              prefixIcon: Icon(Icons.receipt),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildExpenseDetailsCard(ThemeData themeData) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(MySize.size12!)),
-      child: Padding(
-        padding: EdgeInsets.all(MySize.size16!),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildCardHeader(
-                AppLocalizations.of(context).translate('expense_details'),
-                themeData),
-            SizedBox(height: MySize.size16!),
-            DropdownButtonFormField<Map<String, dynamic>>(
-              value: selectedExpenseCategoryId,
-              dropdownColor: themeData.colorScheme.surface,
-              items: expenseCategories.map((item) {
-                return DropdownMenuItem<Map<String, dynamic>>(
-                  value: item,
-                  child: Text(
-                    item['name'],
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.black),
-                  ),
-                );
-              }).toList(),
-              onChanged: (item) {
-                if (item != null) {
-                  setState(() {
-                    selectedExpenseCategoryId = item;
-                    expenseSubCategories = [
-                      {'id': 0, 'name': 'Select'}
-                    ];
-                    selectedExpenseSubCategoryId = expenseSubCategories[0];
-
-                    if (item.containsKey('sub_categories') &&
-                        item['sub_categories'] is List &&
-                        (item['sub_categories'] as List).isNotEmpty) {
-                      var subCategoriesData = item['sub_categories'] as List;
-                      for (var element in subCategoriesData) {
-                        if (element is Map) {
-                          expenseSubCategories
-                              .add(Map<String, dynamic>.from(element));
-                        }
-                      }
-                    }
-                  });
-                }
-              },
-              decoration: InputDecoration(
-                labelText: AppLocalizations.of(context)
-                    .translate('expense_categories'),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(MySize.size8!),
-                ),
-                prefixIcon: Icon(Icons.category),
-              ),
-            ),
-            SizedBox(height: MySize.size16!),
-            DropdownButtonFormField<Map<String, dynamic>>(
-              value: selectedExpenseSubCategoryId,
-              dropdownColor: themeData.colorScheme.surface,
-              items: expenseSubCategories.map((item) {
-                return DropdownMenuItem<Map<String, dynamic>>(
-                  value: item,
-                  child: Text(
-                    item['name'],
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.black),
-                  ),
-                );
-              }).toList(),
-              onChanged: (item) {
-                if (item != null) {
-                  setState(() {
-                    selectedExpenseSubCategoryId = item;
-                  });
-                }
-              },
-              decoration: InputDecoration(
-                labelText:
-                    AppLocalizations.of(context).translate('sub_categories'),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(MySize.size8!),
-                ),
-                prefixIcon: Icon(Icons.subdirectory_arrow_right),
-              ),
-            ),
-            SizedBox(height: MySize.size16!),
-            TextFormField(
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return AppLocalizations.of(context)
-                      .translate('please_enter_expense_amount');
-                }
-                return null;
-              },
-              decoration: InputDecoration(
-                prefixText: symbol,
-                labelText:
-                    AppLocalizations.of(context).translate('expense_amount'),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(MySize.size8!),
-                ),
-                prefixIcon: Icon(Icons.currency_rupee),
-              ),
-              controller: expenseAmount,
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d{0,2}')),
-              ],
-              textAlign: TextAlign.start,
-            ),
-            SizedBox(height: MySize.size16!),
-            TextFormField(
-              decoration: InputDecoration(
-                labelText:
-                    AppLocalizations.of(context).translate('expense_note'),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(MySize.size8!),
-                ),
-                prefixIcon: Icon(Icons.note),
-              ),
-              controller: expenseNote,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPaymentCard(ThemeData themeData) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(MySize.size12!)),
-      child: Padding(
-        padding: EdgeInsets.all(MySize.size16!),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildCardHeader(
-                AppLocalizations.of(context).translate('payment'), themeData),
-            SizedBox(height: MySize.size16!),
-            TextFormField(
-              validator: (value) {
-                if (value == null || value.isEmpty) value = '0.00';
-                if (expenseAmount.text.isEmpty ||
-                    double.tryParse(value) == null ||
-                    double.parse(value) > double.parse(expenseAmount.text)) {
-                  return AppLocalizations.of(context)
-                      .translate('enter_valid_payment_amount');
-                }
-                return null;
-              },
-              decoration: InputDecoration(
-                prefixText: symbol,
-                labelText:
-                    AppLocalizations.of(context).translate('payment_amount'),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(MySize.size8!),
-                ),
-                prefixIcon: Icon(Icons.payment),
-              ),
-              controller: payingAmount,
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d{0,2}')),
-              ],
-              textAlign: TextAlign.start,
-            ),
-            SizedBox(height: MySize.size16!),
-            DropdownButtonFormField<Map<String, dynamic>>(
-              value: selectedPaymentMethod,
-              dropdownColor: themeData.colorScheme.surface,
-              items: paymentMethods.map((item) {
-                return DropdownMenuItem<Map<String, dynamic>>(
-                  value: item,
-                  child: Text(item['value'],
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: Colors.black)),
-                );
-              }).toList(),
-              onChanged: (item) {
-                if (item != null) {
-                  setState(() {
-                    selectedPaymentMethod = item;
-                    selectedPaymentAccount = paymentAccounts.firstWhere(
-                        (element) => element['id'] == item['account_id'],
-                        orElse: () => paymentAccounts.isNotEmpty
-                            ? paymentAccounts[0]
-                            : {'id': null, 'name': "None"});
-                  });
-                }
-              },
-              decoration: InputDecoration(
-                labelText:
-                    AppLocalizations.of(context).translate('payment_method'),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(MySize.size8!),
-                ),
-                prefixIcon: Icon(Icons.credit_card),
-              ),
-            ),
-            SizedBox(height: MySize.size16!),
-            DropdownButtonFormField<Map<String, dynamic>>(
-              value: selectedPaymentAccount,
-              dropdownColor: themeData.colorScheme.surface,
-              items: paymentAccounts.map((item) {
-                return DropdownMenuItem<Map<String, dynamic>>(
-                  value: item,
-                  child: Text(
-                    item['name'],
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.black),
-                  ),
-                );
-              }).toList(),
-              onChanged: (item) {
-                if (item != null) {
-                  setState(() {
-                    selectedPaymentAccount = item;
-                    selectedPaymentMethod['account_id'] = item['id'];
-                  });
-                }
-              },
-              decoration: InputDecoration(
-                labelText:
-                    AppLocalizations.of(context).translate('payment_account'),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(MySize.size8!),
-                ),
-                prefixIcon: Icon(Icons.account_balance),
-                filled: true,
-                fillColor: themeData.colorScheme.surface,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCardHeader(String title, ThemeData themeData) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-          vertical: MySize.size8!, horizontal: MySize.size12!),
-      decoration: BoxDecoration(
-        color: themeData.colorScheme.primary.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(MySize.size8!),
-      ),
-      child: Text(
-        title,
-        style: AppTheme.getTextStyle(themeData.textTheme.titleMedium,
-            fontWeight: 700, color: themeData.colorScheme.primary),
-      ),
-    );
-  }
-
-  Widget _buildSubmitButton(ThemeData themeData) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: themeData.colorScheme.primary,
-          padding: EdgeInsets.symmetric(vertical: MySize.size16!),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(MySize.size12!),
-          ),
-        ),
-        onPressed: () async {
-          if (await Helper().checkConnectivity()) {
-            if (_formKey.currentState!.validate()) {
-              onSubmit();
-            }
-          } else {
-            ToastHelper.show(context,
-                AppLocalizations.of(context).translate('check_connectivity'));
-          }
-        },
-        child: Text(
-          AppLocalizations.of(context).translate('submit'),
-          style: AppTheme.getTextStyle(themeData.textTheme.titleMedium,
-              color: themeData.colorScheme.onSecondary, fontWeight: 700),
-        ),
-      ),
     );
   }
 
