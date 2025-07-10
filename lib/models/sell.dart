@@ -255,9 +255,9 @@ class Sell {
     //if added increase quantity else addToCart
     if (checkSellLine.length > 0) {
       //update in database
-      // var quantity = checkSellLine[0]['quantity'] + 1;
-      // await SellDatabase()
-      //     .update(checkSellLine[0]['id'], {'quantity': quantity});
+      var quantity = checkSellLine[0]['quantity'] + 1;
+      await SellDatabase()
+          .update(checkSellLine[0]['id'], {'quantity': quantity});
     } else {
       //insert in database
       await SellDatabase().store(sellLine);

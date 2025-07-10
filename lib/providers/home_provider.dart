@@ -17,6 +17,7 @@ import '../../models/system.dart';
 import '../../models/variations.dart';
 
 class HomeProvider with ChangeNotifier {
+  bool _isDisposed = false;
   var user;
   var note = TextEditingController();
   var clockInTime = DateTime.now();
@@ -73,7 +74,9 @@ class HomeProvider with ChangeNotifier {
     });
     selectedLanguage =
         prefs.getString('language_code') ?? Config().defaultLanguage;
-    notifyListeners();
+    if (!_isDisposed) {
+      notifyListeners();
+    }
   }
 
   Future<void> checkIOButtonDisplay() async {
@@ -90,21 +93,29 @@ class HomeProvider with ChangeNotifier {
       if (packageDetails.containsKey('essentials_module') &&
           packageDetails['essentials_module'].toString() == '1') {
         checkedIn = await Attendance().getAttendanceStatus(USERID);
-        notifyListeners();
+        if (!_isDisposed) {
+          notifyListeners();
+        }
       } else {
         checkedIn = null;
-        notifyListeners();
+        if (!_isDisposed) {
+          notifyListeners();
+        }
       }
     } else {
       checkedIn = null;
-      notifyListeners();
+      if (!_isDisposed) {
+        notifyListeners();
+      }
     }
   }
 
   Future<void> sync(BuildContext context) async {
     if (!syncPressed) {
       syncPressed = true;
-      notifyListeners();
+      if (!_isDisposed) {
+        notifyListeners();
+      }
       showDialog(
         barrierDismissible: true,
         context: context,
@@ -131,7 +142,9 @@ class HomeProvider with ChangeNotifier {
         });
       });
       syncPressed = false;
-      notifyListeners();
+      if (!_isDisposed) {
+        notifyListeners();
+      }
     }
   }
 
@@ -157,7 +170,9 @@ class HomeProvider with ChangeNotifier {
         await Helper().getPermission('view_own_expense')) {
       accessExpenses = true;
     }
-    notifyListeners();
+    if (!_isDisposed) {
+      notifyListeners();
+    }
   }
 
   Future<List> loadStatistics() async {
@@ -179,7 +194,9 @@ class HomeProvider with ChangeNotifier {
       totalReceivedAmount = (totalReceivedAmount + (paidAmount - returnAmount));
       totalDueAmount = (totalDueAmount + sell['pending_amount']);
     }
-    notifyListeners();
+    if (!_isDisposed) {
+      notifyListeners();
+    }
     return result;
   }
 
@@ -245,14 +262,18 @@ class HomeProvider with ChangeNotifier {
           if (byCustomPayment_3 > 0 && row['key'] == 'custom_pay_3')
             method.add({'key': row['value'], 'value': byCustomPayment_3});
         }
-        notifyListeners();
+        if (!_isDisposed) {
+          notifyListeners();
+        }
       });
     });
   }
 
   void updateLanguage(String? newLanguage) {
     selectedLanguage = newLanguage;
-    notifyListeners();
+    if (!_isDisposed) {
+      notifyListeners();
+    }
   }
 
   void onCheckInOut(bool newCheckedIn) async {
@@ -262,6 +283,14 @@ class HomeProvider with ChangeNotifier {
         clockInTime = DateTime.parse(value);
       }
     });
-    notifyListeners();
+    if (!_isDisposed) {
+      notifyListeners();
+    }
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
   }
 }
