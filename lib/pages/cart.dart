@@ -134,7 +134,7 @@ class CartState extends State<Cart> {
         actions: [
           InkWell(
             onTap: () async {
-              var barcode = await Helper().barcodeScan();
+              var barcode = await Helper().barcodeScan(context);
               await getScannedProduct(barcode);
             },
             child: Container(

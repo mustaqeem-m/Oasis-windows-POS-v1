@@ -274,6 +274,10 @@ class Sell {
         .countSellLines(isCompleted: isCompleted, sellId: sellId);
   }
 
+  Future<List<Map<String, dynamic>>> getCartLines() async {
+    return await SellDatabase().getSellLinesByStatus(0);
+  }
+
   //refresh sale
   Map<String, dynamic> createSellMap(Map sell, change, pending) {
     Map<String, dynamic> sale = {

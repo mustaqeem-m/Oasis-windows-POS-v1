@@ -46,6 +46,16 @@ class SellDatabase {
     return response;
   }
 
+  //fetch sell_lines by is_completed status
+  Future<List<Map<String, dynamic>>> getSellLinesByStatus(
+      int isCompleted) async {
+    final db = await dbProvider.database;
+    var response = await db.rawQuery(
+        'SELECT SL.*, V.display_name as product_name FROM sell_lines AS SL JOIN variations AS V ON SL.variation_id = V.variation_id WHERE SL.is_completed = ?',
+        [isCompleted]);
+    return response;
+  }
+
   //fetch incomplete sellLine
   Future<List> getInCompleteLines(locationId, {sellId}) async {
     String where = 'is_completed = 0';

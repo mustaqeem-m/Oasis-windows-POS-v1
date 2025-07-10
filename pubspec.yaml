@@ -73,7 +73,7 @@ environment:
 dependencies:
   app_settings: any
   badges: any
-  barcode_scan2: any
+  simple_barcode_scanner: ^0.3.0
   cached_network_image: any
   change_app_package_name: any
   connectivity_plus: ^4.0.2

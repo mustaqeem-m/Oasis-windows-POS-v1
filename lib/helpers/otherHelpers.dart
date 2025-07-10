@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:barcode_scan2/barcode_scan2.dart';
+import '../components/barcode_scanner.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
@@ -170,9 +170,13 @@ class Helper {
     return subTotal.toStringAsFixed(2);
   }
 
-  Future<String> barcodeScan() async {
-    var result = await BarcodeScanner.scan();
-    return result.rawContent.trimRight();
+  Future<String> barcodeScan(BuildContext context) async {
+    var result = await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const BarcodeScannerPage(),
+        ));
+    return result ?? "";
   }
 
   //function for formatting invoice
