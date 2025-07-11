@@ -2,8 +2,11 @@ import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:pos_2/helpers/toast_helper.dart';
+import 'package:pos_2/providers/home_provider.dart';
+import 'package:provider/provider.dart';
 import '../helpers/AppTheme.dart';
 import '../helpers/SizeConfig.dart';
 import '../helpers/generators.dart';
@@ -11,6 +14,7 @@ import '../helpers/otherHelpers.dart';
 import '../locale/MyLocalizations.dart';
 import '../models/product_model.dart';
 import '../models/sell.dart';
+import '../models/sellDatabase.dart';
 import '../models/system.dart';
 import '../models/variations.dart';
 
@@ -19,29 +23,49 @@ class CustomerSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            const Icon(Icons.person, size: 40),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Walk-In Customer',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const Text('+1 234 567 890'),
-                ],
-              ),
+    return Consumer<HomeProvider>(
+      builder: (context, provider, child) {
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                const Icon(Icons.person, size: 40),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                          provider.selectedCustomer['name'] ??
+                              'Walk-In Customer',
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text(provider.selectedCustomer['mobile'] ?? ''),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/customer', arguments: {
+                      'locationId': 0,
+                      'taxId': 0,
+                      'discountType': 'fixed',
+                      'discountAmount': 0,
+                      'invoiceAmount': 0,
+                      'customerId': provider.selectedCustomer['id'],
+                      'serviceStaff': 0,
+                      'sellId': null,
+                    });
+                  },
+                ),
+              ],
             ),
-            IconButton(icon: const Icon(Icons.edit), onPressed: () {}),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
@@ -76,15 +100,15 @@ class CartTable extends StatelessWidget {
                   ],
                   rows: cartLines.map((line) {
                     double price = double.parse(line['unit_price'].toString());
-                    int quantity = line['quantity'];
+                    double quantity = line['quantity'];
                     double total = price * quantity;
                     return DataRow(cells: [
                       DataCell(Text(line['product_name'] ?? '')),
                       DataCell(Text(quantity.toString())),
-                      DataCell(Text(
-                          '$currencySymbol${price.toStringAsFixed(2)}')),
-                      DataCell(Text(
-                          '$currencySymbol${total.toStringAsFixed(2)}')),
+                      DataCell(
+                          Text('$currencySymbol${price.toStringAsFixed(2)}')),
+                      DataCell(
+                          Text('$currencySymbol${total.toStringAsFixed(2)}')),
                     ]);
                   }).toList(),
                 ),
@@ -101,14 +125,14 @@ class Products extends StatefulWidget {
   const Products({super.key});
 
   @override
-  _ProductsState createState() => _ProductsState();
+  ProductsState createState() => ProductsState();
 }
 
-class _ProductsState extends State<Products> {
+class ProductsState extends State<Products> {
   List products = [];
   List<Map<String, dynamic>> cartLines = [];
   static int themeType = 1;
-  ThemeData themeData = AppTheme.getThemeFromThemeMode(themeType);
+  late ThemeData themeData;
   bool changeLocation = false,
       canChangeLocation = true,
       canMakeSell = false,
@@ -126,9 +150,9 @@ class _ProductsState extends State<Products> {
       offset = 0;
   int? byAlphabets, byPrice;
 
-  List<DropdownMenuItem<int>> _categoryMenuItems = [],
-      _subCategoryMenuItems = [],
-      _brandsMenuItems = [];
+  final List<DropdownMenuItem<int>> _categoryMenuItems = [];
+  final List<DropdownMenuItem<int>> _subCategoryMenuItems = [];
+  final List<DropdownMenuItem<int>> _brandsMenuItems = [];
   List<DropdownMenuItem<bool>> _priceGroupMenuItems = [];
   Map? argument;
   List<Map<String, dynamic>> locationListMap = [
@@ -148,8 +172,9 @@ class _ProductsState extends State<Products> {
   }
 
   @override
-  initState() {
+  void initState() {
     super.initState();
+    themeData = AppTheme.getThemeFromThemeMode(themeType);
     getPermission();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
@@ -176,10 +201,10 @@ class _ProductsState extends State<Products> {
 
   @override
   Future<void> didChangeDependencies() async {
-    argument = ModalRoute.of(context)!.settings.arguments as Map?;
+    argument = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
     //Arguments sellId & locationId is send from edit.
     if (argument != null) {
-      Future.delayed(Duration(milliseconds: 200), () {
+      Future.delayed(const Duration(milliseconds: 200), () {
         if (mounted) {
           setState(() {
             selectedLocationId = argument!['locationId'];
@@ -196,19 +221,22 @@ class _ProductsState extends State<Products> {
   }
 
   //Set location & product
-  Future<void> setInitDetails(selectedLocationId) async {
+  Future<void> setInitDetails(int selectedLocationId) async {
     //check subscription
     final activeSubscriptionDetails = await System().get('active-subscription');
     if (activeSubscriptionDetails.isNotEmpty) {
-      setState(() {
-        canMakeSell = true;
-      });
+      if (mounted) {
+        setState(() {
+          canMakeSell = true;
+        });
+      }
     } else {
+      if (!mounted) return;
       ToastHelper.show(context,
           AppLocalizations.of(context).translate('no_subscription_found'));
     }
     await Helper().getFormattedBusinessDetails().then((value) {
-      symbol = value['symbol'] + ' ';
+      symbol = '${value['symbol']} ';
     });
     setDefaultLocation(selectedLocationId);
     products = [];
@@ -227,7 +255,7 @@ class _ProductsState extends State<Products> {
   }
 
   //set selling Price Group Id
-  void findSellingPriceGroupId(locId) {
+  void findSellingPriceGroupId(int locId) {
     if (usePriceGroup) {
       for (var element in locationListMap) {
         if (element['id'] == selectedLocationId &&
@@ -247,10 +275,12 @@ class _ProductsState extends State<Products> {
   //set product list
   Future<void> productList({bool resetOffset = false}) async {
     if (resetOffset) {
-      setState(() {
-        offset = 0;
-        products = <dynamic>[];
-      });
+      if (mounted) {
+        setState(() {
+          offset = 0;
+          products = <dynamic>[];
+        });
+      }
     }
     offset++;
     //check last sync, if difference is 10 minutes then sync again.
@@ -297,7 +327,7 @@ class _ProductsState extends State<Products> {
 
   Future<void> categoryList() async {
     List<dynamic> categories = await System().getCategories();
-
+    _categoryMenuItems.clear();
     _categoryMenuItems.add(
       DropdownMenuItem(
         value: 0,
@@ -315,9 +345,9 @@ class _ProductsState extends State<Products> {
     }
   }
 
-  Future<void> subCategoryList(parentId) async {
+  Future<void> subCategoryList(int parentId) async {
     List<dynamic> subCategories = await System().getSubCategories(parentId);
-    _subCategoryMenuItems = [];
+    _subCategoryMenuItems.clear();
     _subCategoryMenuItems.add(
       DropdownMenuItem(
         value: 0,
@@ -337,7 +367,7 @@ class _ProductsState extends State<Products> {
 
   Future<void> brandList() async {
     List<dynamic> brands = await System().getBrands();
-
+    _brandsMenuItems.clear();
     _brandsMenuItems.add(
       DropdownMenuItem(
         value: 0,
@@ -392,7 +422,7 @@ class _ProductsState extends State<Products> {
   }
 
   Future<String> getCartItemCount({dynamic isCompleted, dynamic sellId}) async {
-    final counts =
+    final String counts =
         await Sell().cartItemCount(isCompleted: isCompleted, sellId: sellId);
     if (mounted) {
       setState(() {
@@ -484,15 +514,58 @@ class _ProductsState extends State<Products> {
               ),
             ),
           ),
-          Text(DateTime.now().toString().substring(0, 16)),
+          Text(DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now())),
         ],
       ),
       actions: [
-        IconButton(icon: Icon(Icons.save), onPressed: () {}),
-        IconButton(icon: Icon(Icons.print), onPressed: () {}),
-        IconButton(icon: Icon(Icons.build), onPressed: () {}),
-        IconButton(icon: Icon(Icons.add_shopping_cart), onPressed: () {}),
-        IconButton(icon: Icon(Icons.fullscreen), onPressed: () {}),
+        IconButton(
+            icon: const Icon(Icons.save),
+            onPressed: () {
+              _saveSale('draft');
+            }),
+        IconButton(
+            icon: const Icon(Icons.print),
+            onPressed: () async {
+              if (cartLines.isNotEmpty) {
+                Map<String, dynamic> sell = await Sell().createSell(
+                    changeReturn: 0.00,
+                    transactionDate:
+                        DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.now()),
+                    pending: _totalPayable,
+                    shippingCharges: 0.00,
+                    shippingDetails: '',
+                    invoiceNo: 'quotation-' +
+                        DateTime.now().millisecondsSinceEpoch.toString(),
+                    contactId:
+                        Provider.of<HomeProvider>(context, listen: false)
+                            .selectedCustomer['id'],
+                    discountAmount: 0,
+                    discountType: 'fixed',
+                    invoiceAmount: _totalPayable,
+                    locId: selectedLocationId,
+                    saleStatus: 'quotation',
+                    isQuotation: 1);
+                var sellId = await SellDatabase().storeSell(sell);
+                await SellDatabase()
+                    .updateSellLine({'sell_id': sellId, 'is_completed': 1});
+                if (!mounted) return;
+                Helper().printDocument(sellId, 0, context);
+              } else {
+                if (!mounted) return;
+                ToastHelper.show(context, 'Cart is empty');
+              }
+            }),
+        IconButton(
+            icon: const Icon(Icons.add_shopping_cart),
+            onPressed: () {
+              _showCancelConfirmationDialog(isNewSale: true);
+            }),
+        // IconButton(
+        //     icon: const Icon(Icons.fullscreen),
+        //     onPressed: () async {
+        //       bool isFullscreen = await FullscreenWindow.isFullScreen();
+        //       await FullscreenWindow.setFullScreen(!isFullscreen);
+        //     }),
       ],
     );
   }
@@ -502,7 +575,7 @@ class _ProductsState extends State<Products> {
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
-          CustomerSection(),
+          const CustomerSection(),
           Expanded(
               child: CartTable(
             cartLines: cartLines,
@@ -529,7 +602,7 @@ class _ProductsState extends State<Products> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.location_on),
+                            const Icon(Icons.location_on),
                             Text(AppLocalizations.of(context)
                                 .translate('please_set_a_location')),
                           ],
@@ -539,7 +612,7 @@ class _ProductsState extends State<Products> {
                 : Center(
                     child: Text(
                       AppLocalizations.of(context).translate('unauthorised'),
-                      style: TextStyle(color: Colors.black),
+                      style: const TextStyle(color: Colors.black),
                     ),
                   ),
           ),
@@ -556,6 +629,7 @@ class _ProductsState extends State<Products> {
         children: <Widget>[
           InkWell(
             onTap: () async {
+              if (!mounted) return;
               var barcode = await Helper().barcodeScan(context);
               await getScannedProduct(barcode);
             },
@@ -563,13 +637,12 @@ class _ProductsState extends State<Products> {
               margin: EdgeInsets.only(left: MySize.size8!),
               decoration: BoxDecoration(
                 color: themeData.colorScheme.surface,
-                borderRadius:
-                    BorderRadius.all(Radius.circular(MySize.size16!)),
+                borderRadius: BorderRadius.all(Radius.circular(MySize.size16!)),
                 boxShadow: [
                   BoxShadow(
                     color: themeData.cardTheme.shadowColor!.withAlpha(48),
                     blurRadius: 3,
-                    offset: Offset(0, 1),
+                    offset: const Offset(0, 1),
                   )
                 ],
               ),
@@ -590,10 +663,48 @@ class _ProductsState extends State<Products> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        ElevatedButton(onPressed: () {}, child: Text("Category")),
-        ElevatedButton(onPressed: () {}, child: Text("Brand")),
+        ElevatedButton(
+            onPressed: () {
+              _showFilterDialog(
+                  'category',
+                  _categoryMenuItems,
+                  (int? value) => setState(() {
+                        categoryId = value!;
+                        productList(resetOffset: true);
+                      }));
+            },
+            child: const Text("Category")),
+        ElevatedButton(
+            onPressed: () {
+              _showFilterDialog(
+                  'brand',
+                  _brandsMenuItems,
+                  (int? value) => setState(() {
+                        brandId = value!;
+                        productList(resetOffset: true);
+                      }));
+            },
+            child: const Text("Brand")),
       ],
     );
+  }
+
+  void _showFilterDialog(String title, List<DropdownMenuItem<int>> items,
+      Function(int?) onChanged) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Select $title'),
+            content: DropdownButton<int>(
+              items: items,
+              onChanged: (value) {
+                onChanged(value);
+                Navigator.of(context).pop();
+              },
+            ),
+          );
+        });
   }
 
   Widget _buildCartOptions() {
@@ -604,23 +715,23 @@ class _ProductsState extends State<Products> {
           Row(
             children: [
               Checkbox(value: false, onChanged: (val) {}),
-              Text("Subscribe?"),
+              const Text("Subscribe?"),
             ],
           ),
           DropdownButtonFormField<String>(
-            items: [DropdownMenuItem(child: Text("Select Table"))],
+            items: const [DropdownMenuItem(child: Text("Select Table"))],
             onChanged: (val) {},
-            decoration: InputDecoration(labelText: "Select Table"),
+            decoration: const InputDecoration(labelText: "Select Table"),
           ),
           DropdownButtonFormField<String>(
-            items: [DropdownMenuItem(child: Text("Service Staff"))],
+            items: const [DropdownMenuItem(child: Text("Service Staff"))],
             onChanged: (val) {},
-            decoration: InputDecoration(labelText: "Service Staff"),
+            decoration: const InputDecoration(labelText: "Service Staff"),
           ),
           Row(
             children: [
               Checkbox(value: false, onChanged: (val) {}),
-              Text("Kitchen Order"),
+              const Text("Kitchen Order"),
             ],
           ),
         ],
@@ -635,15 +746,21 @@ class _ProductsState extends State<Products> {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [Text("Items Count:"), Text("0")],
+            children: [
+              const Text("Items Count:"),
+              Text(cartLines.length.toString())
+            ],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [Text("Subtotal:"), Text("\$0.00")],
+            children: [
+              const Text("Subtotal:"),
+              Text("$symbol${_totalPayable.toStringAsFixed(2)}")
+            ],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [Text("Tax:"), Text("\$0.00")],
+            children: [const Text("Tax:"), const Text("\$0.00")],
           ),
         ],
       ),
@@ -660,29 +777,48 @@ class _ProductsState extends State<Products> {
             Wrap(
               spacing: 8.0,
               children: [
-                ElevatedButton(onPressed: () {}, child: Text("Draft")),
-                ElevatedButton(onPressed: () {}, child: Text("Quotation")),
-                ElevatedButton(onPressed: () {}, child: Text("Suspend")),
-                ElevatedButton(onPressed: () {}, child: Text("Credit Sale")),
-                ElevatedButton(onPressed: () {}, child: Text("Card")),
-                ElevatedButton(onPressed: () {}, child: Text("Multiple Pay")),
-                ElevatedButton(onPressed: () {}, child: Text("Cash")),
                 ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () => _saveSale('draft'),
+                    child: const Text("Draft")),
+                ElevatedButton(
+                    onPressed: () => _saveSale('quotation'),
+                    child: const Text("Quotation")),
+                ElevatedButton(
+                    onPressed: () => _saveSale('suspend'),
+                    child: const Text("Suspend")),
+                ElevatedButton(
+                    onPressed: () => _goToCheckout('credit_sale'),
+                    child: const Text("Credit Sale")),
+                ElevatedButton(
+                    onPressed: () => _goToCheckout('card'),
+                    child: const Text("Card")),
+                ElevatedButton(
+                    onPressed: () => _goToCheckout('multiple_pay'),
+                    child: const Text("Multiple Pay")),
+                ElevatedButton(
+                    onPressed: () => _goToCheckout('cash'),
+                    child: const Text("Cash")),
+                ElevatedButton(
+                    onPressed: () {
+                      _showCancelConfirmationDialog();
+                    },
                     style:
                         ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                    child: Text("Cancel")),
+                    child: const Text("Cancel")),
               ],
             ),
             Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text("Total Payable: \$0.00",
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text("Total Payable: $symbol${_totalPayable.toStringAsFixed(2)}",
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.bold)),
                 TextButton(
-                    onPressed: () {}, child: Text("Recent Transactions")),
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/sale');
+                    },
+                    child: const Text("Recent Transactions")),
               ],
             )
           ],
@@ -702,9 +838,9 @@ class _ProductsState extends State<Products> {
               searchTerm: searchController.text)
           .then((value) async {
         if (canAddSell) {
-          if (value.length > 0) {
-            var price;
-            var product;
+          if (value.isNotEmpty) {
+            dynamic price;
+            dynamic product;
             if (value[0]['selling_price_group'] != null) {
               jsonDecode(value[0]['selling_price_group']).forEach((element) {
                 if (element['key'] == sellingPriceGroupId) {
@@ -716,6 +852,7 @@ class _ProductsState extends State<Products> {
               product = ProductModel().product(value[0], price);
             });
             if (product != null && product['stock_available'] > 0) {
+              if (!mounted) return;
               ToastHelper.show(context,
                   AppLocalizations.of(context).translate('added_to_cart'));
               await Sell().addToCart(
@@ -725,19 +862,23 @@ class _ProductsState extends State<Products> {
               }
               _getCartLines();
             } else {
+              if (!mounted) return;
               ToastHelper.show(context,
                   AppLocalizations.of(context).translate('out_of_stock'));
             }
           } else {
+            if (!mounted) return;
             ToastHelper.show(context,
                 AppLocalizations.of(context).translate('no_product_found'));
           }
         } else {
+          if (!mounted) return;
           ToastHelper.show(context,
               AppLocalizations.of(context).translate('no_sells_permission'));
         }
       });
     } else {
+      if (!mounted) return;
       ToastHelper.show(context,
           AppLocalizations.of(context).translate('no_subscription_found'));
     }
@@ -749,48 +890,46 @@ class _ProductsState extends State<Products> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.hourglass_empty),
+                const Icon(Icons.hourglass_empty),
                 Text(AppLocalizations.of(context)
                     .translate('no_products_found')),
               ],
             ),
           )
-        : Container(
-            child: GridView.builder(
-              controller: _scrollController,
-              padding: EdgeInsets.only(
-                  bottom: MySize.size16!,
-                  left: MySize.size16!,
-                  right: MySize.size16!),
-              shrinkWrap: true,
-              physics: ClampingScrollPhysics(),
-              itemCount: products.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // Changed to 2 for the right panel
-                mainAxisSpacing: MySize.size16!,
-                crossAxisSpacing: MySize.size16!,
-                childAspectRatio:
-                    findAspectRatio(MediaQuery.of(context).size.width / 2),
-              ),
-              itemBuilder: (context, index) {
-                return InkWell(
-                  onTap: () async {
-                    onTapProduct(index);
-                  },
-                  child: _ProductGridWidget(
-                    name: products[index]['display_name'],
-                    image: products[index]['product_image_url'],
-                    qtyAvailable: (products[index]['enable_stock'] != 0)
-                        ? products[index]['stock_available'].toString()
-                        : '-',
-                    price:
-                        double.parse(products[index]['unit_price'].toString()),
-                    symbol: symbol,
-                    key: ValueKey(products[index]['id']),
-                  ),
-                );
-              },
+        : GridView.builder(
+            controller: _scrollController,
+            padding: EdgeInsets.only(
+                bottom: MySize.size16!,
+                left: MySize.size16!,
+                right: MySize.size16!),
+            shrinkWrap: true,
+            physics: const ClampingScrollPhysics(),
+            itemCount: products.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4, // Changed to 2 for the right panel
+              mainAxisSpacing: MySize.size16!,
+              crossAxisSpacing: MySize.size16!,
+              childAspectRatio:
+                  findAspectRatio(MediaQuery.of(context).size.width / 2),
             ),
+            itemBuilder: (context, index) {
+              return InkWell(
+                onTap: () async {
+                  onTapProduct(index);
+                },
+                child: _ProductGridWidget(
+                  name: products[index]['display_name'],
+                  image: products[index]['product_image_url'],
+                  qtyAvailable: (products[index]['enable_stock'] != 0)
+                      ? products[index]['stock_available'].toString()
+                      : '-',
+                  price:
+                      double.parse(products[index]['unit_price'].toString()),
+                  symbol: symbol,
+                  key: ValueKey(products[index]['id']),
+                ),
+              );
+            },
           );
   }
 
@@ -799,8 +938,9 @@ class _ProductsState extends State<Products> {
     if (canAddSell) {
       if (canMakeSell) {
         if (products[index]['stock_available'] > 0) {
-          ToastHelper.show(
-              context, AppLocalizations.of(context).translate('added_to_cart'));
+          if (!mounted) return;
+          ToastHelper.show(context,
+              AppLocalizations.of(context).translate('added_to_cart'));
           await Sell().addToCart(
               products[index], argument != null ? argument!['sellId'] : null);
           if (argument != null) {
@@ -808,14 +948,17 @@ class _ProductsState extends State<Products> {
           }
           _getCartLines();
         } else {
-          ToastHelper.show(
-              context, AppLocalizations.of(context).translate('out_of_stock'));
+          if (!mounted) return;
+          ToastHelper.show(context,
+              AppLocalizations.of(context).translate('out_of_stock'));
         }
       } else {
+        if (!mounted) return;
         ToastHelper.show(context,
             AppLocalizations.of(context).translate('no_sale_permission'));
       }
     } else {
+      if (!mounted) return;
       ToastHelper.show(context,
           AppLocalizations.of(context).translate('no_subscription_found'));
     }
@@ -840,7 +983,7 @@ class _ProductsState extends State<Products> {
     });
   }
 
-  void setDefaultLocation(defaultLocation) {
+  void setDefaultLocation(dynamic defaultLocation) {
     if (defaultLocation != 0) {
       if (mounted) {
         setState(() {
@@ -860,7 +1003,7 @@ class _ProductsState extends State<Products> {
     return DropdownButtonHideUnderline(
       child: DropdownButton(
           dropdownColor: themeData.colorScheme.surface,
-          icon: Icon(
+          icon: const Icon(
             Icons.arrow_drop_down,
           ),
           value: selectedLocationId,
@@ -873,7 +1016,7 @@ class _ProductsState extends State<Products> {
                       softWrap: true,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 2,
-                      style: TextStyle(fontSize: 15)),
+                      style: const TextStyle(fontSize: 15)),
                 ));
           }).toList(),
           onTap: () {
@@ -911,6 +1054,7 @@ class _ProductsState extends State<Products> {
                 });
               }
             } else {
+              if (!mounted) return;
               ToastHelper.show(
                   context,
                   AppLocalizations.of(context)
@@ -947,6 +1091,108 @@ class _ProductsState extends State<Products> {
       },
     );
   }
+
+  double get _totalPayable {
+    if (cartLines.isEmpty) {
+      return 0.0;
+    }
+    return cartLines
+        .map<double>((line) =>
+            double.parse(line['unit_price'].toString()) * line['quantity'])
+        .fold(0.0, (a, b) => a + b);
+  }
+
+  void _goToCheckout(String paymentMethod) {
+    if (cartLines.isEmpty) {
+      ToastHelper.show(
+          context, AppLocalizations.of(context).translate('cart_is_empty'));
+      return;
+    }
+    Navigator.pushNamed(context, '/checkout',
+        arguments: Helper().argument(
+            invoiceAmount: _totalPayable,
+            locId: selectedLocationId,
+            customerId: Provider.of<HomeProvider>(context, listen: false)
+                .selectedCustomer['id'],
+            taxId: 0, //TODO: get tax id
+            discountType: 'fixed',
+            discountAmount: 0));
+  }
+
+  Future<void> _showCancelConfirmationDialog({bool isNewSale = false}) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(isNewSale ? 'New Sale' : 'Cancel Sale'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(isNewSale
+                    ? 'Are you sure you want to start a new sale? All items in the cart will be cleared.'
+                    : 'Are you sure you want to cancel this sale?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Yes'),
+              onPressed: () {
+                _cancelSale();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _cancelSale() {
+    Sell().resetCart();
+    _getCartLines();
+    Provider.of<HomeProvider>(context, listen: false).resetCustomer();
+    ToastHelper.show(context, "Sale cancelled");
+  }
+
+  Future<void> _saveSale(String status) async {
+    if (cartLines.isEmpty) {
+      if (mounted) {
+        ToastHelper.show(
+            context, AppLocalizations.of(context).translate('cart_is_empty'));
+      }
+      return;
+    }
+
+    Map<String, dynamic> sale = await Sell().createSell(
+      invoiceNo: '$status-${DateTime.now().millisecondsSinceEpoch}',
+      transactionDate: DateTime.now().toIso8601String(),
+      contactId: Provider.of<HomeProvider>(context, listen: false)
+          .selectedCustomer['id'],
+      locId: selectedLocationId,
+      saleStatus: status,
+      invoiceAmount: _totalPayable,
+    );
+
+    int sellId = await SellDatabase().storeSell(sale);
+    await SellDatabase().updateSellLine({'sell_id': sellId, 'is_completed': 1});
+
+    if (mounted) {
+      ToastHelper.show(context, 'Sale saved as $status');
+    }
+    await Sell().resetCart();
+    _getCartLines();
+    if (mounted) {
+      Provider.of<HomeProvider>(context, listen: false).resetCustomer();
+    }
+  }
 }
 
 class _ProductGridWidget extends StatefulWidget {
@@ -969,7 +1215,13 @@ class _ProductGridWidget extends StatefulWidget {
 
 class _ProductGridWidgetState extends State<_ProductGridWidget> {
   static int themeType = 1;
-  ThemeData themeData = AppTheme.getThemeFromThemeMode(themeType);
+  late ThemeData themeData;
+
+  @override
+  void initState() {
+    super.initState();
+    themeData = AppTheme.getThemeFromThemeMode(themeType);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -984,7 +1236,7 @@ class _ProductGridWidgetState extends State<_ProductGridWidget> {
             color: themeData.cardTheme.shadowColor!.withAlpha(12),
             blurRadius: 4,
             spreadRadius: 2,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -1028,7 +1280,8 @@ class _ProductGridWidgetState extends State<_ProductGridWidget> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Text(
-                        widget.symbol! + Helper().formatCurrency(widget.price),
+                        (widget.symbol ?? '') +
+                            Helper().formatCurrency(widget.price),
                         style: AppTheme.getTextStyle(
                             themeData.textTheme.bodyMedium,
                             fontWeight: 700,
@@ -1063,7 +1316,7 @@ class _ProductGridWidgetState extends State<_ProductGridWidget> {
                                           color:
                                               themeData.colorScheme.onPrimary,
                                           fontWeight: 600))
-                                  : Text('-'),
+                                  : const Text('-'),
                             ),
                           ],
                         ),

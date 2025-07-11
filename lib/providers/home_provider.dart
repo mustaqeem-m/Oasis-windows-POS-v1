@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:get_ip_address/get_ip_address.dart';
+
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pos_2/models/contact_model.dart';
 import 'package:pos_2/pages/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../config.dart';
 import '../../helpers/otherHelpers.dart';
-import '../../helpers/toast_helper.dart';
+
 import '../../models/attendance.dart';
 import '../../models/paymentDatabase.dart';
 import '../../models/sell.dart';
@@ -18,7 +18,7 @@ import '../../models/variations.dart';
 
 class HomeProvider with ChangeNotifier {
   bool _isDisposed = false;
-  var user;
+  Map<String, dynamic>? user;
   var note = TextEditingController();
   var clockInTime = DateTime.now();
   String? selectedLanguage;
@@ -52,18 +52,48 @@ class HomeProvider with ChangeNotifier {
   int? totalSales;
   List<Map> method = [], payments = [];
 
+  Map<String, dynamic> _selectedCustomer = {
+    'id': 0,
+    'name': 'Walk-In Customer',
+    'mobile': ''
+  };
+  Map<String, dynamic> get selectedCustomer => _selectedCustomer;
+
   HomeProvider() {
     getPermission();
     homepageData();
     Helper().syncCallLogs();
+    _initializeCustomer();
+  }
+
+  void _initializeCustomer() async {
+    List customers = await Contact().get();
+    for (var value in customers) {
+      if (value['name'] == 'Walk-In Customer') {
+        _selectedCustomer = {
+          'id': value['id'],
+          'name': value['name'],
+          'mobile': value['mobile']
+        };
+        notifyListeners();
+        break;
+      }
+    }
+  }
+
+  void updateSelectedCustomer(Map<String, dynamic> customer) {
+    _selectedCustomer = customer;
+    notifyListeners();
+  }
+
+  void resetCustomer() {
+    _initializeCustomer();
   }
 
   Future<void> homepageData() async {
     var prefs = await SharedPreferences.getInstance();
     user = await System().get('loggedInUser');
-    userName = ((user['surname'] != null) ? user['surname'] : "") +
-        ' ' +
-        user['first_name'];
+    userName = "${user?['surname'] ?? ''} ${user?['first_name'] ?? ''}";
     await loadPaymentDetails();
     await Helper().getFormattedBusinessDetails().then((value) {
       businessSymbol = value['symbol'];
@@ -190,9 +220,9 @@ class HomeProvider with ChangeNotifier {
           returnAmount += element['amount'];
         }
       }
-      totalSalesAmount = (totalSalesAmount + sell['invoice_amount']);
+      totalSalesAmount = (totalSalesAmount + (sell['invoice_amount'] ?? 0.0));
       totalReceivedAmount = (totalReceivedAmount + (paidAmount - returnAmount));
-      totalDueAmount = (totalDueAmount + sell['pending_amount']);
+      totalDueAmount = (totalDueAmount + (sell['pending_amount'] ?? 0.0));
     }
     if (!_isDisposed) {
       notifyListeners();
@@ -245,22 +275,30 @@ class HomeProvider with ChangeNotifier {
           }
         }
         for (var row in paymentMethod) {
-          if (byCash > 0 && row['key'] == 'cash')
+          if (byCash > 0 && row['key'] == 'cash') {
             method.add({'key': row['value'], 'value': byCash});
-          if (byCard > 0 && row['key'] == 'card')
+          }
+          if (byCard > 0 && row['key'] == 'card') {
             method.add({'key': row['value'], 'value': byCard});
-          if (byCheque > 0 && row['key'] == 'cheque')
+          }
+          if (byCheque > 0 && row['key'] == 'cheque') {
             method.add({'key': row['value'], 'value': byCheque});
-          if (byBankTransfer > 0 && row['key'] == 'bank_transfer')
+          }
+          if (byBankTransfer > 0 && row['key'] == 'bank_transfer') {
             method.add({'key': row['value'], 'value': byBankTransfer});
-          if (byOther > 0 && row['key'] == 'other')
+          }
+          if (byOther > 0 && row['key'] == 'other') {
             method.add({'key': row['value'], 'value': byOther});
-          if (byCustomPayment_1 > 0 && row['key'] == 'custom_pay_1')
+          }
+          if (byCustomPayment_1 > 0 && row['key'] == 'custom_pay_1') {
             method.add({'key': row['value'], 'value': byCustomPayment_1});
-          if (byCustomPayment_2 > 0 && row['key'] == 'custom_pay_2')
+          }
+          if (byCustomPayment_2 > 0 && row['key'] == 'custom_pay_2') {
             method.add({'key': row['value'], 'value': byCustomPayment_2});
-          if (byCustomPayment_3 > 0 && row['key'] == 'custom_pay_3')
+          }
+          if (byCustomPayment_3 > 0 && row['key'] == 'custom_pay_3') {
             method.add({'key': row['value'], 'value': byCustomPayment_3});
+          }
         }
         if (!_isDisposed) {
           notifyListeners();

@@ -115,6 +115,7 @@ dependencies:
   url_launcher: any
   video_player: any
   fl_chart: ^1.0.0
+  fullscreen_window: ^1.1.0
 
 dev_dependencies:
   flutter_launcher_icons: any

@@ -8,6 +8,7 @@ class ToastHelper {
     if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
       Fluttertoast.showToast(msg: message);
     } else {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
       );

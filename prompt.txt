@@ -1,18 +1,4 @@
-You are working on a Flutter desktop POS application. When a user clicks on a product from the product grid, that product gets added to the cart. Each added product should display inside the cart section as a "cart card".
+In customer.ddart line 169 there is a error
+Exception has occurred.
+_TypeError (type 'int' is not a subtype of type 'double?')
 
-Design a Flutter UI widget for the cart card that appears in the cart list. The card must include:
-- Product name (bold and clear)
-- Quantity (default 1, with + and - buttons to update)
-- Price per item and total price (quantity × unit price)
-- A remove/delete icon button
-- Layout optimized for desktop screen
-- All items aligned properly (row-based layout)
-- Proper padding and spacing, no overlapping
-- Consistent with a professional POS design
-
-
-like in cart.dart page , but i need it in product.dart under left panel's , cart item 
-
-DO NOT modify any cart logic or state management. Just design the cart card widget assuming `CartItem` model with `name`, `price`, and `quantity`.
-
-Output clean Dart code for this widget only.

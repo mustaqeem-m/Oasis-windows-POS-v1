@@ -5,6 +5,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:pos_2/helpers/toast_helper.dart';
+import 'package:pos_2/providers/home_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:search_choices/search_choices.dart';
 
 import '../apis/contact.dart';
@@ -163,8 +165,10 @@ class _CustomerState extends State<Customer> {
                       locId: argument!['locationId'],
                       taxId: argument!['taxId'],
                       discountType: argument!['discountType'],
-                      discountAmount: argument!['discountAmount'],
-                      invoiceAmount: argument!['invoiceAmount'],
+                      discountAmount:
+                          (argument!['discountAmount'] as num).toDouble(),
+                      invoiceAmount:
+                          (argument!['invoiceAmount'] as num).toDouble(),
                       customerId: selectedCustomer['id'],
                       serviceStaff: argument!['serviceStaff'],
                       sellId: argument!['sellId'])),
@@ -1012,6 +1016,8 @@ class _CustomerState extends State<Customer> {
       onChanged: (newValue) {
         setState(() {
           selectedCustomer = jsonDecode(newValue);
+          Provider.of<HomeProvider>(context, listen: false)
+              .updateSelectedCustomer(selectedCustomer);
         });
       },
       isExpanded: true,

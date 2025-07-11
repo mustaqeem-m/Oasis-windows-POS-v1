@@ -66,6 +66,7 @@ import 'config.dart';
 import 'helpers/AppTheme.dart';
 import 'helpers/routes.dart';
 import 'locale/MyLocalizations.dart';
+import 'providers/home_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -94,8 +95,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<AppLanguage>(
-      create: (_) => appLanguage!,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AppLanguage>(create: (_) => appLanguage!),
+        ChangeNotifierProvider<HomeProvider>(create: (_) => HomeProvider()),
+      ],
       child: Consumer<AppLanguage>(
         builder: (context, model, child) {
           int themeType = AppTheme.themeLight;
