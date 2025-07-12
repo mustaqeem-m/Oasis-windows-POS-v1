@@ -1,4 +1,73 @@
-In customer.ddart line 169 there is a error
-Exception has occurred.
-_TypeError (type 'int' is not a subtype of type 'double?')
+ Gemini CLI Prompt — Cart Summary Section (Exact Alignment & Text Style)
+Refactor the Cart Summary Section UI at the bottom of the left panel in product.dart to match the exact layout and styling of a modern POS web app.
+🔒 Keep my logic and values intact. Only adjust the UI layout, alignment, icons, and text styling using Flutter.
+
+🔷 Summary Items to Display:
+Items
+
+Total
+
+Discount (–)
+
+Order Tax (+)
+
+Shipping (+)
+
+Packing Charge (+)
+
+Round Off
+
+🔧 Redesign Instructions:
+Two-line layout:
+
+Line 1: Items: and Total: — bolded, inline, full-width aligned
+
+Line 2: All remaining charges, spaced evenly
+
+Text Styling:
+
+Labels (Discount, Order Tax, etc.) should be semi-bold
+
+Values should be right-aligned, bold, and consistent in font size
+
+Use dark text color (#1E1E1E or similar) for values
+
+Icons:
+
+Add blue info (ℹ️) icon beside:
+
+Discount
+
+Order Tax
+
+Shipping
+
+Packing Charge
+
+Add edit icon (✏️) beside the values that are editable
+
+All icons should be compact, same height as text, and evenly spaced
+
+Alignment & Layout:
+
+Use Row layout for inline fields
+
+Wrap each row item in a fixed-width container if needed for even spacing
+
+Ensure total widths don’t break on resize — use Expanded, Spacer, SizedBox as needed
+
+Container Styling:
+
+Use white background with slight shadow or light grey border
+
+Padding: consistent inner spacing all around (e.g., EdgeInsets.all(12))
+
+Bottom border or separation from cart section above
+
+❌ Do Not:
+Change data values or business logic
+
+Hardcode any number
+
+Break state bindings or delete existing variables
 

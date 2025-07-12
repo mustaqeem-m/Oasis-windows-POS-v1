@@ -64,7 +64,7 @@ class _CustomerState extends State<Customer> {
   void didChangeDependencies() {
     argument = ModalRoute.of(context)!.settings.arguments as Map?;
 
-    if (argument!['customerId'] != null) {
+    if (argument != null && argument!['customerId'] != null) {
       Future.delayed(Duration(milliseconds: 400), () async {
         await Contact()
             .getCustomerDetailById(argument!['customerId'])
@@ -127,12 +127,12 @@ class _CustomerState extends State<Customer> {
         bottomNavigationBar: Visibility(
           visible: (selectedCustomer['id'] != 0),
           child: Row(
-            mainAxisAlignment: (argument!['is_quotation'] == null)
+            mainAxisAlignment: (argument != null && argument!['is_quotation'] == null)
                 ? MainAxisAlignment.spaceAround
                 : MainAxisAlignment.center,
             children: [
               Visibility(
-                visible: argument!['is_quotation'] == null,
+                visible: argument != null && argument!['is_quotation'] == null,
                 child: TextButton(
                   onPressed: (addQuotation),
                   style: TextButton.styleFrom(
@@ -162,16 +162,16 @@ class _CustomerState extends State<Customer> {
                   AppLocalizations.of(context).translate('pay_&_checkout'),
                   context,
                   Helper().argument(
-                      locId: argument!['locationId'],
-                      taxId: argument!['taxId'],
-                      discountType: argument!['discountType'],
+                      locId: argument?['locationId'] ?? 0,
+                      taxId: argument?['taxId'] ?? 0,
+                      discountType: argument?['discountType'] ?? 'fixed',
                       discountAmount:
-                          (argument!['discountAmount'] as num).toDouble(),
+                          (argument?['discountAmount'] as num? ?? 0).toDouble(),
                       invoiceAmount:
-                          (argument!['invoiceAmount'] as num).toDouble(),
+                          (argument?['invoiceAmount'] as num? ?? 0).toDouble(),
                       customerId: selectedCustomer['id'],
-                      serviceStaff: argument!['serviceStaff'],
-                      sellId: argument!['sellId'])),
+                      serviceStaff: argument?['serviceStaff'] ?? 0,
+                      sellId: argument?['sellId'])),
             ],
           ),
         ));
