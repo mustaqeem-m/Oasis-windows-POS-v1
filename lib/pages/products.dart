@@ -666,19 +666,6 @@ class ProductsState extends State<Products> {
             ),
           ],
         ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Checkbox(
-              value: false,
-              onChanged: (val) {},
-              activeColor: themeData.primaryColor,
-            ),
-            const Text('Subscribe?'),
-            const SizedBox(width: 4),
-            const Icon(Icons.info_outline, size: 18, color: Colors.grey),
-          ],
-        ),
       ],
     );
   }
