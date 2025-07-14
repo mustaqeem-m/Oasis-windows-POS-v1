@@ -339,37 +339,35 @@ class ProductsState extends State<Products> {
   Widget build(BuildContext context) {
     themeData = Theme.of(context);
 
-    return SafeArea(
-      child: Scaffold(
-        key: _scaffoldKey,
-        resizeToAvoidBottomInset: false,
-        backgroundColor: const Color(0xFFF7F8FC),
-        body: Column(
-          children: [
-            _buildTopBar(),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 7, // Left panel for cart
-                      child: _buildLeftPanel(),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      flex: 3, // Right panel for products
-                      child: _buildRightPanel(),
-                    ),
-                  ],
-                ),
+    return Scaffold(
+      key: _scaffoldKey,
+      resizeToAvoidBottomInset: false,
+      backgroundColor: const Color(0xFFF7F8FC),
+      body: Column(
+        children: [
+          _buildTopBar(),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 7, // Left panel for cart
+                    child: _buildLeftPanel(),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    flex: 3, // Right panel for products
+                    child: _buildRightPanel(),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-        bottomNavigationBar: _buildStickyBottomBar(),
+          ),
+        ],
       ),
+      bottomNavigationBar: _buildStickyBottomBar(),
     );
   }
 
@@ -998,7 +996,7 @@ class ProductsState extends State<Products> {
   Widget _buildRightPanel() {
     return Column(
       children: [
-        _buildFilterHeader(),
+        _buildSearchAndFilterHeader(),
         const SizedBox(height: 16),
         Expanded(
           child: (canViewProducts)
@@ -1025,10 +1023,16 @@ class ProductsState extends State<Products> {
     );
   }
 
-  Widget _buildFilterHeader() {
+  Widget _buildSearchAndFilterHeader() {
     return Row(
       children: [
         Expanded(
+          flex: 5,
+          child: _buildSearchField(),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          flex: 2,
           child: _buildPillButton(
             'Category',
             Icons.category_outlined,
@@ -1046,6 +1050,7 @@ class ProductsState extends State<Products> {
         ),
         const SizedBox(width: 16),
         Expanded(
+          flex: 2,
           child: _buildPillButton(
             'Brands',
             Icons.branding_watermark_outlined,
@@ -1100,6 +1105,28 @@ class ProductsState extends State<Products> {
             ),
           );
         });
+  }
+
+  Widget _buildSearchField() {
+    return TextField(
+      controller: searchController,
+      decoration: InputDecoration(
+        hintText: AppLocalizations.of(context).translate('search_products'),
+        prefixIcon: const Icon(Icons.search),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: const BorderSide(color: Colors.blue),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: const BorderSide(color: Colors.blue, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 16),
+      ),
+      onSubmitted: (value) {
+        productList(resetOffset: true);
+      },
+    );
   }
 
   Widget _productsGrid() {
@@ -1243,8 +1270,11 @@ class ProductsState extends State<Products> {
             });
             if (product != null && product['stock_available'] > 0) {
               if (!mounted) return;
-              ToastHelper.show(context,
-                  AppLocalizations.of(context).translate('added_to_cart'));
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text(AppLocalizations.of(context).translate('added_to_cart')),
+                duration: const Duration(seconds: 1),
+              ));
               await Sell().addToCart(
                   product, argument != null ? argument!['sellId'] : null);
               if (argument != null) {
@@ -1280,8 +1310,11 @@ class ProductsState extends State<Products> {
       if (canMakeSell) {
         if (products[index]['stock_available'] > 0) {
           if (!mounted) return;
-          ToastHelper.show(
-              context, AppLocalizations.of(context).translate('added_to_cart'));
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(AppLocalizations.of(context).translate('added_to_cart')),
+            duration: const Duration(seconds: 1),
+          ));
           await Sell().addToCart(
               products[index], argument != null ? argument!['sellId'] : null);
           if (argument != null) {

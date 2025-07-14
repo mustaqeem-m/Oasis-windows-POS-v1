@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../helpers/AppTheme.dart';
 import '../helpers/SizeConfig.dart';
-import '../helpers/style.dart' as style;
 import '../locale/MyLocalizations.dart';
 
-Widget posBottomBar(page, context, [call]) {
+Widget posBottomBar(int page, BuildContext context, Function(int) onTapped) {
   ThemeData themeData = AppTheme.getThemeFromThemeMode(1);
   return Material(
     elevation: 0,
@@ -15,71 +14,57 @@ Widget posBottomBar(page, context, [call]) {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          bottomBarMenu(
-              context,
-              '/home',
-              AppLocalizations.of(context).translate('home'),
-              page == "home",
-              Icons.home,
-              true),
-          bottomBarMenu(
-              context,
-              '/products',
-              AppLocalizations.of(context).translate('products'),
-              page == "products",
-              Icons.shop_two,
-              true),
-          bottomBarMenu(
-              context,
-              '/sale',
-              AppLocalizations.of(context).translate('sales'),
-              page == "sale",
-              Icons.list,
-              true),
+          _bottomBarMenu(
+            context,
+            AppLocalizations.of(context).translate('home'),
+            page == 0,
+            Icons.home,
+            () => onTapped(0),
+          ),
+          _bottomBarMenu(
+            context,
+            AppLocalizations.of(context).translate('products'),
+            page == 1,
+            Icons.shop_two,
+            () => onTapped(1),
+          ),
+          _bottomBarMenu(
+            context,
+            AppLocalizations.of(context).translate('sales'),
+            page == 2,
+            Icons.list,
+            () => onTapped(2),
+          ),
         ],
       ),
     ),
   );
 }
 
-Widget bottomBarMenu(context, route, name, isSelected, icon,
-    [replace, arguments]) {
-  replace = (replace == null) ? false : replace;
+Widget _bottomBarMenu(
+    BuildContext context, String name, bool isSelected, IconData icon, VoidCallback onPressed) {
   return TextButton(
-      style: TextButton.styleFrom(
-        backgroundColor: isSelected ? style.StyleColors().mainColor(1) : null,
-        shape: isSelected
-            ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(40.0))
-            : null,
-      ),
-      onPressed: () {
-        if (replace)
-          Navigator.pushReplacementNamed(context, route, arguments: arguments);
-        else
-          Navigator.pushNamed(context, route, arguments: arguments);
-      },
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Icon(
-            icon,
-            color: (!isSelected)
-                ? Colors.grey
-                : Theme.of(context).colorScheme.surface,
+    onPressed: onPressed,
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Icon(
+          icon,
+          color: isSelected
+              ? Theme.of(context).primaryColor
+              : Colors.white,
+        ),
+        Text(
+          name,
+          style: TextStyle(
+            color: isSelected
+                ? Theme.of(context).primaryColor
+                : Colors.white,
           ),
-          (isSelected)
-              ? Padding(
-            padding: const EdgeInsets.only(left: 4.0),
-                  child: Text(
-                    name,
-                    style: AppTheme.getTextStyle(
-                        Theme.of(context).textTheme.bodyLarge,
-                        color: Theme.of(context).colorScheme.surface),
-                  ),
-                )
-              : Container()
-        ],
-      ));
+        )
+      ],
+    ),
+  );
 }
 
 Widget cartBottomBar(route, name, context, [nextArguments]) {
@@ -92,8 +77,9 @@ Widget cartBottomBar(route, name, context, [nextArguments]) {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
-          bottomBarMenu(context, route, name, true, Icons.arrow_forward, false,
-              nextArguments),
+          _bottomBarMenu(context, name, true, Icons.arrow_forward, () {
+            Navigator.pushNamed(context, route, arguments: nextArguments);
+          }),
         ],
       ),
     ),

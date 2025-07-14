@@ -79,13 +79,17 @@ class _SalesState extends State<Sales> {
   }
 
   setCustomers() async {
+    if (!mounted) return;
     customerListMap.addAll(await Contact().get());
+    if (!mounted) return;
     setState(() {});
   }
 
   setLocations() async {
+    if (!mounted) return;
     await System().get('location').then((value) {
       value.forEach((element) {
+        if (!mounted) return;
         setState(() {
           locationListMap.add({
             'id': element['id'],
@@ -165,13 +169,14 @@ class _SalesState extends State<Sales> {
           ]),
         ),
         body: TabBarView(children: [currentSales(), allSales()]),
-        bottomNavigationBar: posBottomBar('sale', context),
+        
       ),
     );
   }
 
   //Fetch permission from database
   getPermission() async {
+    if (!mounted) return;
     var activeSubscriptionDetails = await System().get('active-subscription');
     if (activeSubscriptionDetails.length > 0) {
       if (await Helper().getPermission("sell.update")) {
@@ -204,6 +209,7 @@ class _SalesState extends State<Sales> {
         paymentStatuses.addAll(['paid', 'due', 'partial', 'overdue']);
         selectedPaymentStatus = 'all';
       }
+      if (!mounted) return;
       setState(() {
         canViewSell = true;
       });
@@ -213,6 +219,7 @@ class _SalesState extends State<Sales> {
         paymentStatuses.addAll(['paid', 'due', 'partial', 'overdue']);
         selectedPaymentStatus = 'all';
       }
+      if (!mounted) return;
       setState(() {
         canViewSell = true;
       });
@@ -220,6 +227,7 @@ class _SalesState extends State<Sales> {
   }
 
   refreshSales() async {
+    if (!mounted) return;
     if (await Helper().checkConnectivity()) {
       showDialog(
         barrierDismissible: true,
@@ -253,6 +261,7 @@ class _SalesState extends State<Sales> {
 
   //fetch current sales from database
   sells() async {
+    if (!mounted) return;
     sellList = [];
     await SellDatabase().getSells(all: true).then((value) {
       value.forEach((element) async {
@@ -261,6 +270,7 @@ class _SalesState extends State<Sales> {
             await Contact().getCustomerDetailById(element['contact_id']);
         var locationName =
             await Helper().getLocationNameById(element['location_id']);
+        if (!mounted) return;
         setState(() {
           sellList.add({
             'id': element['id'],
@@ -294,6 +304,7 @@ class _SalesState extends State<Sales> {
 
   //refresh sales list
   updateSellsFromApi() async {
+    if (!mounted) return;
     //get synced sells transactionId
     List transactionIds = await SellDatabase().getTransactionIds();
 
@@ -351,6 +362,7 @@ class _SalesState extends State<Sales> {
 
   //update sells
   updateSells(sells) async {
+    if (!mounted) return;
     var changeReturn = 0.0;
     var pendingAmount = 0.0;
     var totalAmount = 0.0;
@@ -373,6 +385,7 @@ class _SalesState extends State<Sales> {
   }
 
   onFilter() {
+    if (!mounted) return;
     nextPage = url;
     if (selectedLocation['id'] != 0) {
       nextPage = nextPage! + "&location_id=${selectedLocation['id']}";
@@ -389,8 +402,8 @@ class _SalesState extends State<Sales> {
       nextPage = nextPage! + "&payment_status=$statuses";
     }
     if (startDateRange != null && endDateRange != null) {
-      nextPage =
-          nextPage! + "&start_date=$startDateRange&end_date=$endDateRange";
+      nextPage = (nextPage ?? '') +
+          "&start_date=$startDateRange&end_date=$endDateRange";
     }
     changeUrl = true;
     setAllSalesList();
@@ -406,6 +419,14 @@ class _SalesState extends State<Sales> {
       }
       isLoading = false;
     });
+    if (nextPage == null || nextPage == '') {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+      return;
+    }
     final dio = new Dio();
     var token = await System().getToken();
     dio.options.headers['content-Type'] = 'application/json';
@@ -445,6 +466,7 @@ class _SalesState extends State<Sales> {
         'is_quotation': sell['is_quotation'].toString()
       });
       if (this.mounted) {
+        if (!mounted) return;
         setState(() {
           isLoading = true;
         });
@@ -490,21 +512,21 @@ class _SalesState extends State<Sales> {
   Widget currentSales() {
     return (sellList.length > 0)
         ? ListView.builder(
-        padding: EdgeInsets.all(10),
+            padding: EdgeInsets.all(10),
             controller: _scrollController,
             shrinkWrap: true,
             itemCount: sellList.length,
             itemBuilder: (context, index) {
               return recentSellItem(
                   price: Helper()
-                      .formatCurrency(sellList[index]['invoice_amount']),
+                      .formatCurrency(sellList[index]['invoice_amount'] ?? 0),
                   number: sellList[index]['invoice_no'],
-                  status: checkStatus(sellList[index]['invoice_amount'],
-                      sellList[index]['pending_amount']),
+                  status: checkStatus(sellList[index]['invoice_amount'] ?? 0,
+                      sellList[index]['pending_amount'] ?? 0),
                   time: sellList[index]['transaction_date'],
-                  paid: Helper().formatCurrency(sellList[index]
-                          ['invoice_amount'] -
-                      sellList[index]['pending_amount']),
+                  paid: Helper().formatCurrency(
+                      (sellList[index]['invoice_amount'] ?? 0) -
+                          (sellList[index]['pending_amount'] ?? 0)),
                   isSynced: sellList[index]['is_synced'],
                   customerName: sellList[index]['customer_name'],
                   locationName: sellList[index]['location_name'],
@@ -651,7 +673,9 @@ class _SalesState extends State<Sales> {
                                   children: [
                                     ElevatedButton(
                                       style: ElevatedButton.styleFrom(
-                                        foregroundColor: themeData.colorScheme.primary, shape: RoundedRectangleBorder(
+                                        foregroundColor:
+                                            themeData.colorScheme.primary,
+                                        shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(
                                                 MySize.size20!),
                                             side: BorderSide(
@@ -681,7 +705,9 @@ class _SalesState extends State<Sales> {
                                     ),
                                     ElevatedButton(
                                       style: ElevatedButton.styleFrom(
-                                        foregroundColor: themeData.colorScheme.primary, shape: RoundedRectangleBorder(
+                                        foregroundColor:
+                                            themeData.colorScheme.primary,
+                                        shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(
                                                 MySize.size20!),
                                             side: BorderSide(
@@ -724,6 +750,8 @@ class _SalesState extends State<Sales> {
                                 ? _buildProgressIndicator()
                                 : Container();
                           } else {
+                            var isQuotation =
+                                allSalesListMap[index]['is_quotation'];
                             return allSellItem(
                                 index: index,
                                 price: allSalesListMap[index]['invoice_amount'],
@@ -735,9 +763,9 @@ class _SalesState extends State<Sales> {
                                     ['contact_name'],
                                 locationName: allSalesListMap[index]
                                     ['location_name'],
-                                isQuotation: int.parse(allSalesListMap[index]
-                                        ['is_quotation']
-                                    .toString()));
+                                isQuotation: isQuotation != null
+                                    ? int.parse(isQuotation.toString())
+                                    : 0);
                           }
                         })
                     : Helper().noDataWidget(context),
@@ -788,7 +816,8 @@ class _SalesState extends State<Sales> {
             children: [
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  foregroundColor: themeData.colorScheme.primary, shape: RoundedRectangleBorder(
+                  foregroundColor: themeData.colorScheme.primary,
+                  shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(MySize.size20!),
                       side: BorderSide(color: themeData.colorScheme.primary)),
                 ),
@@ -807,7 +836,8 @@ class _SalesState extends State<Sales> {
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  foregroundColor: themeData.colorScheme.primary, shape: RoundedRectangleBorder(
+                  foregroundColor: themeData.colorScheme.primary,
+                  shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(MySize.size20!),
                       side: BorderSide(color: themeData.colorScheme.primary)),
                 ),
@@ -963,15 +993,16 @@ class _SalesState extends State<Sales> {
                                         textAlign: TextAlign.center,
                                         style: AppTheme.getTextStyle(
                                             themeData.textTheme.bodyLarge,
-                                            color: themeData
-                                                .colorScheme.onSurface,
+                                            color:
+                                                themeData.colorScheme.onSurface,
                                             fontWeight: 600,
                                             muted: true)),
                                     actions: <Widget>[
                                       TextButton(
                                           style: TextButton.styleFrom(
-                                              foregroundColor: themeData
-                                                  .colorScheme.primary, backgroundColor: themeData
+                                              foregroundColor:
+                                                  themeData.colorScheme.primary,
+                                              backgroundColor: themeData
                                                   .colorScheme.onPrimary),
                                           onPressed: () {
                                             Navigator.pop(context);
@@ -981,8 +1012,9 @@ class _SalesState extends State<Sales> {
                                                   .translate('cancel'))),
                                       TextButton(
                                           style: TextButton.styleFrom(
-                                              foregroundColor: themeData
-                                                  .colorScheme.onError, backgroundColor: Colors.red),
+                                              foregroundColor:
+                                                  themeData.colorScheme.onError,
+                                              backgroundColor: Colors.red),
                                           onPressed: () async {
                                             Navigator.pop(context);
                                             await SellDatabase().deleteSell(
@@ -994,7 +1026,7 @@ class _SalesState extends State<Sales> {
                                           },
                                           child: Text(
                                               AppLocalizations.of(context)
-                                                  .translate('ok')))
+                                                  .translate('ok'))),
                                     ],
                                   );
                                 },
@@ -1060,7 +1092,9 @@ class _SalesState extends State<Sales> {
                                 sellList[index]['invoice_no']);
                           }
                         }),
-                    ((sellList[index]['pending_amount'] > 0) && canEditSell)
+                    ((sellList[index]['pending_amount'] != null &&
+                                sellList[index]['pending_amount'] > 0) &&
+                            canEditSell)
                         ? IconButton(
                             icon: Icon(
                               MdiIcons.creditCardOutline,
@@ -1083,7 +1117,9 @@ class _SalesState extends State<Sales> {
                                       sellId: sellList[index]['id']));
                             })
                         : Container(),
-                    (((sellList[index]['pending_amount'] > 0) && canEditSell) &&
+                    (((sellList[index]['pending_amount'] != null &&
+                                    sellList[index]['pending_amount'] > 0) &&
+                                canEditSell) &&
                             (sellList[index]['mobile'] != null))
                         ? IconButton(
                             icon: Icon(
@@ -1116,8 +1152,11 @@ class _SalesState extends State<Sales> {
                             : Colors.yellowAccent),
                     child: Text(
                       (isQuotation == 0) ? status.toUpperCase() : 'QUOTATION',
-                      style: AppTheme.getTextStyle(themeData.textTheme.labelSmall,
-                          fontSize: 14, fontWeight: 700, letterSpacing: 0.2),
+                      style: AppTheme.getTextStyle(
+                          themeData.textTheme.labelSmall,
+                          fontSize: 14,
+                          fontWeight: 700,
+                          letterSpacing: 0.2),
                     ),
                   ),
                   Visibility(
@@ -1172,8 +1211,7 @@ class _SalesState extends State<Sales> {
                   style: AppTheme.getTextStyle(themeData.textTheme.bodyMedium,
                       fontWeight: 600,
                       letterSpacing: -0.2,
-                      color:
-                          themeData.colorScheme.onSurface.withAlpha(160))),
+                      color: themeData.colorScheme.onSurface.withAlpha(160))),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
@@ -1289,7 +1327,8 @@ class _SalesState extends State<Sales> {
                                           TextButton(
                                               style: TextButton.styleFrom(
                                                   foregroundColor: themeData
-                                                      .colorScheme.primary, backgroundColor: themeData
+                                                      .colorScheme.primary,
+                                                  backgroundColor: themeData
                                                       .colorScheme.onPrimary),
                                               onPressed: () {
                                                 Navigator.pop(context);
@@ -1300,7 +1339,8 @@ class _SalesState extends State<Sales> {
                                           TextButton(
                                               style: TextButton.styleFrom(
                                                   foregroundColor: themeData
-                                                      .colorScheme.onError, backgroundColor: Colors.red),
+                                                      .colorScheme.onError,
+                                                  backgroundColor: Colors.red),
                                               onPressed: () async {
                                                 Navigator.pop(context);
                                                 await SellApi()

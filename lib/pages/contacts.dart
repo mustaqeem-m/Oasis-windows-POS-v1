@@ -757,8 +757,8 @@ class _ContactsState extends State<Contacts> {
                                           hintStyle: themeData
                                               .textTheme.titleSmall!
                                               .merge(TextStyle(
-                                                  color: themeData.colorScheme
-                                                      .onSurface)),
+                                                  color: themeData
+                                                      .colorScheme.onSurface)),
                                           hintText: AppLocalizations.of(context)
                                               .translate('prefix'),
                                           border: UnderlineInputBorder(
@@ -813,8 +813,8 @@ class _ContactsState extends State<Contacts> {
                                           hintStyle: themeData
                                               .textTheme.titleSmall!
                                               .merge(TextStyle(
-                                                  color: themeData.colorScheme
-                                                      .onSurface)),
+                                                  color: themeData
+                                                      .colorScheme.onSurface)),
                                           hintText: AppLocalizations.of(context)
                                               .translate('first_name'),
                                           border: UnderlineInputBorder(
@@ -864,8 +864,8 @@ class _ContactsState extends State<Contacts> {
                                           hintStyle: themeData
                                               .textTheme.titleSmall!
                                               .merge(TextStyle(
-                                                  color: themeData.colorScheme
-                                                      .onSurface)),
+                                                  color: themeData
+                                                      .colorScheme.onSurface)),
                                           hintText: AppLocalizations.of(context)
                                               .translate('middle_name'),
                                           border: UnderlineInputBorder(
@@ -909,8 +909,8 @@ class _ContactsState extends State<Contacts> {
                                           hintStyle: themeData
                                               .textTheme.titleSmall!
                                               .merge(TextStyle(
-                                                  color: themeData.colorScheme
-                                                      .onSurface)),
+                                                  color: themeData
+                                                      .colorScheme.onSurface)),
                                           hintText: AppLocalizations.of(context)
                                               .translate('last_name'),
                                           border: UnderlineInputBorder(
@@ -972,8 +972,8 @@ class _ContactsState extends State<Contacts> {
                                 children: <Widget>[
                                   TextFormField(
                                     controller: addressLine1,
-                                    style: themeData.textTheme.titleSmall!.merge(
-                                        TextStyle(
+                                    style: themeData.textTheme.titleSmall!
+                                        .merge(TextStyle(
                                             color: themeData
                                                 .colorScheme.onSurface)),
                                     decoration: InputDecoration(
@@ -1013,8 +1013,8 @@ class _ContactsState extends State<Contacts> {
                                   ),
                                   TextFormField(
                                     controller: addressLine2,
-                                    style: themeData.textTheme.titleSmall!.merge(
-                                        TextStyle(
+                                    style: themeData.textTheme.titleSmall!
+                                        .merge(TextStyle(
                                             color: themeData
                                                 .colorScheme.onSurface)),
                                     decoration: InputDecoration(
@@ -1091,8 +1091,8 @@ class _ContactsState extends State<Contacts> {
                                         return null;
                                       }
                                     },
-                                    style: themeData.textTheme.titleSmall!.merge(
-                                        TextStyle(
+                                    style: themeData.textTheme.titleSmall!
+                                        .merge(TextStyle(
                                             color: themeData
                                                 .colorScheme.onSurface)),
                                     decoration: InputDecoration(
@@ -1167,8 +1167,8 @@ class _ContactsState extends State<Contacts> {
                                           controller: city,
                                           style: themeData.textTheme.titleSmall!
                                               .merge(TextStyle(
-                                                  color: themeData.colorScheme
-                                                      .onSurface)),
+                                                  color: themeData
+                                                      .colorScheme.onSurface)),
                                           decoration: InputDecoration(
                                             hintStyle: themeData
                                                 .textTheme.titleSmall!
@@ -1213,8 +1213,8 @@ class _ContactsState extends State<Contacts> {
                                           controller: state,
                                           style: themeData.textTheme.titleSmall!
                                               .merge(TextStyle(
-                                                  color: themeData.colorScheme
-                                                      .onSurface)),
+                                                  color: themeData
+                                                      .colorScheme.onSurface)),
                                           decoration: InputDecoration(
                                             hintStyle: themeData
                                                 .textTheme.titleSmall!
@@ -1265,8 +1265,8 @@ class _ContactsState extends State<Contacts> {
                                           controller: country,
                                           style: themeData.textTheme.titleSmall!
                                               .merge(TextStyle(
-                                                  color: themeData.colorScheme
-                                                      .onSurface)),
+                                                  color: themeData
+                                                      .colorScheme.onSurface)),
                                           decoration: InputDecoration(
                                             hintStyle: themeData
                                                 .textTheme.titleSmall!
@@ -1312,8 +1312,8 @@ class _ContactsState extends State<Contacts> {
                                           keyboardType: TextInputType.number,
                                           style: themeData.textTheme.titleSmall!
                                               .merge(TextStyle(
-                                                  color: themeData.colorScheme
-                                                      .onSurface)),
+                                                  color: themeData
+                                                      .colorScheme.onSurface)),
                                           decoration: InputDecoration(
                                             hintStyle: themeData
                                                 .textTheme.titleSmall!
@@ -1406,7 +1406,10 @@ class _ContactsState extends State<Contacts> {
                             // Fluttertoast.showToast(
                             //     msg: AppLocalizations.of(context)
                             //         .translate('check_connectivity'));
-                            ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
+                            ToastHelper.show(
+                                context,
+                                AppLocalizations.of(context)
+                                    .translate('check_connectivity'));
                           }
                         },
                         child: Text(
