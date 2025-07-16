@@ -1,3 +1,4 @@
+import 'package:pos_2/models/contact_model.dart';
 import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -28,6 +29,8 @@ class Products extends StatefulWidget {
 class ProductsState extends State<Products> {
   List products = [];
   List<Map<String, dynamic>> cartLines = [];
+  List<Map<String, dynamic>> _customers = [];
+  int? _selectedCustomerId;
   static int themeType = 1;
   late ThemeData themeData;
   bool changeLocation = false,
@@ -83,8 +86,28 @@ class ProductsState extends State<Products> {
     categoryList();
     subCategoryList(categoryId);
     brandList();
+    _getCustomers();
     Helper().syncCallLogs();
     _getCartLines();
+  }
+
+  Future<void> _getCustomers() async {
+    final customers = await Contact().get();
+    if (mounted) {
+      setState(() {
+        _customers = customers;
+        var homeProvider = Provider.of<HomeProvider>(context, listen: false);
+        if (homeProvider.selectedCustomer['id'] != null) {
+          _selectedCustomerId = homeProvider.selectedCustomer['id'];
+        } else if (_customers.isNotEmpty) {
+          var walkIn = _customers.firstWhere(
+              (c) => c['name']?.toLowerCase() == 'walk-in customer',
+              orElse: () => _customers.first);
+          _selectedCustomerId = walkIn['id'];
+          homeProvider.updateSelectedCustomer(walkIn);
+        }
+      });
+    }
   }
 
   Future<void> _getCartLines() async {
@@ -451,59 +474,64 @@ class ProductsState extends State<Products> {
   }
 
   Widget _buildLocationDropdown() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<int>(
-          value: selectedLocationId,
-          items: locationListMap.map<DropdownMenuItem<int>>((Map value) {
-            return DropdownMenuItem<int>(
-              value: value['id'],
-              child: Text(
-                value['name'],
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
-            );
-          }).toList(),
-          onChanged: (int? newValue) async {
-            if (canChangeLocation) {
-              if (selectedLocationId == newValue) {
-                changeLocation = false;
-              } else if (selectedLocationId != 0) {
-                await _showCartResetDialogForLocation();
-                await priceGroupList();
+    return SizedBox(
+      width: 200,
+      height: 39,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<int>(
+            dropdownColor: Colors.white,
+            value: selectedLocationId,
+            items: locationListMap.map<DropdownMenuItem<int>>((Map value) {
+              return DropdownMenuItem<int>(
+                value: value['id'],
+                child: Text(
+                  value['name'],
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+              );
+            }).toList(),
+            onChanged: (int? newValue) async {
+              if (canChangeLocation) {
+                if (selectedLocationId == newValue) {
+                  changeLocation = false;
+                } else if (selectedLocationId != 0) {
+                  await _showCartResetDialogForLocation();
+                  await priceGroupList();
+                } else {
+                  changeLocation = true;
+                  await priceGroupList();
+                }
+                if (mounted) {
+                  setState(() {
+                    if (changeLocation) {
+                      Sell().resetCart();
+                      selectedLocationId = newValue!;
+                      brandId = 0;
+                      categoryId = 0;
+                      searchController.clear();
+                      inStock = true;
+                      cartCount = 0;
+                      productList(resetOffset: true);
+                    }
+                  });
+                }
               } else {
-                changeLocation = true;
-                await priceGroupList();
+                if (!mounted) return;
+                ToastHelper.show(
+                    context,
+                    AppLocalizations.of(context)
+                        .translate('cannot_change_location'));
               }
-              if (mounted) {
-                setState(() {
-                  if (changeLocation) {
-                    Sell().resetCart();
-                    selectedLocationId = newValue!;
-                    brandId = 0;
-                    categoryId = 0;
-                    searchController.clear();
-                    inStock = true;
-                    cartCount = 0;
-                    productList(resetOffset: true);
-                  }
-                });
-              }
-            } else {
-              if (!mounted) return;
-              ToastHelper.show(
-                  context,
-                  AppLocalizations.of(context)
-                      .translate('cannot_change_location'));
-            }
-          },
-          icon: const Icon(Icons.arrow_drop_down),
+            },
+            icon: const Icon(Icons.arrow_drop_down),
+          ),
         ),
       ),
     );
@@ -549,14 +577,7 @@ class ProductsState extends State<Products> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
-              child: _buildDropdownField(
-                icon: MdiIcons.accountOutline,
-                label: 'Customer',
-                value: Provider.of<HomeProvider>(context)
-                        .selectedCustomer['name'] ??
-                    'Walk-In Customer',
-                onTap: () => Navigator.pushNamed(context, '/customer'),
-              ),
+              child: _buildCustomerDropdown(),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -668,6 +689,57 @@ class ProductsState extends State<Products> {
     );
   }
 
+  Widget _buildCustomerDropdown() {
+    return Container(
+      height: 58,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 3,
+            )
+          ]),
+      child: Row(
+        children: [
+          Icon(MdiIcons.accountOutline, color: Colors.grey[600]),
+          const SizedBox(width: 12),
+          Expanded(
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                dropdownColor: Colors.white,
+                isExpanded: true,
+                value: _selectedCustomerId,
+                items: _customers.map((customer) {
+                  return DropdownMenuItem<int>(
+                    value: customer['id'],
+                    child: Text(customer['name'] ?? 'Unknown'),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    final selected = _customers
+                        .firstWhere((element) => element['id'] == value);
+                    Provider.of<HomeProvider>(context, listen: false)
+                        .updateSelectedCustomer(selected);
+                    setState(() {
+                      _selectedCustomerId = value;
+                    });
+                  }
+                },
+                hint: const Text("Select Customer"),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCartItemsList() {
     if (cartLines.isEmpty) {
       return const Center(
@@ -758,6 +830,7 @@ class ProductsState extends State<Products> {
             SizedBox(
               width: 100,
               child: DropdownButtonFormField<String>(
+                dropdownColor: Colors.white,
                 value: 'Pieces',
                 items: ['Pieces', 'Kg', 'Box'].map((String value) {
                   return DropdownMenuItem<String>(
@@ -1272,7 +1345,8 @@ class ProductsState extends State<Products> {
               if (!mounted) return;
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text(AppLocalizations.of(context).translate('added_to_cart')),
+                content: Text(
+                    AppLocalizations.of(context).translate('added_to_cart')),
                 duration: const Duration(seconds: 1),
               ));
               await Sell().addToCart(
@@ -1312,7 +1386,8 @@ class ProductsState extends State<Products> {
           if (!mounted) return;
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(AppLocalizations.of(context).translate('added_to_cart')),
+            content:
+                Text(AppLocalizations.of(context).translate('added_to_cart')),
             duration: const Duration(seconds: 1),
           ));
           await Sell().addToCart(
