@@ -57,7 +57,7 @@ class DbProvider {
       "CREATE TABLE sell_lines (id INTEGER PRIMARY KEY AUTOINCREMENT, sell_id INTEGER,"
       " product_id INTEGER,variation_id INTEGER, quantity REAL, unit_price REAL,"
       " tax_rate_id INTEGER, discount_amount REAL, discount_type TEXT, note TEXT,"
-      " is_completed INTEGER,res_service_staff_id INTEGER DEFAULT null)";
+      " is_completed INTEGER,res_service_staff_id INTEGER DEFAULT null, product_image_url TEXT)";
 
   //query to create payment line table in database
   String createSellPaymentsTable =
@@ -75,7 +75,7 @@ class DbProvider {
     return _database!;
   }
 
-  int currVersion = 7;
+  int currVersion = 8;
 
   //create tables during the creation of the database itself.
   Future<Database> initializeDatabase(loginUserId) async {
@@ -129,6 +129,11 @@ class DbProvider {
               "ALTER TABLE sell_lines ADD COLUMN res_service_staff_id INTEGER DEFAULT null;");
           await db.execute(
               "ALTER TABLE sell ADD COLUMN res_waiter_id INTEGER DEFAULT null;");
+        }
+
+        if (oldVersion < 8) {
+          await db.execute(
+              "ALTER TABLE sell_lines ADD COLUMN product_image_url TEXT DEFAULT null;");
         }
 
         db.setVersion(currVersion);

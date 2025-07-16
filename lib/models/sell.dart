@@ -246,7 +246,8 @@ class Sell {
       'discount_type': 'fixed',
       'note': '',
       'is_completed': 0,
-      'res_service_staff_id': null
+      'res_service_staff_id': null,
+      'product_image_url': product['product_image_url']
     };
 
     //check if item is added to cart/not

@@ -51,7 +51,7 @@ class SellDatabase {
       int isCompleted) async {
     final db = await dbProvider.database;
     var response = await db.rawQuery(
-        'SELECT SL.*, V.display_name as product_name FROM sell_lines AS SL JOIN variations AS V ON SL.variation_id = V.variation_id WHERE SL.is_completed = ?',
+        'SELECT SL.*, V.display_name as product_name, V.product_image_url FROM sell_lines AS SL JOIN variations AS V ON SL.variation_id = V.variation_id WHERE SL.is_completed = ?',
         [isCompleted]);
     return response;
   }
