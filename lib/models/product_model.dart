@@ -13,6 +13,7 @@ class ProductModel {
       'display_name': element['display_name'],
       'product_image_url': element['product_image_url'],
       'enable_stock': element['enable_stock'],
+      'sub_sku': element['sub_sku'],
       'unit_price': price ?? element['sell_price_inc_tax']
     };
     return productMap;
