@@ -101,7 +101,6 @@ class Variations {
       locationId,
       inStock,
       barcode,
-      offset,
       byAlphabets,
       byPrice}) async {
     final db = await dbProvider.database;
@@ -162,7 +161,7 @@ class Variations {
         'on (V.product_id = PL.product_id AND PL.location_id = $locationId )'
         ' LEFT JOIN "variations_location_details" as VLD '
         'ON V.variation_id = VLD.variation_id AND VLD.location_id = $locationId '
-        '$where ORDER BY ${order}id LIMIT 10 OFFSET ($offset-1)*10');
+        '$where ORDER BY ${order}id');
     return result;
   }
 

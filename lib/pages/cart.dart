@@ -18,6 +18,8 @@ import '../models/variations.dart';
 import 'elements.dart';
 
 class Cart extends StatefulWidget {
+  const Cart({super.key});
+
   @override
   CartState createState() => CartState();
 }
@@ -38,8 +40,8 @@ class CartState extends State<Cart> {
   Map? argument = {};
   String symbol = '';
   var sellDetail, selectedDiscountType = "fixed";
-  final discountController = new TextEditingController();
-  final searchController = new TextEditingController();
+  final discountController = TextEditingController();
+  final searchController = TextEditingController();
   var invoiceAmount,
       taxListMap = [
         {'id': 0, 'name': 'Tax rate', 'amount': 0}
@@ -77,7 +79,7 @@ class CartState extends State<Cart> {
     super.dispose();
   }
 
-  cartList() async {
+  Future<void> cartList() async {
     cartItems = [];
     (argument!['sellId'] != null)
         ? cartItems = await SellDatabase().getInCompleteLines(
@@ -85,7 +87,7 @@ class CartState extends State<Cart> {
             sellId: argument!['sellId'])
         : cartItems =
             await SellDatabase().getInCompleteLines(argument!['locationId']);
-    if (this.mounted) {
+    if (mounted) {
       setState(() {
         if (editItem == null) {
           proceedNext = true;
@@ -94,7 +96,7 @@ class CartState extends State<Cart> {
     }
   }
 
-  editCart(sellId) async {
+  Future<void> editCart(sellId) async {
     sellDetail = await SellDatabase().getSellBySellId(sellId);
     selectedTaxId = (sellDetail[0]['tax_rate_id'] != null)
         ? sellDetail[0]['tax_rate_id']
@@ -107,7 +109,7 @@ class CartState extends State<Cart> {
     discountAmount = sellDetail[0]['discount_amount'];
     discountController.text = discountAmount.toString();
     calculateSubtotal(selectedTaxId, selectedDiscountType, discountAmount);
-    if (this.mounted) {
+    if (mounted) {
       setState(() {});
     }
   }
@@ -169,7 +171,7 @@ class CartState extends State<Cart> {
           Container(
               height: MySize.safeHeight! * 0.65,
               color: customAppTheme.bgLayer1,
-              child: (cartItems.length > 0)
+              child: (cartItems.isNotEmpty)
                   ? itemList()
                   : Center(
                       child: Text(AppLocalizations.of(context)
@@ -184,8 +186,7 @@ class CartState extends State<Cart> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
                     Text(
-                        AppLocalizations.of(context).translate('sub_total') +
-                            ' : ',
+                        '${AppLocalizations.of(context).translate('sub_total')} : ',
                         style: AppTheme.getTextStyle(
                           themeData.textTheme.titleMedium,
                           fontWeight: 700,
@@ -209,7 +210,7 @@ class CartState extends State<Cart> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(
-                  AppLocalizations.of(context).translate('discount') + ' : ',
+                  '${AppLocalizations.of(context).translate('discount')} : ',
                   style: AppTheme.getTextStyle(themeData.textTheme.bodyLarge,
                       color: themeData.colorScheme.onSurface,
                       fontWeight: 600,
@@ -217,7 +218,7 @@ class CartState extends State<Cart> {
                 ),
                 discount(),
                 Expanded(
-                  child: Container(
+                  child: SizedBox(
                     height: MySize.size50,
                     child: TextFormField(
                       controller: discountController,
@@ -249,9 +250,8 @@ class CartState extends State<Cart> {
                           if (maxDiscountValue != null &&
                               discountAmount! > maxDiscountValue!) {
                             Fluttertoast.showToast(
-                                msg: AppLocalizations.of(context)
-                                        .translate('discount_error_message') +
-                                    " $maxDiscountValue");
+                                msg:
+                                    "${AppLocalizations.of(context).translate('discount_error_message')} $maxDiscountValue");
                             proceedNext = false;
                           } else {
                             proceedNext = true;
@@ -271,7 +271,7 @@ class CartState extends State<Cart> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(
-                  AppLocalizations.of(context).translate('tax') + ' : ',
+                  '${AppLocalizations.of(context).translate('tax')} : ',
                   style: AppTheme.getTextStyle(themeData.textTheme.bodyLarge,
                       color: themeData.colorScheme.onSurface,
                       fontWeight: 600,
@@ -279,7 +279,7 @@ class CartState extends State<Cart> {
                 ),
                 taxes(),
                 Text(
-                  AppLocalizations.of(context).translate('total') + ' : ',
+                  '${AppLocalizations.of(context).translate('total')} : ',
                   style: AppTheme.getTextStyle(
                     themeData.textTheme.titleMedium,
                     fontWeight: 700,
@@ -323,7 +323,7 @@ class CartState extends State<Cart> {
         ]),
       ),
       bottomNavigationBar: Visibility(
-        visible: (cartItems.length > 0 && proceedNext == true),
+        visible: (cartItems.isNotEmpty && proceedNext == true),
         child: cartBottomBar(
             '/customer',
             AppLocalizations.of(context).translate('customer'),
@@ -393,7 +393,7 @@ class CartState extends State<Cart> {
   }
 
   //show items dialog list
-  itemDialog(List items) {
+  void itemDialog(List items) {
     showDialog(
       barrierDismissible: true,
       context: context,
@@ -406,7 +406,7 @@ class CartState extends State<Cart> {
             width: MySize.screenWidth! * 0.8,
             child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: (items.length != 0) ? items.length : 0,
+                itemCount: (items.isNotEmpty) ? items.length : 0,
                 itemBuilder: ((context, index) {
                   return Card(
                     elevation: 4,
@@ -487,9 +487,8 @@ class CartState extends State<Cart> {
     await Variations()
         .get(
             locationId: argument!['locationId'],
-            offset: 0,
             inStock: true,
-            searchTerm: '$searchText')
+            searchTerm: searchText)
         .then((value) {
       value.forEach((element) {
         if (element['selling_price_group'] != null) {
@@ -508,7 +507,7 @@ class CartState extends State<Cart> {
   }
 
   //set selling price group Id
-  getSellingPriceGroupId() async {
+  Future<void> getSellingPriceGroupId() async {
     await System().get('location').then((value) {
       value.forEach((element) {
         if (element['id'] == argument!['locationId'] &&
@@ -521,11 +520,10 @@ class CartState extends State<Cart> {
   }
 
   //add product to cart after scanning barcode
-  getScannedProduct(String barcode) async {
+  Future<void> getScannedProduct(String barcode) async {
     await Variations()
         .get(
             locationId: argument!['locationId'],
-            offset: 0,
             barcode: barcode,
             searchTerm: '')
         .then((value) async {
@@ -649,26 +647,8 @@ class CartState extends State<Cart> {
                                                   MainAxisAlignment
                                                       .spaceBetween,
                                               children: [
-                                                Text(AppLocalizations.of(context)
-                                                        .translate('total') +
-                                                    ' : ' +
-                                                    symbol +
-                                                    Helper().formatCurrency((double.parse(
-                                                            calculateInlineUnitPrice(
-                                                                cartItems[index]
-                                                                    [
-                                                                    'unit_price'],
-                                                                cartItems[index]
-                                                                    [
-                                                                    'tax_rate_id'],
-                                                                cartItems[index]
-                                                                    [
-                                                                    'discount_type'],
-                                                                cartItems[index]
-                                                                    [
-                                                                    'discount_amount'])) *
-                                                        cartItems[index]
-                                                            ['quantity']))),
+                                                Text(
+                                                    '${AppLocalizations.of(context).translate('total')} : $symbol${Helper().formatCurrency((double.parse(calculateInlineUnitPrice(cartItems[index]['unit_price'], cartItems[index]['tax_rate_id'], cartItems[index]['discount_type'], cartItems[index]['discount_amount'])) * cartItems[index]['quantity']))}'),
                                               ]),
                                           Row(
                                             children: [
@@ -836,11 +816,8 @@ class CartState extends State<Cart> {
                                                       cartList();
                                                     } else {
                                                       Fluttertoast.showToast(
-                                                          msg: "${cartItems[index]['stock_available']}" +
-                                                              AppLocalizations.of(
-                                                                      context)
-                                                                  .translate(
-                                                                      'stock_available'));
+                                                          msg:
+                                                              "${cartItems[index]['stock_available']}${AppLocalizations.of(context).translate('stock_available')}");
                                                     }
                                                   } else if (newQuantity ==
                                                       "") {
@@ -880,11 +857,8 @@ class CartState extends State<Cart> {
                                                     cartItems[index]
                                                         ['stock_available'];
                                                 Fluttertoast.showToast(
-                                                    msg: "$stockAvailable" +
-                                                        AppLocalizations.of(
-                                                                context)
-                                                            .translate(
-                                                                'stock_available'));
+                                                    msg:
+                                                        "$stockAvailable${AppLocalizations.of(context).translate('stock_available')}");
                                               }
                                             },
                                             child: Container(
@@ -1017,9 +991,8 @@ class CartState extends State<Cart> {
                   ? Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: <Widget>[
-                        Text(AppLocalizations.of(context)
-                                .translate('discount_type') +
-                            ' : '),
+                        Text(
+                            '${AppLocalizations.of(context).translate('discount_type')} : '),
                         inLineDiscount(index),
                       ],
                     )
@@ -1068,7 +1041,7 @@ class CartState extends State<Cart> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(AppLocalizations.of(context).translate('tax') + ' : '),
+                  Text('${AppLocalizations.of(context).translate('tax')} : '),
                   inLineTax(index),
                 ],
               ),
@@ -1081,9 +1054,7 @@ class CartState extends State<Cart> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
-                            'Service staff' + //AppLocalizations.of(context).translate('tax') +
-                                ' : '),
+                        Text('Service staff' ' : '),
                         inLineServiceStaff(index),
                       ],
                     )
@@ -1095,7 +1066,7 @@ class CartState extends State<Cart> {
     );
   }
 
-  setTaxMap() {
+  void setTaxMap() {
     System().get('tax').then((value) {
       value.forEach((element) {
         taxListMap.add({
@@ -1107,7 +1078,7 @@ class CartState extends State<Cart> {
     });
   }
 
-  setServiceStaffMap() {
+  void setServiceStaffMap() {
     System().get('serviceStaff').then((value) {
       if (value != null) {
         value.forEach((element) {
@@ -1281,14 +1252,11 @@ class CartState extends State<Cart> {
   //calculate inline total
   String calculateInlineUnitPrice(price, taxId, discountType, discountAmount) {
     double subTotal;
-    var taxAmount;
-    taxListMap.forEach((value) {
+    num taxAmount = 0;
+    for (var value in taxListMap) {
       if (value['id'] == taxId) {
-        taxAmount = value['amount'];
+        taxAmount = value['amount'] as num;
       }
-    });
-    if (taxAmount == null) {
-      taxAmount = 0;
     }
     if (discountType == 'fixed') {
       var unitPrice = price - discountAmount;
@@ -1303,31 +1271,28 @@ class CartState extends State<Cart> {
   //calculate subTotal
   double calculateSubTotal() {
     var subTotal = 0.0;
-    cartItems.forEach((element) {
+    for (var element in cartItems) {
       subTotal += (double.parse(calculateInlineUnitPrice(
               element['unit_price'],
               element['tax_rate_id'],
               element['discount_type'],
               element['discount_amount'])) *
           element['quantity']);
-    });
+    }
     return subTotal;
   }
 
   //calculate total
   double calculateSubtotal(taxId, discountType, discountAmount) {
     double subTotal = calculateSubTotal();
-    var finalTotal;
-    var taxAmount;
-    taxListMap.forEach((value) {
+    double finalTotal;
+    num taxAmount = 0;
+    for (var value in taxListMap) {
       if (value['id'] == taxId) {
-        taxAmount = value['amount'];
+        taxAmount = value['amount'] as num;
       }
-    });
-
-    if (taxAmount == null) {
-      taxAmount = 0;
     }
+
     if (discountType == 'fixed') {
       var total = subTotal - discountAmount;
       finalTotal = total + (total * taxAmount / 100);
@@ -1340,7 +1305,7 @@ class CartState extends State<Cart> {
   }
 
   //fetch default discount and tax from database
-  getDefaultValues() async {
+  Future<void> getDefaultValues() async {
     var businessDetails = await System().get('business');
     await Helper().getFormattedBusinessDetails().then((value) {
       symbol = "${value['symbol']} ";
@@ -1366,9 +1331,8 @@ class CartState extends State<Cart> {
         discountController.text = discountAmount.toString();
         if (maxDiscountValue != null && discountAmount! > maxDiscountValue!) {
           Fluttertoast.showToast(
-              msg: AppLocalizations.of(context)
-                      .translate('discount_error_message') +
-                  " $maxDiscountValue");
+              msg:
+                  "${AppLocalizations.of(context).translate('discount_error_message')} $maxDiscountValue");
           proceedNext = false;
         }
       });
@@ -1376,7 +1340,7 @@ class CartState extends State<Cart> {
   }
 
   //Fetch permission from database
-  getPermission() async {
+  Future<void> getPermission() async {
     canEditPrice =
         await Helper().getPermission("edit_product_price_from_pos_screen");
     canEditDiscount =

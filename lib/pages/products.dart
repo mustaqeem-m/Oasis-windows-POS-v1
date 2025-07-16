@@ -76,12 +76,6 @@ class ProductsState extends State<Products> {
     super.initState();
     themeData = AppTheme.getThemeFromThemeMode(themeType);
     getPermission();
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
-        productList();
-      }
-    });
     setLocationMap();
     categoryList();
     subCategoryList(categoryId);
@@ -89,6 +83,7 @@ class ProductsState extends State<Products> {
     _getCustomers();
     Helper().syncCallLogs();
     _getCartLines();
+    productList();
   }
 
   Future<void> _getCustomers() async {
@@ -224,7 +219,6 @@ class ProductsState extends State<Products> {
             inStock: inStock,
             locationId: selectedLocationId,
             searchTerm: searchController.text,
-            offset: offset,
             byAlphabets: byAlphabets,
             byPrice: byPrice)
         .then((element) {
@@ -1340,7 +1334,6 @@ class ProductsState extends State<Products> {
           .get(
               locationId: selectedLocationId,
               barcode: barcode,
-              offset: 0,
               searchTerm: searchController.text)
           .then((value) async {
         if (canAddSell) {

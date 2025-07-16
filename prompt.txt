@@ -1,2 +1,9 @@
-in products page when click on customer dropdown i dont want to go to another page instead of that i need it to show the available customer in that drop down , and also make all   │
-│    dropdown color in products page as white  
+The argument type 'Object' can't be assigned to the parameter type 'num'
+at these lines:
+
+dart
+Copy
+Edit
+finalTotal = total + (total * taxAmount / 100)
+
+in cart.dart page
