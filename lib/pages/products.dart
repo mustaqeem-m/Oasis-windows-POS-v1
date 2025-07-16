@@ -763,10 +763,30 @@ class ProductsState extends State<Products> {
     );
   }
 
+  void _updateCartItemQuantity(
+      int lineId, double currentQuantity, double change) {
+    double newQuantity = currentQuantity + change;
+    if (newQuantity > 0) {
+      SellDatabase().update(lineId, {'quantity': newQuantity}).then((_) {
+        _getCartLines();
+      });
+    } else {
+      _removeCartItem(lineId);
+    }
+  }
+
+  void _removeCartItem(int lineId) {
+    SellDatabase().deleteSellLine(lineId).then((_) {
+      _getCartLines();
+      ToastHelper.show(context, "Item removed from cart");
+    });
+  }
+
   Widget _buildCartItemCard(Map<String, dynamic> line) {
     double price = double.parse(line['unit_price']?.toString() ?? '0');
     double quantity = line['quantity'] ?? 0;
     double total = price * quantity;
+    int lineId = line['id'];
 
     return Card(
       margin: EdgeInsets.zero,
@@ -812,18 +832,16 @@ class ProductsState extends State<Products> {
                 IconButton(
                     icon: const Icon(Icons.remove_circle_outline,
                         color: Colors.red),
-                    onPressed: () {
-                      // TODO: Decrement quantity
-                    }),
+                    onPressed: () =>
+                        _updateCartItemQuantity(lineId, quantity, -1)),
                 Text(quantity.toStringAsFixed(0),
                     style: const TextStyle(
                         fontSize: 16, fontWeight: FontWeight.bold)),
                 IconButton(
                     icon: const Icon(Icons.add_circle_outline,
                         color: Colors.green),
-                    onPressed: () {
-                      // TODO: Increment quantity
-                    }),
+                    onPressed: () =>
+                        _updateCartItemQuantity(lineId, quantity, 1)),
               ],
             ),
             const SizedBox(width: 12),
@@ -877,9 +895,7 @@ class ProductsState extends State<Products> {
             ),
             IconButton(
               icon: Icon(MdiIcons.closeCircleOutline, color: Colors.red),
-              onPressed: () {
-                // TODO: Remove item
-              },
+              onPressed: () => _removeCartItem(lineId),
             ),
           ],
         ),

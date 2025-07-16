@@ -130,6 +130,12 @@ class SellDatabase {
     return response;
   }
 
+  Future<int> deleteSellLine(int lineId) async {
+    final db = await dbProvider.database;
+    var response = await db.delete('sell_lines', where: 'id = ?', whereArgs: [lineId]);
+    return response;
+  }
+
   //delete sell_line by sellId
   Future<int> deleteSellLineBySellId(sellId) async {
     final db = await dbProvider.database;
