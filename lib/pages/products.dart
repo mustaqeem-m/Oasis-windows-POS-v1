@@ -1,3 +1,4 @@
+import 'package:pos_2/components/calculator_popup.dart';
 import 'package:pos_2/models/contact_model.dart';
 import 'dart:convert';
 
@@ -122,7 +123,8 @@ class ProductsState extends State<Products> {
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
-    final newArguments = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+    final newArguments =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
     if (argument != newArguments) {
       argument = newArguments;
       if (argument != null) {
@@ -345,6 +347,35 @@ class ProductsState extends State<Products> {
     return (width / 2 - MySize.size24!) / ((width / 2 - MySize.size24!) + 60);
   }
 
+  void _showCalculatorPopup(BuildContext context) {
+    final RenderBox button = context.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RelativeRect position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        button.localToGlobal(Offset.zero, ancestor: overlay),
+        button.localToGlobal(button.size.bottomRight(Offset.zero),
+            ancestor: overlay),
+      ),
+      Offset.zero & overlay.size,
+    );
+
+    showMenu(
+      context: context,
+      position: position,
+      items: [
+        const PopupMenuItem(
+          enabled: false,
+          child: CalculatorPopup(),
+        ),
+      ],
+      elevation: 8.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     themeData = Theme.of(context);
@@ -407,7 +438,9 @@ class ProductsState extends State<Products> {
             Navigator.pushNamed(context, '/customer');
           }),
           _buildActionIconButton(Icons.business_center_outlined, () {}),
-          _buildActionIconButton(Icons.calculate_outlined, () {}),
+          _buildActionIconButton(Icons.calculate_outlined, () {
+            _showCalculatorPopup(context);
+          }),
           _buildActionIconButton(Icons.undo_outlined, () {}),
           _buildActionIconButton(Icons.minimize, () {}),
           _buildActionIconButton(Icons.fullscreen, () {}),
@@ -1356,23 +1389,23 @@ class ProductsState extends State<Products> {
             _getCartLines();
           } else {
             if (!mounted) return;
-            ToastHelper.show(
-                context, AppLocalizations.of(context).translate('out_of_stock'));
+            ToastHelper.show(context,
+                AppLocalizations.of(context).translate('out_of_stock'));
           }
         } else {
           if (!mounted) return;
-          ToastHelper.show(
-              context, AppLocalizations.of(context).translate('no_product_found'));
+          ToastHelper.show(context,
+              AppLocalizations.of(context).translate('no_product_found'));
         }
       } else {
         if (!mounted) return;
-        ToastHelper.show(
-            context, AppLocalizations.of(context).translate('no_sells_permission'));
+        ToastHelper.show(context,
+            AppLocalizations.of(context).translate('no_sells_permission'));
       }
     } else {
       if (!mounted) return;
-      ToastHelper.show(
-          context, AppLocalizations.of(context).translate('no_subscription_found'));
+      ToastHelper.show(context,
+          AppLocalizations.of(context).translate('no_subscription_found'));
     }
   }
 
@@ -1414,8 +1447,8 @@ class ProductsState extends State<Products> {
         _isAddingToCart = false;
         return;
       }
-      ToastHelper.show(
-          context, AppLocalizations.of(context).translate('no_sells_permission'));
+      ToastHelper.show(context,
+          AppLocalizations.of(context).translate('no_sells_permission'));
     }
 
     _isAddingToCart = false;

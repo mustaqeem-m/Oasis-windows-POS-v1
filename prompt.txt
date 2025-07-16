@@ -1,9 +1,27 @@
-The argument type 'Object' can't be assigned to the parameter type 'num'
-at these lines:
+In my Flutter Windows desktop app, I have a calculator icon in the top bar. When the user clicks this icon, I want a custom calculator widget to appear like a dropdown popup (refer to the attached design).
 
-dart
-Copy
-Edit
-finalTotal = total + (total * taxAmount / 100)
+✅ Requirements:
 
-in cart.dart page
+The calculator should open directly below the icon (like a dropdown with a pointer).
+
+The calculator should have basic functionalities: AC, CE, +, -, *, /, =, 0-9, ., %.
+
+Each button should be styled with color like the image:
+
+AC = Red background
+
+CE = Orange background
+
+= = Green background
+
+It should not navigate to a new screen; just display as a floating popup/card.
+
+The calculator UI should be consistent with Windows desktop apps and responsive in size.
+
+❗Make sure:
+
+The calculator hides if clicked outside.
+
+It appears as a rounded, slightly elevated popup with a pointer triangle at the top.
+
+It supports mouse click input only (keyboard not mandatory).
