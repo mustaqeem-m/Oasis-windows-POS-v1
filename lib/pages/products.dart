@@ -33,12 +33,13 @@ class ProductsState extends State<Products> {
   int? _selectedCustomerId;
   static int themeType = 1;
   late ThemeData themeData;
+  bool _isLoading = true;
   bool changeLocation = false,
       canChangeLocation = true,
       canMakeSell = false,
       inStock = true,
-      canAddSell = false,
-      canViewProducts = false,
+      canAddSell = true,
+      canViewProducts = true,
       usePriceGroup = true;
 
   int selectedLocationId = 0,
@@ -46,8 +47,7 @@ class ProductsState extends State<Products> {
       subCategoryId = 0,
       brandId = 0,
       cartCount = 0,
-      sellingPriceGroupId = 0,
-      offset = 0;
+      sellingPriceGroupId = 0;
   int? byAlphabets, byPrice;
 
   final List<DropdownMenuItem<int>> _categoryMenuItems = [];
@@ -62,12 +62,10 @@ class ProductsState extends State<Products> {
   String symbol = '';
   final searchController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final ScrollController _scrollController = ScrollController();
 
   @override
   void dispose() {
     searchController.dispose();
-    _scrollController.dispose();
     super.dispose();
   }
 
@@ -75,15 +73,22 @@ class ProductsState extends State<Products> {
   void initState() {
     super.initState();
     themeData = AppTheme.getThemeFromThemeMode(themeType);
-    getPermission();
-    setLocationMap();
-    categoryList();
-    subCategoryList(categoryId);
-    brandList();
-    _getCustomers();
-    Helper().syncCallLogs();
-    _getCartLines();
-    productList();
+    _initializePage();
+  }
+
+  Future<void> _initializePage() async {
+    await setLocationMap();
+    await categoryList();
+    await subCategoryList(categoryId);
+    await brandList();
+    await _getCustomers();
+    await Helper().syncCallLogs();
+    await _getCartLines();
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _getCustomers() async {
@@ -116,24 +121,23 @@ class ProductsState extends State<Products> {
 
   @override
   Future<void> didChangeDependencies() async {
-    argument =
-        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
-    //Arguments sellId & locationId is send from edit.
-    if (argument != null) {
-      Future.delayed(const Duration(milliseconds: 200), () {
+    super.didChangeDependencies();
+    final newArguments = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+    if (argument != newArguments) {
+      argument = newArguments;
+      if (argument != null) {
         if (mounted) {
           setState(() {
             selectedLocationId = argument!['locationId'];
             canChangeLocation = false;
           });
         }
-      });
-    } else {
-      canChangeLocation = true;
+      } else {
+        canChangeLocation = true;
+      }
+      if (!mounted) return;
+      await setInitDetails(selectedLocationId);
     }
-    if (!mounted) return;
-    await setInitDetails(selectedLocationId);
-    super.didChangeDependencies();
   }
 
   //Set location & product
@@ -155,19 +159,7 @@ class ProductsState extends State<Products> {
       symbol = '${value['symbol']} ';
     });
     setDefaultLocation(selectedLocationId);
-    products = [];
-    offset = 0;
-    productList();
-  }
-
-  //Fetch permission from database
-  Future<void> getPermission() async {
-    if (await Helper().getPermission("direct_sell.access")) {
-      canAddSell = true;
-    }
-    if (await Helper().getPermission("product.view")) {
-      canViewProducts = true;
-    }
+    await productList(resetOffset: true);
   }
 
   //set selling Price Group Id
@@ -190,16 +182,12 @@ class ProductsState extends State<Products> {
 
   //set product list
   Future<void> productList({bool resetOffset = false}) async {
-    if (resetOffset) {
-      if (mounted) {
-        setState(() {
-          offset = 0;
-          products = <dynamic>[];
-        });
-      }
+    if (resetOffset && mounted) {
+      setState(() {
+        products = <dynamic>[];
+      });
     }
-    offset++;
-    //check last sync, if difference is 10 minutes then sync again.
+
     String? lastSync = await System().getProductLastSync();
     final date2 = DateTime.now();
     if (lastSync == null ||
@@ -211,33 +199,38 @@ class ProductsState extends State<Products> {
     }
 
     findSellingPriceGroupId(selectedLocationId);
-    await Variations()
-        .get(
-            brandId: brandId,
-            categoryId: categoryId,
-            subCategoryId: subCategoryId,
-            inStock: inStock,
-            locationId: selectedLocationId,
-            searchTerm: searchController.text,
-            byAlphabets: byAlphabets,
-            byPrice: byPrice)
-        .then((element) {
-      for (var product in element) {
-        dynamic price;
-        if (product['selling_price_group'] != null) {
-          jsonDecode(product['selling_price_group']).forEach((element) {
-            if (element['key'] == sellingPriceGroupId) {
-              price = double.parse(element['value'].toString());
-            }
-          });
-        }
-        if (mounted) {
-          setState(() {
-            products.add(ProductModel().product(product, price));
-          });
-        }
+    List<dynamic> newProducts = [];
+    var variations = await Variations().get(
+        brandId: brandId,
+        categoryId: categoryId,
+        subCategoryId: subCategoryId,
+        inStock: inStock,
+        locationId: selectedLocationId,
+        searchTerm: searchController.text,
+        byAlphabets: byAlphabets,
+        byPrice: byPrice);
+
+    for (var product in variations) {
+      dynamic price;
+      if (product['selling_price_group'] != null) {
+        jsonDecode(product['selling_price_group']).forEach((element) {
+          if (element['key'] == sellingPriceGroupId) {
+            price = double.parse(element['value'].toString());
+          }
+        });
       }
-    });
+      newProducts.add(ProductModel().product(product, price));
+    }
+
+    if (mounted) {
+      setState(() {
+        if (resetOffset) {
+          products = newProducts;
+        } else {
+          products.addAll(newProducts);
+        }
+      });
+    }
   }
 
   Future<void> categoryList() async {
@@ -360,30 +353,32 @@ class ProductsState extends State<Products> {
       key: _scaffoldKey,
       resizeToAvoidBottomInset: false,
       backgroundColor: const Color(0xFFF7F8FC),
-      body: Column(
-        children: [
-          _buildTopBar(),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 7, // Left panel for cart
-                    child: _buildLeftPanel(),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                _buildTopBar(),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 7, // Left panel for cart
+                          child: _buildLeftPanel(),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          flex: 3, // Right panel for products
+                          child: _buildRightPanel(),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    flex: 3, // Right panel for products
-                    child: _buildRightPanel(),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
       bottomNavigationBar: _buildStickyBottomBar(),
     );
   }
@@ -1224,7 +1219,6 @@ class ProductsState extends State<Products> {
             ),
           )
         : GridView.builder(
-            controller: _scrollController,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 4,
               mainAxisSpacing: 16,
@@ -1236,7 +1230,7 @@ class ProductsState extends State<Products> {
               return _ProductCard(
                 product: products[index],
                 symbol: symbol,
-                onTap: () => onTapProduct(index),
+                onTap: () => onTapProduct(products[index]),
               );
             },
           );
@@ -1330,96 +1324,101 @@ class ProductsState extends State<Products> {
   //add product to cart after scanning barcode
   Future<void> getScannedProduct(String barcode) async {
     if (canMakeSell) {
-      await Variations()
-          .get(
-              locationId: selectedLocationId,
-              barcode: barcode,
-              searchTerm: searchController.text)
-          .then((value) async {
-        if (canAddSell) {
-          if (value.isNotEmpty) {
-            dynamic price;
-            dynamic product;
-            if (value[0]['selling_price_group'] != null) {
-              jsonDecode(value[0]['selling_price_group']).forEach((element) {
-                if (element['key'] == sellingPriceGroupId) {
-                  price = element['value'];
-                }
-              });
-            }
-            setState(() {
-              product = ProductModel().product(value[0], price);
-            });
-            if (product != null && product['stock_available'] > 0) {
-              if (!mounted) return;
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text(
-                    AppLocalizations.of(context).translate('added_to_cart')),
-                duration: const Duration(seconds: 1),
-              ));
-              await Sell().addToCart(
-                  product, argument != null ? argument!['sellId'] : null);
-              if (argument != null) {
-                selectedLocationId = argument!['locationId'];
+      var variations = await Variations().get(
+          locationId: selectedLocationId,
+          barcode: barcode,
+          searchTerm: searchController.text);
+      if (canAddSell) {
+        if (variations.isNotEmpty) {
+          dynamic price;
+          dynamic product;
+          if (variations[0]['selling_price_group'] != null) {
+            jsonDecode(variations[0]['selling_price_group']).forEach((element) {
+              if (element['key'] == sellingPriceGroupId) {
+                price = element['value'];
               }
-              _getCartLines();
-            } else {
-              if (!mounted) return;
-              ToastHelper.show(context,
-                  AppLocalizations.of(context).translate('out_of_stock'));
+            });
+          }
+          product = ProductModel().product(variations[0], price);
+          if (product != null && product['stock_available'] > 0) {
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content:
+                  Text(AppLocalizations.of(context).translate('added_to_cart')),
+              duration: const Duration(seconds: 1),
+            ));
+            await Sell().addToCart(
+                product, argument != null ? argument!['sellId'] : null);
+            if (argument != null) {
+              selectedLocationId = argument!['locationId'];
             }
+            _getCartLines();
           } else {
             if (!mounted) return;
-            ToastHelper.show(context,
-                AppLocalizations.of(context).translate('no_product_found'));
+            ToastHelper.show(
+                context, AppLocalizations.of(context).translate('out_of_stock'));
           }
-        } else {
-          if (!mounted) return;
-          ToastHelper.show(context,
-              AppLocalizations.of(context).translate('no_sells_permission'));
-        }
-      });
-    } else {
-      if (!mounted) return;
-      ToastHelper.show(context,
-          AppLocalizations.of(context).translate('no_subscription_found'));
-    }
-  }
-
-  //onTap product
-  Future<void> onTapProduct(int index) async {
-    if (canAddSell) {
-      if (canMakeSell) {
-        if (products[index]['stock_available'] > 0) {
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content:
-                Text(AppLocalizations.of(context).translate('added_to_cart')),
-            duration: const Duration(seconds: 1),
-          ));
-          await Sell().addToCart(
-              products[index], argument != null ? argument!['sellId'] : null);
-          if (argument != null) {
-            selectedLocationId = argument!['locationId'];
-          }
-          _getCartLines();
         } else {
           if (!mounted) return;
           ToastHelper.show(
-              context, AppLocalizations.of(context).translate('out_of_stock'));
+              context, AppLocalizations.of(context).translate('no_product_found'));
         }
       } else {
         if (!mounted) return;
-        ToastHelper.show(context,
-            AppLocalizations.of(context).translate('no_sale_permission'));
+        ToastHelper.show(
+            context, AppLocalizations.of(context).translate('no_sells_permission'));
       }
     } else {
       if (!mounted) return;
-      ToastHelper.show(context,
-          AppLocalizations.of(context).translate('no_subscription_found'));
+      ToastHelper.show(
+          context, AppLocalizations.of(context).translate('no_subscription_found'));
     }
+  }
+
+  bool _isAddingToCart = false;
+
+  //onTap product
+  Future<void> onTapProduct(Map<String, dynamic> product) async {
+    if (_isAddingToCart) return;
+    _isAddingToCart = true;
+
+    if (canAddSell) {
+      if (product['stock_available'] > 0) {
+        if (!mounted) {
+          _isAddingToCart = false;
+          return;
+        }
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content:
+              Text(AppLocalizations.of(context).translate('added_to_cart')),
+          duration: const Duration(seconds: 1),
+        ));
+        await Sell()
+            .addToCart(product, argument != null ? argument!['sellId'] : null);
+        if (argument != null) {
+          selectedLocationId = argument!['locationId'];
+        }
+        await _getCartLines();
+      } else {
+        if (!mounted) {
+          _isAddingToCart = false;
+          return;
+        }
+        ToastHelper.show(
+            context, AppLocalizations.of(context).translate('out_of_stock'));
+      }
+    } else {
+      if (!mounted) {
+        _isAddingToCart = false;
+        return;
+      }
+      ToastHelper.show(
+          context, AppLocalizations.of(context).translate('no_sells_permission'));
+    }
+
+    _isAddingToCart = false;
   }
 
   Future<void> setLocationMap() async {
