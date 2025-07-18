@@ -1,4 +1,11 @@
+import 'package:pos_2/components/service_staff_popup.dart';
+import 'package:pos_2/components/add_expense_dialog.dart';
+import 'package:pos_2/models/expense_database.dart';
+import 'package:pos_2/components/open_register_dialog.dart';
+import 'package:pos_2/models/register_database.dart';
+import 'package:pos_2/components/close_register_dialog.dart';
 import 'package:pos_2/components/calculator_popup.dart';
+import 'package:pos_2/components/register_details/register_details_dialog.dart';
 import 'package:pos_2/models/contact_model.dart';
 import 'dart:convert';
 
@@ -6,19 +13,24 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:pos_2/helpers/otherHelpers.dart';
 import 'package:pos_2/helpers/toast_helper.dart';
+import 'package:pos_2/models/register_entry.dart';
 import 'package:pos_2/providers/home_provider.dart';
 import 'package:provider/provider.dart';
 import '../helpers/AppTheme.dart';
 import '../helpers/SizeConfig.dart';
 import '../helpers/generators.dart';
-import '../helpers/otherHelpers.dart';
 import '../locale/MyLocalizations.dart';
 import '../models/product_model.dart';
 import '../models/sell.dart';
 import '../models/sellDatabase.dart';
 import '../models/system.dart';
 import '../models/variations.dart';
+import 'package:pos_2/models/paymentDatabase.dart';
+import 'package:pos_2/apis/user.dart';
+import 'package:pos_2/models/close_register_model.dart';
+import 'package:pos_2/models/register_details_models.dart' as register_details;
 
 class Products extends StatefulWidget {
   const Products({super.key});
@@ -344,7 +356,7 @@ class ProductsState extends State<Products> {
 
   double findAspectRatio(double width) {
     //Logic for aspect ratio of grid view
-    return (width / 2 - MySize.size24!) / ((width / 2 - MySize.size24!) + 60);
+    return (width / 2 - 16.0) / ((width / 2 - 16.0) + 60);
   }
 
   void _showCalculatorPopup(BuildContext context) {
@@ -414,6 +426,209 @@ class ProductsState extends State<Products> {
     );
   }
 
+  Future<void> _showRegisterDetails() async {
+    await showDialog(
+      context: _scaffoldKey.currentContext!,
+      builder: (context) => OpenRegisterDialog(
+        onConfirm: (openingBalance) async {
+          await RegisterDatabase().insertOpeningBalance(openingBalance);
+          if (!mounted) return;
+          final registerDetails = await _getRegisterDetailsData();
+          showRegisterDetailsDialog(
+            _scaffoldKey.currentContext!,
+            registerDetails.registerEntries,
+            registerDetails.soldProducts,
+            registerDetails.brandSales,
+            registerDetails.serviceTypes,
+            registerDetails.startDate,
+            registerDetails.endDate,
+            registerDetails.totalRefund,
+            registerDetails.totalPayment,
+            registerDetails.creditSales,
+            registerDetails.finalSales,
+            registerDetails.computedTotal,
+            registerDetails.discount,
+            registerDetails.shipping,
+            registerDetails.user,
+            registerDetails.email,
+            registerDetails.location,
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _showCloseRegisterDialog() async {
+    final data = await _getCloseRegisterData();
+    if (!mounted) return;
+    showDialog(
+      context: _scaffoldKey.currentContext!,
+      builder: (BuildContext context) {
+        return CloseRegisterDialog(data: data);
+      },
+    );
+  }
+
+  Future<CloseRegisterModel> _getCloseRegisterData() async {
+    final registerDetails = await _getRegisterDetailsData();
+    final expenses = await ExpenseDatabase().getExpenses();
+    final totalExpenses = expenses.fold<double>(0.0, (sum, item) => sum + item['amount']);
+
+    return CloseRegisterModel(
+      registerPeriod: '${DateFormat('dd MMM, yyyy hh:mm a').format(registerDetails.startDate)} - ${DateFormat('dd MMM, yyyy hh:mm a').format(registerDetails.endDate)}',
+      paymentDetails: registerDetails.registerEntries
+          .map((e) => PaymentDetail(
+                method: e.method,
+                sell: '₹ ${e.sell.toStringAsFixed(2)}',
+                expense: '₹ ${e.expense.toStringAsFixed(2)}',
+              ))
+          .toList(),
+      totals: Totals(
+        totalSales: '₹ ${registerDetails.finalSales.toStringAsFixed(2)}',
+        refund: '₹ ${registerDetails.totalRefund.toStringAsFixed(2)}',
+        payment: '₹ ${registerDetails.totalPayment.toStringAsFixed(2)}',
+        creditSales: '₹ ${registerDetails.creditSales.toStringAsFixed(2)}',
+        finalSales: '₹ ${registerDetails.finalSales.toStringAsFixed(2)}',
+        expenses: '₹ ${totalExpenses.toStringAsFixed(2)}', // Replace with actual expense data if available
+        cashCalculation: '₹ ${await RegisterDatabase().getOpeningBalance()} (opening) + ₹ ${registerDetails.finalSales.toStringAsFixed(2)} (Sale) - ₹ ${registerDetails.totalRefund.toStringAsFixed(2)} (Refund) - ₹ ${totalExpenses.toStringAsFixed(2)} (Expense) = ₹ ${(await RegisterDatabase().getOpeningBalance() + registerDetails.finalSales - registerDetails.totalRefund - totalExpenses).toStringAsFixed(2)}',
+      ),
+      soldProducts: registerDetails.soldProducts
+          .map((p) => SoldProduct(
+                sku: p.sku,
+                product: p.product,
+                quantity: p.quantity.toString(),
+                amount: '₹ ${p.total.toStringAsFixed(2)}',
+              ))
+          .toList(),
+      discounts: Discounts(
+        discount: '₹ ${registerDetails.discount.toStringAsFixed(2)}',
+        shipping: '₹ ${registerDetails.shipping.toStringAsFixed(2)}',
+        grandTotal: '₹ ${(registerDetails.finalSales + registerDetails.shipping).toStringAsFixed(2)}',
+      ),
+      soldByBrand: registerDetails.brandSales
+          .map((b) => BrandSale(
+                brand: b.brand,
+                quantity: b.quantity.toString(),
+                amount: '₹ ${b.total.toStringAsFixed(2)}',
+              ))
+          .toList(),
+      serviceTypes: [], // Replace with actual service type data if available
+      cashSummary: CashSummary(
+        totalCash: '₹ ${registerDetails.totalPayment.toStringAsFixed(2)}',
+        cardSlips: '1', // Replace with actual card slips data if available
+        cheques: '0', // Replace with actual cheques data if available
+        denominationNote: 'Add denominations in Settings -> Business Settings -> POS -> Cash Denominations',
+      ),
+      closingNote: ClosingNote(
+        user: registerDetails.user,
+        email: registerDetails.email,
+        location: registerDetails.location,
+      ),
+    );
+  }
+
+  Future<register_details.RegisterDetails> _getRegisterDetailsData() async {
+    // Fetch all completed sales
+    final sales = await SellDatabase().getSells(all: true);
+    final List<RegisterEntry> registerEntries = [];
+    final List<register_details.SoldProduct> soldProducts = [];
+    final List<register_details.BrandSales> brandSales = [];
+    double totalRefund = 0;
+    double creditSales = 0;
+    double discount = 0;
+    double shipping = 0;
+    double totalSell = 0;
+
+    for (var sale in sales) {
+      final payments = await PaymentDatabase().get(sale['id']);
+      double saleTotal = 0;
+      for (var payment in payments) {
+        saleTotal += payment['amount'];
+        if (payment['method'] == 'cash') {
+          registerEntries.add(RegisterEntry(
+              method: 'Cash Payment', sell: payment['amount'], expense: 0));
+        } else if (payment['method'] == 'card') {
+          registerEntries.add(RegisterEntry(
+              method: 'Card Payment', sell: payment['amount'], expense: 0));
+        } else if (payment['method'] == 'upi') {
+          registerEntries.add(RegisterEntry(
+              method: 'UPI Payment', sell: payment['amount'], expense: 0));
+        }
+      }
+
+      totalSell += saleTotal;
+      discount += sale['discount_amount'] ?? 0;
+      shipping += sale['shipping_charges'] ?? 0;
+
+      if (sale['status'] == 'credit_sale') {
+        creditSales += saleTotal;
+      }
+
+      final sellLines = await SellDatabase().getSellLines(sale['id']);
+      for (var line in sellLines) {
+        final product = await Variations().getVariationById(line['variation_id']);
+        soldProducts.add(register_details.SoldProduct(
+          index: soldProducts.length + 1,
+          sku: product['sub_sku'],
+          product: product['display_name'],
+          quantity: line['quantity'],
+          total: line['unit_price'] * line['quantity'],
+        ));
+
+        final brand = await System().getBrandById(product['brand_id']);
+        final existingBrandIndex =
+            brandSales.indexWhere((b) => b.brand == brand['name']);
+        if (existingBrandIndex != -1) {
+          final existingBrand = brandSales[existingBrandIndex];
+          brandSales[existingBrandIndex] = register_details.BrandSales(
+            index: existingBrand.index,
+            brand: existingBrand.brand,
+            quantity: existingBrand.quantity + line['quantity'],
+            total: existingBrand.total + (line['unit_price'] * line['quantity']),
+          );
+        } else {
+          brandSales.add(register_details.BrandSales(
+            index: brandSales.length + 1,
+            brand: brand['name'] ?? 'Unknown Brand',
+            quantity: line['quantity'],
+            total: line['unit_price'] * line['quantity'],
+          ));
+        }
+      }
+    }
+
+    final totalPayment = totalSell - totalRefund;
+    final finalSales = totalPayment - creditSales;
+    final openingBalance = await RegisterDatabase().getOpeningBalance();
+    final computedTotal =
+        openingBalance + totalSell - totalRefund;
+
+    final locationData = locationListMap
+        .firstWhere((loc) => loc['id'] == selectedLocationId, orElse: () => {'name': 'Unknown'});
+
+    final token = await System().getToken();
+    final userDetails = await User().get(token);
+
+    return register_details.RegisterDetails(
+      registerEntries: registerEntries,
+      soldProducts: soldProducts,
+      brandSales: brandSales,
+      serviceTypes: [], // Fetch this data if available
+      startDate: DateTime.now().subtract(const Duration(hours: 8)),
+      endDate: DateTime.now(),
+      totalRefund: totalRefund,
+      totalPayment: totalPayment,
+      creditSales: creditSales,
+      finalSales: finalSales,
+      computedTotal: computedTotal,
+      discount: discount,
+      shipping: shipping,
+      user: userDetails['first_name'] + ' ' + userDetails['last_name'],
+      email: userDetails['email'],
+      location: locationData['name'],
+    );
+  }
+
   Widget _buildTopBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
@@ -432,18 +647,42 @@ class ProductsState extends State<Products> {
           const Spacer(),
 
           // Action Buttons
-          _buildActionIconButton(Icons.arrow_back, () {}),
-          _buildActionIconButton(Icons.close, () {}, color: Colors.red),
-          _buildActionIconButton(Icons.person_add_alt_1_outlined, () {
-            Navigator.pushNamed(context, '/customer');
-          }),
-          _buildActionIconButton(Icons.business_center_outlined, () {}),
-          _buildActionIconButton(Icons.calculate_outlined, () {
-            _showCalculatorPopup(context);
-          }),
-          _buildActionIconButton(Icons.undo_outlined, () {}),
-          _buildActionIconButton(Icons.minimize, () {}),
-          _buildActionIconButton(Icons.fullscreen, () {}),
+          Tooltip(
+            message: 'Back',
+            child: _buildActionIconButton(Icons.arrow_back, () {}),
+          ),
+          Tooltip(
+            message: 'Close register',
+            child: _buildActionIconButton(Icons.close, _showCloseRegisterDialog, color: Colors.red),
+          ),
+          const ServiceStaffPopup(),
+          Tooltip(
+            message: 'Open Cash Register',
+            child: _buildActionIconButton(
+                Icons.business_center_outlined, _showRegisterDetails),
+          ),
+          Tooltip(
+            message: 'Calculator Popup',
+            child: _buildActionIconButton(Icons.calculate_outlined, () {
+              _showCalculatorPopup(context);
+            }),
+          ),
+          Tooltip(
+            message: 'Sell return',
+            child: _buildActionIconButton(Icons.undo_outlined, () {}),
+          ),
+          Tooltip(
+            message: 'Minimize Window',
+            child: _buildActionIconButton(Icons.minimize, () {}),
+          ),
+          Tooltip(
+            message: 'View suspended sales',
+            child: _buildActionIconButton(Icons.pause, () {}),
+          ),
+          Tooltip(
+            message: 'Toggle Fullscreen',
+            child: _buildActionIconButton(Icons.fullscreen, () {}),
+          ),
           const Spacer(),
 
           // Far Right Buttons
@@ -452,7 +691,16 @@ class ProductsState extends State<Products> {
           const SizedBox(width: 30),
           _buildTextIconButton(
               'Add Expense', Icons.add_card_outlined, Colors.transparent,
-              borderColor: Colors.black),
+              borderColor: Colors.black, onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) => AddExpenseDialog(
+                onConfirm: (amount, note) {
+                  ExpenseDatabase().insertExpense(amount, note);
+                },
+              ),
+            );
+          }),
         ],
       ),
     );
@@ -478,9 +726,9 @@ class ProductsState extends State<Products> {
 
   Widget _buildTextIconButton(
       String label, IconData icon, Color backgroundColor,
-      {Color? borderColor}) {
+      {Color? borderColor, VoidCallback? onPressed}) {
     return TextButton.icon(
-      onPressed: () {},
+      onPressed: onPressed ?? () {},
       icon: Icon(icon, size: 18),
       label: Text(label),
       style: TextButton.styleFrom(
@@ -623,7 +871,7 @@ class ProductsState extends State<Products> {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -1322,7 +1570,7 @@ class ProductsState extends State<Products> {
               const Text('Total Payable:',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               Text(
-                '$symbol${_totalPayable.toStringAsFixed(2)}',
+                '₹${_totalPayable.toStringAsFixed(2)}',
                 style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -1673,7 +1921,7 @@ class _ProductCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '$symbol${double.parse(product['unit_price']?.toString() ?? '0').toStringAsFixed(2)}',
+                    '₹${double.parse(product['unit_price']?.toString() ?? '0').toStringAsFixed(2)}',
                     style: const TextStyle(
                         fontWeight: FontWeight.bold, color: Colors.green),
                   ),

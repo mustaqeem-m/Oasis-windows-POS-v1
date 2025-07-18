@@ -198,4 +198,13 @@ class Variations {
     await db.rawQuery("DELETE FROM variations_location_details");
     await db.rawQuery("DELETE FROM product_locations");
   }
+
+  Future<Map<String, dynamic>> getVariationById(int? variationId) async {
+    if (variationId == null) {
+      return {};
+    }
+    final db = await dbProvider.database;
+    var result = await db.query('variations', where: 'variation_id = ?', whereArgs: [variationId]);
+    return result.isNotEmpty ? result.first : {};
+  }
 }

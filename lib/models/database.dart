@@ -6,6 +6,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../pages/login.dart';
+import 'register_database.dart';
+import 'expense_database.dart';
 
 class DbProvider {
   DbProvider();
@@ -75,7 +77,7 @@ class DbProvider {
     return _database!;
   }
 
-  int currVersion = 8;
+  int currVersion = 9;
 
   //create tables during the creation of the database itself.
   Future<Database> initializeDatabase(loginUserId) async {
@@ -93,6 +95,8 @@ class DbProvider {
         await db.execute(createSellTable);
         await db.execute(createSellLineTable);
         await db.execute(createSellPaymentsTable);
+        await RegisterDatabase().createTable(db);
+        await ExpenseDatabase().createTable(db);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -134,6 +138,11 @@ class DbProvider {
         if (oldVersion < 8) {
           await db.execute(
               "ALTER TABLE sell_lines ADD COLUMN product_image_url TEXT DEFAULT null;");
+        }
+
+        if (oldVersion < 9) {
+          await RegisterDatabase().createTable(db);
+          await ExpenseDatabase().createTable(db);
         }
 
         db.setVersion(currVersion);

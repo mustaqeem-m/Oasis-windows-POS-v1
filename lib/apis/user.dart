@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'api.dart';
 
 class User extends Api {
-  Future<Map> get(var token) async {
+  Future<Map> get(String? token) async {
     String url = apiUrl + "user/loggedin";
     var response =
         await http.get(Uri.parse(url), headers: this.getHeader(token));

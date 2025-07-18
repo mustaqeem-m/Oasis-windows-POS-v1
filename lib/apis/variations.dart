@@ -11,7 +11,7 @@ class VariationsApi extends Api {
   Future<Map<String, dynamic>> get(String link) async {
     var variations;
     String url = link;
-    String token = await System().getToken();
+    String? token = await System().getToken();
     try {
       var response = await http
           .get(Uri.parse(url), headers: this.getHeader(token))

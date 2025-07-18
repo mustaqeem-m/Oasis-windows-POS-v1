@@ -83,12 +83,14 @@ class System {
   }
 
   //fetch token
-  Future<String> getToken() async {
+  Future<String?> getToken() async {
     final db = await dbProvider.database;
     var result =
         await db.query('system', where: 'key = ?', whereArgs: ['token']);
-    String? token = result[0]['value'].toString();
-    return token;
+    if (result.isNotEmpty) {
+      return result[0]['value'] as String?;
+    }
+    return null;
   }
 
   // Return permission list
@@ -134,6 +136,19 @@ class System {
     } else {
       return [];
     }
+  }
+
+  Future<Map<String, dynamic>> getBrandById(int? brandId) async {
+    if (brandId == null) {
+      return {};
+    }
+    var brands = await this.get('brand');
+    if (brands.isNotEmpty) {
+      var brand =
+          brands.firstWhere((b) => b['id'] == brandId, orElse: () => null);
+      return brand ?? {};
+    }
+    return {};
   }
 
   storePermissions() async {

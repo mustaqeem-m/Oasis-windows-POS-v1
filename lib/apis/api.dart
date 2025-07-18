@@ -40,7 +40,7 @@ class Api {
     }
   }
 
-  getHeader(String token) {
+  getHeader(String? token) {
     return {
       'Content-Type': 'application/json',
       'Accept': 'application/json',

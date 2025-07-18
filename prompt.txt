@@ -1,27 +1,20 @@
-In my Flutter Windows desktop app, I have a calculator icon in the top bar. When the user clicks this icon, I want a custom calculator widget to appear like a dropdown popup (refer to the attached design).
+When the user clicks the "Service Staff Replacement" icon in the topbar, display a floating popup as follows:
 
-✅ Requirements:
+- Appears directly under the clicked icon with a small arrow/caret pointing upward at the icon
+- Popup title: "Service staff replacement" (simple, bold font)
+- Contains a single input box with the placeholder text "Invoice No."
+- Below the input box, place a red-bordered, rounded rectangular button labeled "Send" with red text and white background
+- Button must be styled to highlight on hover and trigger a function (e.g., sendInvoiceNo()) when clicked
 
-The calculator should open directly below the icon (like a dropdown with a pointer).
+UX Behavior:
+- Popup should automatically close if the user clicks outside
+- Input must allow free text (invoice number)
+- If no value is entered and the user clicks "Send", highlight the input in red to indicate validation error
 
-The calculator should have basic functionalities: AC, CE, +, -, *, /, =, 0-9, ., %.
+Styling:
+- Clean white background
+- Rounded corners
+- Soft shadow to float above UI
+- Responsive and minimal design
 
-Each button should be styled with color like the image:
-
-AC = Red background
-
-CE = Orange background
-
-= = Green background
-
-It should not navigate to a new screen; just display as a floating popup/card.
-
-The calculator UI should be consistent with Windows desktop apps and responsive in size.
-
-❗Make sure:
-
-The calculator hides if clicked outside.
-
-It appears as a rounded, slightly elevated popup with a pointer triangle at the top.
-
-It supports mouse click input only (keyboard not mandatory).
+No hardcoded invoice numbers. All content should be dynamic and based on user input.
