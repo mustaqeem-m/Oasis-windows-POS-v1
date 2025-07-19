@@ -655,7 +655,10 @@ class ProductsState extends State<Products> {
             message: 'Close register',
             child: _buildActionIconButton(Icons.close, _showCloseRegisterDialog, color: Colors.red),
           ),
-          const ServiceStaffPopup(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30.0),
+            child: const ServiceStaffPopup(),
+          ),
           Tooltip(
             message: 'Open Cash Register',
             child: _buildActionIconButton(
