@@ -1,23 +1,38 @@
-add a elevated button Recent Transactions at the bottom ryt , exactly at the place of total payable by removing it, 
- 
-When the user clicks the “Recent Transactions” button at the bottom-right corner of the screen, display a modal-style text interface in the terminal with the title “Recent Transactions”. It should show the last 10 transactions only, sorted by most recent at the top.
 
-Each transaction must include:
 
-note: all must be my apps transaction all must be dynamic data must be changable based on transaction made fetch it and fill it up refer eg.
+When the user clicks on the fullscreen icon located in the topBar, open a new page wrapped inside a Scaffold layout. This page must be a live sales cart view, visually similar to a POS terminal interface.
 
-Serial number
+Behavior & Structure:
+Fetch all data dynamically from the app’s current sales session (no static or hardcoded data allowed).
 
-Invoice number and customer name (e.g. "0356 (Walk-In Customer)") 
+Display a table-like layout with the following columns:
+Product, Quantity, Price inc. tax, Subtotal
 
-Amount in two decimal places (e.g. "103,970.00")
+Below the table, show a summary row that includes:
 
-Three actionable buttons per row (use labels in brackets):
-[Edit] [Print] [Delete]
+Items: [count]
 
-At the top, include 3 tab headings:
-✓ Final, >_ Quotation, >_ Draft — with the Final tab selected by default (indicated with a checkmark ✓). These tabs are not functional, just shown as labels.
+Total: ₹ [total]
 
-At the bottom, add a [Close] button aligned to the bottom right.
+Discount (-): ₹ [discount amount]
 
-Use proper indentation, spacing, and alignment to make the UI visually clean and easily scannable in CLI.
+Order Tax (+): ₹ [tax amount]
+
+Shipping (+): ₹ [shipping amount]
+
+Total Payable: ₹ [payable amount] (in bold green text)
+
+Payment Info Section:
+At the bottom in a colored box (orange background), show:
+
+Total Paying: ₹ [amount]
+
+Change Return: ₹ [amount]
+
+Balance: ₹ [amount] (balance in red/pink)
+
+Additional Requirements:
+Provide navigation or a return mechanism to go back to the product page from this fullscreen sales view.
+
+All components must update based on live sales data in real-time or upon relevant user action.
+

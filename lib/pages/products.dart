@@ -1,6 +1,4 @@
 import 'package:pos_2/components/sell_return_popup.dart';
-import 'package:pos_2/components/sell_return_popup.dart';
-import 'package:pos_2/components/sell_return_popup.dart';
 import 'package:pos_2/components/recent_transactions_dialog.dart';
 import 'package:pos_2/components/service_staff_popup.dart';
 import 'package:pos_2/components/add_expense_dialog.dart';
@@ -35,6 +33,7 @@ import 'package:pos_2/models/paymentDatabase.dart';
 import 'package:pos_2/apis/user.dart';
 import 'package:pos_2/models/close_register_model.dart';
 import 'package:pos_2/models/register_details_models.dart' as register_details;
+import 'package:pos_2/components/home/suspended_sales_modal.dart';
 
 class Products extends StatefulWidget {
   const Products({super.key});
@@ -91,6 +90,16 @@ class ProductsState extends State<Products> {
     super.initState();
     themeData = AppTheme.getThemeFromThemeMode(themeType);
     _initializePage();
+  }
+
+  void _showSuspendedSalesModal(BuildContext context) async {
+    final suspendedSales = await Sell().getSells(status: 'suspended');
+    showDialog(
+      context: context,
+      builder: (context) {
+        return SuspendedSalesModal(suspendedSales: suspendedSales);
+      },
+    );
   }
 
   Future<void> _initializePage() async {
@@ -687,10 +696,12 @@ class ProductsState extends State<Products> {
 
           Tooltip(
             message: 'View suspended sales',
-            child: _buildActionIconButton(Icons.pause, () {}),
+            child: _buildActionIconButton(Icons.pause, () {
+              _showSuspendedSalesModal(context);
+            }),
           ),
           Tooltip(
-            message: 'Toggle Fullscreen',
+            message: 'Customer Display Screen',
             child: _buildActionIconButton(Icons.fullscreen, () {}),
           ),
           const Spacer(),
