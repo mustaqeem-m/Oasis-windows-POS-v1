@@ -1,38 +1,28 @@
-When the user clicks the edit icon (✏️) next to the discount section in the Products page (POS), open a modal popup titled Discount.
+When the user selects a tax percentage from the Order Tax dropdown (e.g., GST@5%, GST@18%, etc.) and clicks the Update button, the following behavior must occur dynamically:
 
-This modal must include the following two dynamic fields:
+✅ Expected Behavior:
+Calculate the Tax Amount:
 
-🧾 Popup Fields:
-Discount Type*
+Multiply the cart subtotal by the selected tax percentage.
 
-A required dropdown with options:
+Example: If subtotal is ₹200.00 and tax is 5%, Order Tax = ₹10.00
 
-Fixed
+Display Tax Amount:
 
-Percentage
+Immediately update the ₹0.00 label below "Order Tax (+)" in the cart summary section with the newly calculated tax amount (e.g., ₹10.00).
 
-The currently selected discount type must be pre-filled and editable.
+This value must be dynamically fetched and calculated — not hardcoded.
 
-Discount Amount*
+Update Total Payable:
 
-Required input field (numeric)
+Add the Order Tax amount to the Total Payable value at the bottom bar (green strip).
 
-The value must reflect the current discount and allow updating
+Example: Total Payable = Subtotal + Tax → ₹200.00 + ₹10.00 = ₹210.00
 
-✅ Behavior:
-When the user clicks the Update button:
+Reflect this update instantly in the bottom right corner UI (Total Payable: ₹210.00)
 
-Recalculate the Total Payable amount (in the bottom bar of the Product page)
+DO NOT update the main "Total" on the right panel. Only Total Payable must include tax.
 
-Apply the discount dynamically based on:
-
-If Percentage: reduce the total by [percentage]%
-
-If Fixed: subtract the flat amount
-
-When the user clicks Cancel, discard changes and close the popup.
-
-All calculations must be performed using live data only from the current cart — no hardcoded logic or cached data.
-
-Updated totals must reflect immediately without refreshing the page.
+⚠️ Bug:
+Currently, after clicking Update, the value below Order Tax remains ₹0.00 and Total Payable is not increasing — even though a valid tax was selected.
 

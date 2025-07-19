@@ -21,7 +21,7 @@ class CartProvider with ChangeNotifier {
       selectedTaxId = 0,
       sellingPriceGroupId = 0,
       selectedServiceStaff = 0;
-  double? maxDiscountValue, discountAmount = 0.00;
+  double? maxDiscountValue, discountAmount = 0.00, orderTaxAmount = 0.0;
   List cartItems = [];
   Map? argument = {};
   String symbol = '';
@@ -36,25 +36,31 @@ class CartProvider with ChangeNotifier {
         {'id': 0, 'name': 'Service staff'}
       ];
 
-  void init(Map? args) {
-    argument = args;
+  Future<void> init(Map? args) async {
+    argument = args ?? {};
     getPermission();
     setTaxMap();
     setServiceStaffMap();
     getDefaultValues();
     getSellingPriceGroupId();
-    if (argument!['sellId'] != null) editCart(argument!['sellId']);
+    if (argument!.containsKey('sellId') && argument!['sellId'] != null) {
+      editCart(argument!['sellId']);
+    }
     cartList();
   }
 
   Future<void> cartList() async {
     cartItems = [];
-    (argument!['sellId'] != null)
-        ? cartItems = await SellDatabase().getInCompleteLines(
+    if (argument!.containsKey('locationId')) {
+      if (argument!.containsKey('sellId') && argument!['sellId'] != null) {
+        cartItems = await SellDatabase().getInCompleteLines(
             argument!['locationId'],
-            sellId: argument!['sellId'])
-        : cartItems =
+            sellId: argument!['sellId']);
+      } else {
+        cartItems =
             await SellDatabase().getInCompleteLines(argument!['locationId']);
+      }
+    }
 
     if (editItem == null) {
       proceedNext = true;
@@ -148,6 +154,9 @@ class CartProvider with ChangeNotifier {
   }
 
   void setTaxMap() {
+    taxListMap = [
+      {'id': 0, 'name': 'Tax rate', 'amount': 0}
+    ];
     System().get('tax').then((value) {
       value.forEach((element) {
         taxListMap.add({
@@ -160,18 +169,20 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setServiceStaffMap() {
-    System().get('serviceStaff').then((value) {
-      if (value != null) {
-        value.forEach((element) {
-          serviceStaffListMap.add({
-            'id': element['id'],
-            'name':
-                "${element['surname'] ?? ""} ${element['first_name'] ?? ""} ${element['last_name'] ?? ""}"
-          });
+  Future<void> setServiceStaffMap() async {
+    serviceStaffListMap = [
+      {'id': 0, 'name': 'Service staff'}
+    ];
+    var staff = await System().get('serviceStaff');
+    if (staff != null) {
+      staff.forEach((element) {
+        serviceStaffListMap.add({
+          'id': element['id'],
+          'name':
+              "${element['surname'] ?? ""} ${element['first_name'] ?? ""} ${element['last_name'] ?? ""}"
         });
-      }
-    });
+      });
+    }
     notifyListeners();
   }
 
@@ -209,22 +220,37 @@ class CartProvider with ChangeNotifier {
   double calculateSubtotal(taxId, discountType, discountAmount) {
     double subTotal = calculateSubTotal();
     double finalTotal;
-    num taxAmount = 0;
-    for (var value in taxListMap) {
-      if (value['id'] == taxId) {
-        taxAmount = value['amount'] as num;
-      }
-    }
-
     if (discountType == 'fixed') {
-      var total = subTotal - (discountAmount ?? 0.0);
-      finalTotal = total + (total * taxAmount / 100);
+      finalTotal = subTotal - (discountAmount ?? 0.0);
     } else {
-      var total = subTotal - (subTotal * (discountAmount ?? 0.0) / 100);
-      finalTotal = total + (total * taxAmount / 100);
+      finalTotal = subTotal - (subTotal * (discountAmount ?? 0.0) / 100);
     }
     invoiceAmount = finalTotal;
     return finalTotal;
+  }
+
+  void updateOrderTax(int taxId, double subTotal) {
+    selectedTaxId = taxId;
+    num taxPercentage = 0;
+    for (var tax in taxListMap) {
+      if (tax['id'] == taxId) {
+        taxPercentage = tax['amount'] as num;
+        break;
+      }
+    }
+
+    double discount = discountAmount ?? 0.0;
+
+    if (selectedDiscountType == 'percentage') {
+      discount = (subTotal * discount) / 100;
+    }
+
+    double discountedTotal = subTotal - discount;
+    orderTaxAmount = (discountedTotal * taxPercentage) / 100;
+
+    invoiceAmount = discountedTotal + orderTaxAmount!;
+    print('Subtotal: $subTotal, Discount: $discount, Tax Percentage: $taxPercentage, Order Tax: $orderTaxAmount, Total Payable: $invoiceAmount');
+    notifyListeners();
   }
 
   Future<void> getDefaultValues() async {

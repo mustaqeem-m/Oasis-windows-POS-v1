@@ -14,6 +14,7 @@ class Tax extends Api {
       var token = await System().getToken();
       var response =
           await http.get(Uri.parse(url), headers: this.getHeader('$token'));
+      print('Tax API Response: ${response.body}');
       taxes = jsonDecode(response.body);
       var taxList = taxes['data'];
       System().insert('tax', jsonEncode(taxList));

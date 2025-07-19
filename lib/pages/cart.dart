@@ -187,14 +187,44 @@ class CartState extends State<Cart> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Text(
-                      '${AppLocalizations.of(context).translate('tax')} : ',
+                      '${AppLocalizations.of(context).translate('order_tax')} : ',
                       style: AppTheme.getTextStyle(
                           themeData.textTheme.bodyLarge,
                           color: themeData.colorScheme.onSurface,
                           fontWeight: 600,
                           muted: true),
                     ),
-                    taxes(provider),
+                    Row(
+                      children: <Widget>[
+                        taxes(provider),
+                        IconButton(
+                          icon: Icon(MdiIcons.pencil, size: MySize.size20),
+                          onPressed: () {
+                            Fluttertoast.showToast(msg: "Edit tax clicked!");
+                            _showEditTaxDialog(provider);
+                          },
+                        )
+                      ],
+                    ),
+                    Text(
+                      provider.symbol +
+                          Helper().formatCurrency(provider.orderTaxAmount),
+                      style: AppTheme.getTextStyle(
+                        themeData.textTheme.bodyLarge,
+                        color: themeData.colorScheme.onSurface,
+                        fontWeight: 600,
+                        muted: true,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.only(
+                    left: MySize.size24!, right: MySize.size24!),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
                     Text(
                       '${AppLocalizations.of(context).translate('total')} : ',
                       style: AppTheme.getTextStyle(
@@ -253,10 +283,7 @@ class CartState extends State<Cart> {
                     serviceStaff: provider.selectedServiceStaff,
                     discountType: provider.selectedDiscountType,
                     discountAmount: provider.discountAmount,
-                    invoiceAmount: provider.calculateSubtotal(
-                        provider.selectedTaxId,
-                        provider.selectedDiscountType,
-                        provider.discountAmount),
+                    invoiceAmount: provider.invoiceAmount,
                     sellId: provider.argument!['sellId'],
                     isQuotation: provider.argument!['is_quotation'],
                     customerId: (provider.argument!['sellId'] != null)
@@ -859,7 +886,7 @@ class CartState extends State<Cart> {
   Widget inLineServiceStaff(index, CartProvider provider) {
     return DropdownButtonHideUnderline(
       child: DropdownButton(
-          dropdownColor: themeData.colorScheme.surface,
+          dropdownColor: Colors.white,
           icon: Icon(
             Icons.arrow_drop_down,
           ),
@@ -887,7 +914,7 @@ class CartState extends State<Cart> {
   Widget inLineTax(index, CartProvider provider) {
     return DropdownButtonHideUnderline(
       child: DropdownButton(
-          dropdownColor: themeData.colorScheme.surface,
+          dropdownColor: Colors.white,
           icon: Icon(
             Icons.arrow_drop_down,
           ),
@@ -912,7 +939,7 @@ class CartState extends State<Cart> {
   Widget inLineDiscount(index, CartProvider provider) {
     return DropdownButtonHideUnderline(
       child: DropdownButton(
-          dropdownColor: themeData.colorScheme.surface,
+          dropdownColor: Colors.white,
           icon: Icon(
             Icons.arrow_drop_down,
           ),
@@ -934,7 +961,7 @@ class CartState extends State<Cart> {
   Widget discount(CartProvider provider) {
     return DropdownButtonHideUnderline(
       child: DropdownButton(
-          dropdownColor: themeData.colorScheme.surface,
+          dropdownColor: Colors.white,
           icon: Icon(
             Icons.arrow_drop_down,
           ),
@@ -955,7 +982,7 @@ class CartState extends State<Cart> {
   Widget taxes(CartProvider provider) {
     return DropdownButtonHideUnderline(
       child: DropdownButton(
-          dropdownColor: themeData.colorScheme.surface,
+          dropdownColor: Colors.white,
           icon: Icon(
             Icons.arrow_drop_down,
           ),
@@ -969,16 +996,14 @@ class CartState extends State<Cart> {
                   overflow: TextOverflow.ellipsis,
                 ));
           }).toList(),
-          onChanged: (newValue) {
-            provider.setTax(int.parse(newValue.toString()));
-          }),
+          onChanged: null),
     );
   }
 
   Widget serviceStaffs(CartProvider provider) {
     return DropdownButtonHideUnderline(
       child: DropdownButton(
-          dropdownColor: themeData.colorScheme.surface,
+          dropdownColor: Colors.white,
           icon: Icon(
             Icons.arrow_drop_down,
           ),
@@ -997,5 +1022,57 @@ class CartState extends State<Cart> {
             provider.setServiceStaff(int.parse(newValue.toString()));
           }),
     );
+  }
+
+  void _showEditTaxDialog(CartProvider provider) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Edit Order Tax'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                DropdownButtonFormField<int>(
+                  dropdownColor: Colors.white,
+                  value: provider.selectedTaxId,
+                  items: provider.taxListMap.map<DropdownMenuItem<int>>((Map value) {
+                    return DropdownMenuItem<int>(
+                      value: value['id'],
+                      child: Text(value['name']),
+                    );
+                  }).toList(),
+                  onChanged: (newValue) {
+                    if (newValue != null) {
+                      provider.setTax(newValue);
+                    }
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Order Tax*',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: Text('Update'),
+                onPressed: () {
+                  if (provider.selectedTaxId != null) {
+                    provider.updateOrderTax(provider.selectedTaxId!,
+                        provider.calculateSubTotal());
+                  }
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        });
   }
 }

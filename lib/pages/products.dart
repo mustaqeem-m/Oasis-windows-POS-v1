@@ -111,6 +111,8 @@ class ProductsState extends State<Products> {
   }
 
   Future<void> _initializePage() async {
+    await System().refresh();
+    _cartProvider.init(null);
     await setLocationMap();
     await categoryList();
     await subCategoryList(categoryId);
@@ -1265,9 +1267,11 @@ class ProductsState extends State<Products> {
               ),
               _buildChargeItem(
                 label: 'Order Tax (+)',
-                value: '₹${0.0.toStringAsFixed(2)}',
+                value: '₹${_cartProvider.orderTaxAmount?.toStringAsFixed(2) ?? '0.00'}',
                 onInfoTap: () {},
-                onEditTap: () {},
+                onEditTap: () {
+                  _showEditTaxDialog();
+                },
               ),
               _buildChargeItem(
                 label: 'Shipping (+)',
@@ -1792,7 +1796,7 @@ class ProductsState extends State<Products> {
           selectedLocationId = defaultLocation;
         });
       }
-    } else if (locationListMap.length == 2) {
+    } else if (locationListMap.length > 1) {
       if (mounted) {
         setState(() {
           selectedLocationId = locationListMap[1]['id'] as int;
@@ -1842,12 +1846,17 @@ class ProductsState extends State<Products> {
 
   double get _totalPayable {
     final discountAmount = _cartProvider.discountAmount ?? 0.0;
+    final orderTaxAmount = _cartProvider.orderTaxAmount ?? 0.0;
+    double total = _subtotal;
+
     if (_cartProvider.selectedDiscountType == 'fixed') {
-      return _subtotal - discountAmount;
+      total -= discountAmount;
     } else if (_cartProvider.selectedDiscountType == 'percentage') {
-      return _subtotal - (_subtotal * discountAmount / 100);
+      total -= (_subtotal * discountAmount / 100);
     }
-    return _subtotal;
+
+    total += orderTaxAmount;
+    return total;
   }
 
   void _goToCheckout(String paymentMethod) {
@@ -1940,6 +1949,58 @@ class ProductsState extends State<Products> {
     if (mounted) {
       Provider.of<HomeProvider>(context, listen: false).resetCustomer();
     }
+  }
+  void _showEditTaxDialog() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Edit Order Tax'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                DropdownButtonFormField<int>(
+                  dropdownColor: Colors.white,
+                  value: _cartProvider.selectedTaxId,
+                  items: _cartProvider.taxListMap.map<DropdownMenuItem<int>>((Map value) {
+                    return DropdownMenuItem<int>(
+                      value: value['id'],
+                      child: Text(value['name']),
+                    );
+                  }).toList(),
+                  onChanged: (newValue) {
+                    if (newValue != null) {
+                      _cartProvider.setTax(newValue);
+                    }
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Order Tax*',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                child: Text('Update'),
+                onPressed: () {
+                  if (_cartProvider.selectedTaxId != null) {
+                    _cartProvider.updateOrderTax(
+                        _cartProvider.selectedTaxId!, _subtotal);
+                  }
+                  Navigator.of(context).pop();
+                  setState(() {});
+                },
+              ),
+            ],
+          );
+        });
   }
 }
 
