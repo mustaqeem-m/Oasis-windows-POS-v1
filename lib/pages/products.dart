@@ -1585,26 +1585,29 @@ class ProductsState extends State<Products> {
             ),
           ),
           const SizedBox(width: 16),
-          RichText(
-            text: TextSpan(
-              children: [
-                const TextSpan(
-                  text: 'Total Payable: ',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+          Padding(
+            padding: const EdgeInsets.only(right: 200.0),
+            child: RichText(
+              text: TextSpan(
+                children: [
+                  const TextSpan(
+                    text: 'Total Payable: ',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                TextSpan(
-                  text: '$symbol${_totalPayable.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    color: Colors.green,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                  TextSpan(
+                    text: '$symbol${_totalPayable.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      color: Colors.green,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           const SizedBox(width: 16),

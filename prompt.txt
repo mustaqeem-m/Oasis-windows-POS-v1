@@ -1,76 +1,38 @@
-When the user clicks the “Add Expense” button located in the topBar, open a modal window titled “Add Expense”. This modal must exactly follow the structure and layout shown below, and every dropdown and field must use dynamic live data from the app's current expense context — no static data is allowed.
+When the user clicks the edit icon (✏️) next to the discount section in the Products page (POS), open a modal popup titled Discount.
 
-🧾 Form Fields & Behavior (Top to Bottom, Left to Right):
-1. Business Location*
-Dropdown
+This modal must include the following two dynamic fields:
 
-Must fetch and list all business locations (e.g., Oasis Garments (BL0006))
+🧾 Popup Fields:
+Discount Type*
 
-2. Expense Category*
-Dropdown
+A required dropdown with options:
 
-Must fetch expense categories dynamically
+Fixed
 
-3. Sub Category
-Dropdown
+Percentage
 
-Depends on selected Expense Category
+The currently selected discount type must be pre-filled and editable.
 
-4. Reference No
-Input field (text)
+Discount Amount*
 
-Leave empty to auto-generate
+Required input field (numeric)
 
-5. Date*
-Date-time picker
+The value must reflect the current discount and allow updating
 
-Default to current timestamp
+✅ Behavior:
+When the user clicks the Update button:
 
-6. Expense for
-Dropdown
+Recalculate the Total Payable amount (in the bottom bar of the Product page)
 
-Dynamic list of employees/users/suppliers the expense is made for
+Apply the discount dynamically based on:
 
-7. Applicable Tax
-Dropdown
+If Percentage: reduce the total by [percentage]%
 
-Dynamic list of tax rules defined in system
+If Fixed: subtract the flat amount
 
-8. Total Amount*
-Input field (number)
+When the user clicks Cancel, discard changes and close the popup.
 
-9. Expense Note
-Multiline text area for writing a description or purpose
+All calculations must be performed using live data only from the current cart — no hardcoded logic or cached data.
 
-💳 Add Payment Section:
-10. Amount*
-Input field for amount being paid
-
-11. Paid On*
-Date-time picker (default to current time)
-
-12. Payment Method*
-Dropdown
-
-Options: Cash, Card, Bank Transfer, etc. — all fetched from system settings
-
-13. Payment Account
-Dropdown
-
-Dynamically load available payment accounts
-
-14. Payment Note
-Multiline input for internal notes about the payment
-
-📌 Additional Details:
-“Payment Due” should reflect Total Amount - Paid Amount (auto-calculated)
-
-Modal must have two buttons at the bottom:
-
-Save (Primary, purple)
-
-Close (Secondary, dark)
-
-Everything must be wrapped in a clean, responsive modal layout with proper field spacing, and values should update/react based on selected inputs (e.g., category → subcategory).
-Use validation for required fields marked with asterisk (*).
+Updated totals must reflect immediately without refreshing the page.
 
