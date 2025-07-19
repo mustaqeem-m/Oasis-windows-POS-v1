@@ -217,10 +217,10 @@ class CartProvider with ChangeNotifier {
     }
 
     if (discountType == 'fixed') {
-      var total = subTotal - discountAmount;
+      var total = subTotal - (discountAmount ?? 0.0);
       finalTotal = total + (total * taxAmount / 100);
     } else {
-      var total = subTotal - (subTotal * discountAmount / 100);
+      var total = subTotal - (subTotal * (discountAmount ?? 0.0) / 100);
       finalTotal = total + (total * taxAmount / 100);
     }
     invoiceAmount = finalTotal;

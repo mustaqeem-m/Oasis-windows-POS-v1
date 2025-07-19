@@ -1,3 +1,5 @@
+import 'package:pos_2/components/discount_dialog.dart';
+import 'package:pos_2/providers/cart_provider.dart';
 import 'package:pos_2/components/sell_return_popup.dart';
 import 'package:pos_2/components/recent_transactions_dialog.dart';
 import 'package:pos_2/components/service_staff_popup.dart';
@@ -43,6 +45,7 @@ class Products extends StatefulWidget {
 }
 
 class ProductsState extends State<Products> {
+  final CartProvider _cartProvider = CartProvider();
   List products = [];
   List<Map<String, dynamic>> cartLines = [];
   List<Map<String, dynamic>> _customers = [];
@@ -90,6 +93,11 @@ class ProductsState extends State<Products> {
     super.initState();
     themeData = AppTheme.getThemeFromThemeMode(themeType);
     _initializePage();
+    _cartProvider.addListener(_onCartProviderChanged);
+  }
+
+  void _onCartProviderChanged() {
+    setState(() {});
   }
 
   void _showSuspendedSalesModal(BuildContext context) async {
@@ -405,37 +413,40 @@ class ProductsState extends State<Products> {
   Widget build(BuildContext context) {
     themeData = Theme.of(context);
 
-    return Scaffold(
-      key: _scaffoldKey,
-      resizeToAvoidBottomInset: false,
-      backgroundColor: const Color(0xFFF7F8FC),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                _buildTopBar(),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          flex: 7, // Left panel for cart
-                          child: _buildLeftPanel(),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          flex: 3, // Right panel for products
-                          child: _buildRightPanel(),
-                        ),
-                      ],
+    return ChangeNotifierProvider.value(
+      value: _cartProvider,
+      child: Scaffold(
+        key: _scaffoldKey,
+        resizeToAvoidBottomInset: false,
+        backgroundColor: const Color(0xFFF7F8FC),
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
+                children: [
+                  _buildTopBar(),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 7, // Left panel for cart
+                            child: _buildLeftPanel(),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            flex: 3, // Right panel for products
+                            child: _buildRightPanel(),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-      bottomNavigationBar: _buildStickyBottomBar(),
+                ],
+              ),
+        bottomNavigationBar: _buildStickyBottomBar(),
+      ),
     );
   }
 
@@ -1224,7 +1235,7 @@ class ProductsState extends State<Products> {
               const Spacer(),
               const Text('Total :',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
-              Text('₹${_totalPayable.toStringAsFixed(2)}',
+              Text('₹${_subtotal.toStringAsFixed(2)}',
                   style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
@@ -1239,9 +1250,18 @@ class ProductsState extends State<Products> {
             children: [
               _buildChargeItem(
                 label: 'Discount (-)',
-                value: '₹${0.0.toStringAsFixed(2)}',
+                value:
+                    '${_cartProvider.selectedDiscountType == 'fixed' ? '₹' : ''}${_cartProvider.discountAmount?.toStringAsFixed(2) ?? '0.00'}${_cartProvider.selectedDiscountType == 'percentage' ? '%' : ''}',
                 onInfoTap: () {},
-                onEditTap: () {},
+                onEditTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => ChangeNotifierProvider.value(
+                      value: _cartProvider,
+                      child: const DiscountDialog(),
+                    ),
+                  );
+                },
               ),
               _buildChargeItem(
                 label: 'Order Tax (+)',
@@ -1809,7 +1829,7 @@ class ProductsState extends State<Products> {
     );
   }
 
-  double get _totalPayable {
+  double get _subtotal {
     if (cartLines.isEmpty) {
       return 0.0;
     }
@@ -1818,6 +1838,16 @@ class ProductsState extends State<Products> {
             double.parse(line['unit_price']?.toString() ?? '0') *
             (line['quantity'] ?? 0))
         .fold(0.0, (a, b) => a + b);
+  }
+
+  double get _totalPayable {
+    final discountAmount = _cartProvider.discountAmount ?? 0.0;
+    if (_cartProvider.selectedDiscountType == 'fixed') {
+      return _subtotal - discountAmount;
+    } else if (_cartProvider.selectedDiscountType == 'percentage') {
+      return _subtotal - (_subtotal * discountAmount / 100);
+    }
+    return _subtotal;
   }
 
   void _goToCheckout(String paymentMethod) {
