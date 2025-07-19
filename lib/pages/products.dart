@@ -717,11 +717,7 @@ class ProductsState extends State<Products> {
               borderColor: Colors.black, onPressed: () {
             showDialog(
               context: context,
-              builder: (context) => AddExpenseDialog(
-                onConfirm: (amount, note) {
-                  ExpenseDatabase().insertExpense(amount, note);
-                },
-              ),
+              builder: (context) => const AddExpenseDialog(),
             );
           }),
         ],
@@ -1218,20 +1214,20 @@ class ProductsState extends State<Products> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Items:',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const Text('Items :',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
               Text('${cartLines.length}',
                   style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 20,
                       color: Color(0xFF1E1E1E))),
               const Spacer(),
-              const Text('Total:',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              Text('$symbol${_totalPayable.toStringAsFixed(2)}',
+              const Text('Total :',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+              Text('₹${_totalPayable.toStringAsFixed(2)}',
                   style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 20,
                       color: Color(0xFF1E1E1E))),
             ],
           ),
@@ -1243,30 +1239,30 @@ class ProductsState extends State<Products> {
             children: [
               _buildChargeItem(
                 label: 'Discount (-)',
-                value: '$symbol${0.0.toStringAsFixed(2)}',
+                value: '₹${0.0.toStringAsFixed(2)}',
                 onInfoTap: () {},
                 onEditTap: () {},
               ),
               _buildChargeItem(
                 label: 'Order Tax (+)',
-                value: '$symbol${0.0.toStringAsFixed(2)}',
+                value: '₹${0.0.toStringAsFixed(2)}',
                 onInfoTap: () {},
                 onEditTap: () {},
               ),
               _buildChargeItem(
                 label: 'Shipping (+)',
-                value: '$symbol${0.0.toStringAsFixed(2)}',
+                value: '₹${0.0.toStringAsFixed(2)}',
                 onInfoTap: () {},
                 onEditTap: () {},
               ),
               _buildChargeItem(
                 label: 'Packing Charge (+)',
-                value: '$symbol${0.0.toStringAsFixed(2)}',
+                value: '₹${0.0.toStringAsFixed(2)}',
                 onInfoTap: () {},
               ),
               _buildChargeItem(
                 label: 'Round Off',
-                value: '$symbol${0.0.toStringAsFixed(2)}',
+                value: 0.0.toStringAsFixed(2),
               ),
             ],
           )
@@ -1308,9 +1304,12 @@ class ProductsState extends State<Products> {
                     color: Color(0xFF1E1E1E))),
             if (onEditTap != null) ...[
               const SizedBox(width: 4),
-              InkWell(
-                onTap: onEditTap,
-                child: const Icon(Icons.edit, size: 16, color: Colors.grey),
+              Tooltip(
+                message: 'Edit $label',
+                child: InkWell(
+                  onTap: onEditTap,
+                  child: const Icon(Icons.edit, size: 16, color: Colors.grey),
+                ),
               ),
             ],
           ],
@@ -1583,6 +1582,29 @@ class ProductsState extends State<Products> {
                       onPressed: _showCancelConfirmationDialog),
                 ],
               ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          RichText(
+            text: TextSpan(
+              children: [
+                const TextSpan(
+                  text: 'Total Payable: ',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextSpan(
+                  text: '$symbol${_totalPayable.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    color: Colors.green,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: 16),

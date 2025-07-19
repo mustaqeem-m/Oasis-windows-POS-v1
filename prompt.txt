@@ -1,58 +1,76 @@
-When the user clicks on the fullscreen icon in the topBar, open a new Scaffold page designed as a Customer Display Screen. This screen must exactly replicate the layout shown in the provided screenshot using only live sales data from the current transaction — no static or hardcoded values.
+When the user clicks the “Add Expense” button located in the topBar, open a modal window titled “Add Expense”. This modal must exactly follow the structure and layout shown below, and every dropdown and field must use dynamic live data from the app's current expense context — no static data is allowed.
 
-Layout Structure (as per screenshot):
-🔹 Top Section (Table Header)
-Display a table with the following column headers:
+🧾 Form Fields & Behavior (Top to Bottom, Left to Right):
+1. Business Location*
+Dropdown
 
-Product
+Must fetch and list all business locations (e.g., Oasis Garments (BL0006))
 
-Quantity
+2. Expense Category*
+Dropdown
 
-Price inc. tax
+Must fetch expense categories dynamically
 
-Subtotal
+3. Sub Category
+Dropdown
 
-🔹 Middle Section (Product Rows)
-Show real-time rows of each product added to the cart:
+Depends on selected Expense Category
 
-Product name
+4. Reference No
+Input field (text)
 
-Quantity selected
+Leave empty to auto-generate
 
-Price per unit including tax
+5. Date*
+Date-time picker
 
-Subtotal for that product (price × qty)
+Default to current timestamp
 
-Ensure the table auto-refreshes in sync with the main POS cart.
+6. Expense for
+Dropdown
 
-🔹 Summary Section (Bottom)
-Align the following summary rows just below the table:
+Dynamic list of employees/users/suppliers the expense is made for
 
-Items: [total items count]
+7. Applicable Tax
+Dropdown
 
-Total: ₹ [raw total]
+Dynamic list of tax rules defined in system
 
-Discount (-): ₹ [discount amount]
+8. Total Amount*
+Input field (number)
 
-Order Tax (+): ₹ [tax amount]
+9. Expense Note
+Multiline text area for writing a description or purpose
 
-Shipping (+): ₹ [shipping amount]
+💳 Add Payment Section:
+10. Amount*
+Input field for amount being paid
 
-Total Payable: ₹ [grand total] (in bold green)
+11. Paid On*
+Date-time picker (default to current time)
 
-🔹 Final Orange Bar (Bottom Highlight)
-This section must be visually prominent and display:
+12. Payment Method*
+Dropdown
 
-Total Paying: ₹ [amount paid]
+Options: Cash, Card, Bank Transfer, etc. — all fetched from system settings
 
-Change Return: ₹ [if any]
+13. Payment Account
+Dropdown
 
-Balance: ₹ [if any due] (amount shown in red/pink)
+Dynamically load available payment accounts
 
-Additional Notes:
-Do not display any buttons or interactive controls.
+14. Payment Note
+Multiline input for internal notes about the payment
 
-All amounts must be fetched from the live current cart state in real time.
+📌 Additional Details:
+“Payment Due” should reflect Total Amount - Paid Amount (auto-calculated)
 
-Ensure values like totals and taxes are formatted properly with commas and two decimal places, prefixed by ₹.
+Modal must have two buttons at the bottom:
+
+Save (Primary, purple)
+
+Close (Secondary, dark)
+
+Everything must be wrapped in a clean, responsive modal layout with proper field spacing, and values should update/react based on selected inputs (e.g., category → subcategory).
+Use validation for required fields marked with asterisk (*).
 
