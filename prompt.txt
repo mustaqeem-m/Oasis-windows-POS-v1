@@ -1,18 +1,36 @@
+When the user clicks on the fullscreen icon in the topBar, open a new Scaffold page designed as a Customer Display Screen. This screen must exactly replicate the layout shown in the provided screenshot using only live sales data from the current transaction — no static or hardcoded values.
 
+Layout Structure (as per screenshot):
+🔹 Top Section (Table Header)
+Display a table with the following column headers:
 
-When the user clicks on the fullscreen icon located in the topBar, open a new page wrapped inside a Scaffold layout. This page must be a live sales cart view, visually similar to a POS terminal interface.
+Product
 
-Behavior & Structure:
-Fetch all data dynamically from the app’s current sales session (no static or hardcoded data allowed).
+Quantity
 
-Display a table-like layout with the following columns:
-Product, Quantity, Price inc. tax, Subtotal
+Price inc. tax
 
-Below the table, show a summary row that includes:
+Subtotal
 
-Items: [count]
+🔹 Middle Section (Product Rows)
+Show real-time rows of each product added to the cart:
 
-Total: ₹ [total]
+Product name
+
+Quantity selected
+
+Price per unit including tax
+
+Subtotal for that product (price × qty)
+
+Ensure the table auto-refreshes in sync with the main POS cart.
+
+🔹 Summary Section (Bottom)
+Align the following summary rows just below the table:
+
+Items: [total items count]
+
+Total: ₹ [raw total]
 
 Discount (-): ₹ [discount amount]
 
@@ -20,19 +38,21 @@ Order Tax (+): ₹ [tax amount]
 
 Shipping (+): ₹ [shipping amount]
 
-Total Payable: ₹ [payable amount] (in bold green text)
+Total Payable: ₹ [grand total] (in bold green)
 
-Payment Info Section:
-At the bottom in a colored box (orange background), show:
+🔹 Final Orange Bar (Bottom Highlight)
+This section must be visually prominent and display:
 
-Total Paying: ₹ [amount]
+Total Paying: ₹ [amount paid]
 
-Change Return: ₹ [amount]
+Change Return: ₹ [if any]
 
-Balance: ₹ [amount] (balance in red/pink)
+Balance: ₹ [if any due] (amount shown in red/pink)
 
-Additional Requirements:
-Provide navigation or a return mechanism to go back to the product page from this fullscreen sales view.
+Additional Notes:
+Do not display any buttons or interactive controls.
 
-All components must update based on live sales data in real-time or upon relevant user action.
+All amounts must be fetched from the live current cart state in real time.
+
+Ensure values like totals and taxes are formatted properly with commas and two decimal places, prefixed by ₹.
 

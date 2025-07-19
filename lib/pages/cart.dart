@@ -1,20 +1,17 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:pos_2/helpers/toast_helper.dart';
+import 'package:pos_2/providers/cart_provider.dart';
+import 'package:provider/provider.dart';
 
 import '../helpers/AppTheme.dart';
 import '../helpers/SizeConfig.dart';
 import '../helpers/otherHelpers.dart';
 import '../locale/MyLocalizations.dart';
-import '../models/product_model.dart';
 import '../models/sell.dart';
 import '../models/sellDatabase.dart';
-import '../models/system.dart';
-import '../models/variations.dart';
 import 'elements.dart';
 
 class Cart extends StatefulWidget {
@@ -25,327 +22,253 @@ class Cart extends StatefulWidget {
 }
 
 class CartState extends State<Cart> {
-  bool proceedNext = true,
-      canEditPrice = false,
-      canEditDiscount = false,
-      canAddServiceStaff = false,
-      canAddInLineServiceStaff = false;
-  int? selectedContactId,
-      editItem,
-      selectedTaxId = 0,
-      sellingPriceGroupId = 0,
-      selectedServiceStaff = 0;
-  double? maxDiscountValue, discountAmount = 0.00;
-  List cartItems = [];
-  Map? argument = {};
-  String symbol = '';
-  var sellDetail, selectedDiscountType = "fixed";
-  final discountController = TextEditingController();
-  final searchController = TextEditingController();
-  var invoiceAmount,
-      taxListMap = [
-        {'id': 0, 'name': 'Tax rate', 'amount': 0}
-      ],
-      serviceStaffListMap = [
-        {'id': 0, 'name': 'Service staff'}
-      ];
   ThemeData themeData = AppTheme.getThemeFromThemeMode(1);
   CustomAppTheme customAppTheme = AppTheme.getCustomAppTheme(1);
 
   @override
-  void initState() {
-    super.initState();
-    getPermission();
-    setTaxMap();
-    setServiceStaffMap();
-    getDefaultValues();
-    getSellingPriceGroupId();
-  }
-
-  @override
   void didChangeDependencies() {
-    argument = ModalRoute.of(context)!.settings.arguments as Map;
-
-    if (argument!['sellId'] != null) editCart(argument!['sellId']);
-
     super.didChangeDependencies();
-
-    cartList();
-  }
-
-  @override
-  void dispose() {
-    discountController.dispose();
-    super.dispose();
-  }
-
-  Future<void> cartList() async {
-    cartItems = [];
-    (argument!['sellId'] != null)
-        ? cartItems = await SellDatabase().getInCompleteLines(
-            argument!['locationId'],
-            sellId: argument!['sellId'])
-        : cartItems =
-            await SellDatabase().getInCompleteLines(argument!['locationId']);
-    if (mounted) {
-      setState(() {
-        if (editItem == null) {
-          proceedNext = true;
-        }
-      });
-    }
-  }
-
-  Future<void> editCart(sellId) async {
-    sellDetail = await SellDatabase().getSellBySellId(sellId);
-    selectedTaxId = (sellDetail[0]['tax_rate_id'] != null)
-        ? sellDetail[0]['tax_rate_id']
-        : 0;
-    selectedServiceStaff = (sellDetail[0]['res_waiter_id'] != null)
-        ? sellDetail[0]['res_waiter_id']
-        : 0;
-    selectedContactId = sellDetail[0]['contact_id'];
-    selectedDiscountType = sellDetail[0]['discount_type'];
-    discountAmount = sellDetail[0]['discount_amount'];
-    discountController.text = discountAmount.toString();
-    calculateSubtotal(selectedTaxId, selectedDiscountType, discountAmount);
-    if (mounted) {
-      setState(() {});
-    }
+    final cartProvider = Provider.of<CartProvider>(context, listen: false);
+    final Map? argument = ModalRoute.of(context)!.settings.arguments as Map?;
+    cartProvider.init(argument);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        title: Text(AppLocalizations.of(context).translate('cart'),
-            style: AppTheme.getTextStyle(themeData.textTheme.titleLarge,
-                fontWeight: 600)),
-        leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              (argument!['sellId'] == null)
-                  ? Navigator.pop(context)
-                  : Navigator.pushReplacementNamed(context, '/products',
-                      arguments: Helper().argument(
-                        sellId: argument!['sellId'],
-                        locId: argument!['locationId'],
-                      ));
-            }),
-        actions: [
-          InkWell(
-            onTap: () async {
-              var barcode = await Helper().barcodeScan(context);
-              await getScannedProduct(barcode);
-            },
-            child: Container(
-              margin: EdgeInsets.only(
-                  right: MySize.size16!,
-                  bottom: MySize.size8!,
-                  top: MySize.size8!),
-              decoration: BoxDecoration(
-                color: themeData.colorScheme.surface,
-                borderRadius: BorderRadius.all(Radius.circular(MySize.size16!)),
-                boxShadow: [
-                  BoxShadow(
-                    color: themeData.cardTheme.shadowColor!.withAlpha(48),
-                    blurRadius: 3,
-                    offset: Offset(0, 1),
+    return Consumer<CartProvider>(
+      builder: (context, provider, child) {
+        return Scaffold(
+          appBar: AppBar(
+            elevation: 0,
+            title: Text(AppLocalizations.of(context).translate('cart'),
+                style: AppTheme.getTextStyle(themeData.textTheme.titleLarge,
+                    fontWeight: 600)),
+            leading: IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () {
+                  (provider.argument!['sellId'] == null)
+                      ? Navigator.pop(context)
+                      : Navigator.pushReplacementNamed(context, '/products',
+                          arguments: Helper().argument(
+                            sellId: provider.argument!['sellId'],
+                            locId: provider.argument!['locationId'],
+                          ));
+                }),
+            actions: [
+              InkWell(
+                onTap: () async {
+                  var barcode = await Helper().barcodeScan(context);
+                  provider.getScannedProduct(barcode);
+                },
+                child: Container(
+                  margin: EdgeInsets.only(
+                      right: MySize.size16!,
+                      bottom: MySize.size8!,
+                      top: MySize.size8!),
+                  decoration: BoxDecoration(
+                    color: themeData.colorScheme.surface,
+                    borderRadius:
+                        BorderRadius.all(Radius.circular(MySize.size16!)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: themeData.cardTheme.shadowColor!.withAlpha(48),
+                        blurRadius: 3,
+                        offset: Offset(0, 1),
+                      )
+                    ],
+                  ),
+                  padding: EdgeInsets.only(
+                      left: MySize.size12!, right: MySize.size12!),
+                  child: Icon(
+                    MdiIcons.barcode,
+                    color: themeData.colorScheme.primary,
+                  ),
+                ),
+              ),
+              searchDropdown(provider)
+            ],
+          ),
+          body: SingleChildScrollView(
+            child: Column(children: <Widget>[
+              Container(
+                  height: MySize.safeHeight! * 0.65,
+                  color: customAppTheme.bgLayer1,
+                  child: (provider.cartItems.isNotEmpty)
+                      ? itemList(provider)
+                      : Center(
+                          child: Text(AppLocalizations.of(context)
+                              .translate('add_item_to_cart')))),
+              Divider(),
+              Column(
+                children: <Widget>[
+                  Container(
+                    padding: EdgeInsets.only(
+                        left: MySize.size24!, right: MySize.size24!),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        Text(
+                            '${AppLocalizations.of(context).translate('sub_total')} : ',
+                            style: AppTheme.getTextStyle(
+                              themeData.textTheme.titleMedium,
+                              fontWeight: 700,
+                              color: themeData.colorScheme.onSurface,
+                            )),
+                        Text(
+                            provider.symbol +
+                                Helper().formatCurrency(
+                                    provider.calculateSubTotal()),
+                            style: AppTheme.getTextStyle(
+                              themeData.textTheme.titleMedium,
+                              fontWeight: 700,
+                              color: themeData.colorScheme.onSurface,
+                            )),
+                      ],
+                    ),
                   )
                 ],
               ),
-              padding:
-                  EdgeInsets.only(left: MySize.size12!, right: MySize.size12!),
-              child: Icon(
-                MdiIcons.barcode,
-                color: themeData.colorScheme.primary,
-              ),
-            ),
-          ),
-          searchDropdown()
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(children: <Widget>[
-          Container(
-              height: MySize.safeHeight! * 0.65,
-              color: customAppTheme.bgLayer1,
-              child: (cartItems.isNotEmpty)
-                  ? itemList()
-                  : Center(
-                      child: Text(AppLocalizations.of(context)
-                          .translate('add_item_to_cart')))),
-          Divider(),
-          Column(
-            children: <Widget>[
               Container(
                 padding: EdgeInsets.only(
                     left: MySize.size24!, right: MySize.size24!),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Text(
-                        '${AppLocalizations.of(context).translate('sub_total')} : ',
-                        style: AppTheme.getTextStyle(
-                          themeData.textTheme.titleMedium,
-                          fontWeight: 700,
+                      '${AppLocalizations.of(context).translate('discount')} : ',
+                      style: AppTheme.getTextStyle(
+                          themeData.textTheme.bodyLarge,
                           color: themeData.colorScheme.onSurface,
-                        )),
-                    Text(symbol + Helper().formatCurrency(calculateSubTotal()),
-                        style: AppTheme.getTextStyle(
-                          themeData.textTheme.titleMedium,
-                          fontWeight: 700,
-                          color: themeData.colorScheme.onSurface,
-                        )),
+                          fontWeight: 600,
+                          muted: true),
+                    ),
+                    discount(provider),
+                    Expanded(
+                      child: SizedBox(
+                        height: MySize.size50,
+                        child: TextFormField(
+                          controller: provider.discountController,
+                          decoration: InputDecoration(
+                            prefix: Text((provider.selectedDiscountType ==
+                                    'fixed')
+                                ? provider.symbol
+                                : ''),
+                            labelText: AppLocalizations.of(context)
+                                .translate('discount_amount'),
+                            border: themeData.inputDecorationTheme.border,
+                            enabledBorder:
+                                themeData.inputDecorationTheme.border,
+                            focusedBorder:
+                                themeData.inputDecorationTheme.focusedBorder,
+                          ),
+                          style: AppTheme.getTextStyle(
+                              themeData.textTheme.titleSmall,
+                              fontWeight: 400,
+                              letterSpacing: -0.2),
+                          textAlign: TextAlign.end,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                                RegExp(r'^(\d+)?\.?\d{0,2}'))
+                          ],
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            provider.updateDiscount(value);
+                          },
+                        ),
+                      ),
+                    )
                   ],
                 ),
-              )
-            ],
-          ),
-          Container(
-            padding:
-                EdgeInsets.only(left: MySize.size24!, right: MySize.size24!),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text(
-                  '${AppLocalizations.of(context).translate('discount')} : ',
-                  style: AppTheme.getTextStyle(themeData.textTheme.bodyLarge,
-                      color: themeData.colorScheme.onSurface,
-                      fontWeight: 600,
-                      muted: true),
-                ),
-                discount(),
-                Expanded(
-                  child: SizedBox(
-                    height: MySize.size50,
-                    child: TextFormField(
-                      controller: discountController,
-                      decoration: InputDecoration(
-                        prefix: Text(
-                            (selectedDiscountType == 'fixed') ? symbol : ''),
-                        labelText: AppLocalizations.of(context)
-                            .translate('discount_amount'),
-                        border: themeData.inputDecorationTheme.border,
-                        enabledBorder: themeData.inputDecorationTheme.border,
-                        focusedBorder:
-                            themeData.inputDecorationTheme.focusedBorder,
-                      ),
+              ),
+              Container(
+                padding: EdgeInsets.only(
+                    left: MySize.size24!, right: MySize.size24!),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Text(
+                      '${AppLocalizations.of(context).translate('tax')} : ',
                       style: AppTheme.getTextStyle(
-                          themeData.textTheme.titleSmall,
-                          fontWeight: 400,
-                          letterSpacing: -0.2),
-                      textAlign: TextAlign.end,
-                      inputFormatters: [
-                        // ignore: deprecated_member_use
-                        FilteringTextInputFormatter(
-                            RegExp(r'^(\d+)?\.?\d{0,2}'),
-                            allow: true)
-                      ],
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) {
-                        setState(() {
-                          discountAmount = Helper().validateInput(value);
-                          if (maxDiscountValue != null &&
-                              discountAmount! > maxDiscountValue!) {
-                            Fluttertoast.showToast(
-                                msg:
-                                    "${AppLocalizations.of(context).translate('discount_error_message')} $maxDiscountValue");
-                            proceedNext = false;
-                          } else {
-                            proceedNext = true;
-                          }
-                        });
-                      },
+                          themeData.textTheme.bodyLarge,
+                          color: themeData.colorScheme.onSurface,
+                          fontWeight: 600,
+                          muted: true),
                     ),
-                  ),
-                )
-              ],
-            ),
-          ),
-          Container(
-            padding:
-                EdgeInsets.only(left: MySize.size24!, right: MySize.size24!),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text(
-                  '${AppLocalizations.of(context).translate('tax')} : ',
-                  style: AppTheme.getTextStyle(themeData.textTheme.bodyLarge,
-                      color: themeData.colorScheme.onSurface,
-                      fontWeight: 600,
-                      muted: true),
-                ),
-                taxes(),
-                Text(
-                  '${AppLocalizations.of(context).translate('total')} : ',
-                  style: AppTheme.getTextStyle(
-                    themeData.textTheme.titleMedium,
-                    fontWeight: 700,
-                    color: themeData.colorScheme.onSurface,
-                  ),
-                ),
-                Text(
-                    symbol +
-                        Helper().formatCurrency(calculateSubtotal(selectedTaxId,
-                            selectedDiscountType, discountAmount)),
-                    style: AppTheme.getTextStyle(
-                      themeData.textTheme.titleMedium,
-                      fontWeight: 700,
-                      color: themeData.colorScheme.onSurface,
-                      letterSpacing: 0,
-                    ))
-              ],
-            ),
-          ),
-          (canAddServiceStaff)
-              ? Container(
-                  padding: EdgeInsets.only(
-                      left: MySize.size24!, right: MySize.size24!),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        "Service staff : ",
-                        // AppLocalizations.of(context).translate('tax') + ' : ',
-                        style: AppTheme.getTextStyle(
-                            themeData.textTheme.bodyLarge,
-                            color: themeData.colorScheme.onSurface,
-                            fontWeight: 600,
-                            muted: true),
+                    taxes(provider),
+                    Text(
+                      '${AppLocalizations.of(context).translate('total')} : ',
+                      style: AppTheme.getTextStyle(
+                        themeData.textTheme.titleMedium,
+                        fontWeight: 700,
+                        color: themeData.colorScheme.onSurface,
                       ),
-                      serviceStaffs()
-                    ],
-                  ),
-                )
-              : Container(),
-        ]),
-      ),
-      bottomNavigationBar: Visibility(
-        visible: (cartItems.isNotEmpty && proceedNext == true),
-        child: cartBottomBar(
-            '/customer',
-            AppLocalizations.of(context).translate('customer'),
-            context,
-            Helper().argument(
-                locId: argument!['locationId'],
-                taxId: selectedTaxId,
-                serviceStaff: selectedServiceStaff,
-                discountType: selectedDiscountType,
-                discountAmount: discountAmount,
-                invoiceAmount: calculateSubtotal(
-                    selectedTaxId, selectedDiscountType, discountAmount),
-                sellId: argument!['sellId'],
-                isQuotation: argument!['is_quotation'],
-                customerId:
-                    (argument!['sellId'] != null) ? selectedContactId : null)),
-      ),
+                    ),
+                    Text(
+                        provider.symbol +
+                            Helper().formatCurrency(provider.calculateSubtotal(
+                                provider.selectedTaxId,
+                                provider.selectedDiscountType,
+                                provider.discountAmount)),
+                        style: AppTheme.getTextStyle(
+                          themeData.textTheme.titleMedium,
+                          fontWeight: 700,
+                          color: themeData.colorScheme.onSurface,
+                          letterSpacing: 0,
+                        ))
+                  ],
+                ),
+              ),
+              (provider.canAddServiceStaff)
+                  ? Container(
+                      padding: EdgeInsets.only(
+                          left: MySize.size24!, right: MySize.size24!),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            "Service staff : ",
+                            style: AppTheme.getTextStyle(
+                                themeData.textTheme.bodyLarge,
+                                color: themeData.colorScheme.onSurface,
+                                fontWeight: 600,
+                                muted: true),
+                          ),
+                          serviceStaffs(provider)
+                        ],
+                      ),
+                    )
+                  : Container(),
+            ]),
+          ),
+          bottomNavigationBar: Visibility(
+            visible:
+                (provider.cartItems.isNotEmpty && provider.proceedNext == true),
+            child: cartBottomBar(
+                '/customer',
+                AppLocalizations.of(context).translate('customer'),
+                context,
+                Helper().argument(
+                    locId: provider.argument!['locationId'],
+                    taxId: provider.selectedTaxId,
+                    serviceStaff: provider.selectedServiceStaff,
+                    discountType: provider.selectedDiscountType,
+                    discountAmount: provider.discountAmount,
+                    invoiceAmount: provider.calculateSubtotal(
+                        provider.selectedTaxId,
+                        provider.selectedDiscountType,
+                        provider.discountAmount),
+                    sellId: provider.argument!['sellId'],
+                    isQuotation: provider.argument!['is_quotation'],
+                    customerId: (provider.argument!['sellId'] != null)
+                        ? provider.selectedContactId
+                        : null)),
+          ),
+        );
+      },
     );
   }
 
-  //filter dropdown
-  Widget searchDropdown() {
+  Widget searchDropdown(CartProvider provider) {
     return Container(
       margin: EdgeInsets.only(right: MySize.size10!, top: MySize.size8!),
       width: MySize.screenWidth! * 0.45,
@@ -382,18 +305,18 @@ class CartState extends State<Cart> {
           contentPadding: EdgeInsets.only(right: MySize.size16!),
         ),
         textCapitalization: TextCapitalization.sentences,
-        controller: searchController,
+        controller: provider.searchController,
         onEditingComplete: () async {
-          await getSearchItemList(searchController.text)
-              .then((value) => itemDialog(value));
+          await provider
+              .getSearchItemList(provider.searchController.text)
+              .then((value) => itemDialog(value, provider));
           FocusScope.of(context).requestFocus(FocusNode());
         },
       ),
     );
   }
 
-  //show items dialog list
-  void itemDialog(List items) {
+  void itemDialog(List items, CartProvider provider) {
     showDialog(
       barrierDismissible: true,
       context: context,
@@ -417,7 +340,7 @@ class CartState extends State<Cart> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: <Widget>[
                           Text(
-                            symbol +
+                            provider.symbol +
                                 Helper()
                                     .formatCurrency(items[index]['unit_price']),
                             style: AppTheme.getTextStyle(
@@ -465,11 +388,12 @@ class CartState extends State<Cart> {
                         Fluttertoast.showToast(
                             msg: AppLocalizations.of(context)
                                 .translate('added_to_cart'));
-                        await Sell().addToCart(items[index],
-                            argument != null ? argument!['sellId'] : null);
-                        setState(() {
-                          cartList();
-                        });
+                        await Sell().addToCart(
+                            items[index],
+                            provider.argument != null
+                                ? provider.argument!['sellId']
+                                : null);
+                        provider.cartList();
                       },
                     ),
                   );
@@ -480,82 +404,7 @@ class CartState extends State<Cart> {
     );
   }
 
-  //get search items list
-  Future<List> getSearchItemList(String searchText) async {
-    List products = [];
-    var price;
-    await Variations()
-        .get(
-            locationId: argument!['locationId'],
-            inStock: true,
-            searchTerm: searchText)
-        .then((value) {
-      value.forEach((element) {
-        if (element['selling_price_group'] != null) {
-          jsonDecode(element['selling_price_group']).forEach((element) {
-            if (element['key'] == sellingPriceGroupId) {
-              price = element['value'];
-            }
-          });
-        }
-        setState(() {
-          products.add(ProductModel().product(element, price));
-        });
-      });
-    });
-    return products;
-  }
-
-  //set selling price group Id
-  Future<void> getSellingPriceGroupId() async {
-    await System().get('location').then((value) {
-      value.forEach((element) {
-        if (element['id'] == argument!['locationId'] &&
-            element['selling_price_group_id'] != null) {
-          sellingPriceGroupId =
-              int.parse(element['selling_price_group_id'].toString());
-        }
-      });
-    });
-  }
-
-  //add product to cart after scanning barcode
-  Future<void> getScannedProduct(String barcode) async {
-    await Variations()
-        .get(
-            locationId: argument!['locationId'],
-            barcode: barcode,
-            searchTerm: '')
-        .then((value) async {
-      if (value.length > 0) {
-        var price;
-        var product;
-        if (value[0]['selling_price_group'] != null) {
-          jsonDecode(value[0]['selling_price_group']).forEach((element) {
-            if (element['key'] == sellingPriceGroupId) {
-              price = element['value'];
-            }
-          });
-        }
-        setState(() {
-          product = ProductModel().product(value[0], price);
-        });
-        if (product != null && product['stock_available'] > 0) {
-          Fluttertoast.showToast(
-              msg: AppLocalizations.of(context).translate('added_to_cart'));
-          await Sell().addToCart(
-              product, (argument != null) ? argument!['sellId'] : null);
-          cartList();
-        } else {
-          ToastHelper.show(context, "Out of Stock");
-        }
-      } else {
-        ToastHelper.show(context, "No product found");
-      }
-    });
-  }
-
-  Widget itemList() {
+  Widget itemList(CartProvider provider) {
     int themeType = 1;
     ThemeData themeData;
     CustomAppTheme customAppTheme;
@@ -564,7 +413,7 @@ class CartState extends State<Cart> {
 
     return ListView.builder(
       shrinkWrap: true,
-      itemCount: cartItems.length,
+      itemCount: provider.cartItems.length,
       padding: EdgeInsets.only(
         top: MySize.size16!,
       ),
@@ -601,8 +450,8 @@ class CartState extends State<Cart> {
                       alignment: Alignment.topLeft,
                       padding: EdgeInsets.all(MySize.size8!),
                       child: Text(
-                        cartItems[index]['name'],
-                        overflow: (editItem == index)
+                        provider.cartItems[index]['name'],
+                        overflow: (provider.editItem == index)
                             ? TextOverflow.visible
                             : TextOverflow.ellipsis,
                         style: AppTheme.getTextStyle(
@@ -615,8 +464,6 @@ class CartState extends State<Cart> {
                       children: <Widget>[
                         Expanded(
                           child: Container(
-                            // height: MySize.safeHeight *
-                            //     (editItem == index ? 0.37 : 0.15),
                             margin: EdgeInsets.only(left: MySize.size20!),
                             child: Column(
                               children: [
@@ -630,9 +477,9 @@ class CartState extends State<Cart> {
                                                 CrossAxisAlignment.start,
                                             children: <Widget>[
                                           Text(
-                                            symbol +
+                                            provider.symbol +
                                                 Helper().formatCurrency(
-                                                    cartItems[index]
+                                                    provider.cartItems[index]
                                                         ['unit_price']),
                                             style: AppTheme.getTextStyle(
                                                 themeData.textTheme.bodyLarge,
@@ -648,7 +495,7 @@ class CartState extends State<Cart> {
                                                       .spaceBetween,
                                               children: [
                                                 Text(
-                                                    '${AppLocalizations.of(context).translate('total')} : $symbol${Helper().formatCurrency((double.parse(calculateInlineUnitPrice(cartItems[index]['unit_price'], cartItems[index]['tax_rate_id'], cartItems[index]['discount_type'], cartItems[index]['discount_amount'])) * cartItems[index]['quantity']))}'),
+                                                    '${AppLocalizations.of(context).translate('total')} : ${provider.symbol}${Helper().formatCurrency((double.parse(provider.calculateInlineUnitPrice(provider.cartItems[index]['unit_price'], provider.cartItems[index]['tax_rate_id'], provider.cartItems[index]['discount_type'], provider.cartItems[index]['discount_amount'])) * provider.cartItems[index]['quantity']))}'),
                                               ]),
                                           Row(
                                             children: [
@@ -660,11 +507,11 @@ class CartState extends State<Cart> {
                                                   color: themeData
                                                       .colorScheme.onSurface,
                                                   onPressed: () {
-                                                    setState(() {
-                                                      (editItem == index)
-                                                          ? editItem = null
-                                                          : editItem = index;
-                                                    });
+                                                    (provider.editItem == index)
+                                                        ? provider
+                                                            .setEditItem(null)
+                                                        : provider
+                                                            .setEditItem(index);
                                                   }),
                                               IconButton(
                                                   icon: Icon(MdiIcons.delete,
@@ -714,27 +561,15 @@ class CartState extends State<Cart> {
                                                           actions: <Widget>[
                                                             TextButton(
                                                                 onPressed: () {
-                                                                  (argument!['sellId'] ==
-                                                                          null)
-                                                                      ? SellDatabase().delete(
-                                                                          cartItems[index]
-                                                                              [
-                                                                              'variation_id'],
-                                                                          cartItems[index]
-                                                                              [
-                                                                              'product_id'])
-                                                                      : SellDatabase().delete(
-                                                                          cartItems[index]
-                                                                              [
-                                                                              'variation_id'],
-                                                                          cartItems[index]
-                                                                              [
-                                                                              'product_id'],
-                                                                          sellId:
-                                                                              argument!['sellId']);
-                                                                  editItem =
-                                                                      null;
-                                                                  cartList();
+                                                                  provider.deleteCartItem(
+                                                                      provider.cartItems[index]
+                                                                          [
+                                                                          'variation_id'],
+                                                                      provider.cartItems[index]
+                                                                          [
+                                                                          'product_id'],
+                                                                      sellId:
+                                                                          provider.argument!['sellId']);
                                                                   Navigator.pop(
                                                                       context);
                                                                 },
@@ -763,27 +598,29 @@ class CartState extends State<Cart> {
                                         alignment: Alignment.centerRight,
                                         width: MySize.screenWidth! * 0.25,
                                         height: MySize.screenHeight! * 0.05,
-                                        child: (editItem != index)
+                                        child: (provider.editItem != index)
                                             ? Text(
-                                                "${AppLocalizations.of(context).translate('quantity')}:${cartItems[index]['quantity'].toString()}")
+                                                "${AppLocalizations.of(context).translate('quantity')}:${provider.cartItems[index]['quantity'].toString()}")
                                             : TextFormField(
-                                                controller: (editItem != index)
+                                                controller: (provider.editItem !=
+                                                        index)
                                                     ? TextEditingController(
-                                                        text: cartItems[index]
-                                                                ['quantity']
+                                                        text: provider
+                                                                .cartItems[
+                                                            index]['quantity']
                                                             .toString())
                                                     : null,
                                                 initialValue:
-                                                    (editItem == index)
-                                                        ? cartItems[index]
-                                                                ['quantity']
+                                                    (provider.editItem == index)
+                                                        ? provider
+                                                                .cartItems[
+                                                            index]['quantity']
                                                             .toString()
                                                         : null,
                                                 inputFormatters: [
-                                                  FilteringTextInputFormatter(
-                                                      RegExp(
-                                                          r'^(\d+)?\.?\d{0,2}'),
-                                                      allow: true)
+                                                  FilteringTextInputFormatter
+                                                      .allow(RegExp(
+                                                          r'^(\d+)?\.?\d{0,2}'))
                                                 ],
                                                 keyboardType: TextInputType
                                                     .numberWithOptions(
@@ -795,41 +632,13 @@ class CartState extends State<Cart> {
                                                       .translate('quantity'),
                                                 ),
                                                 onChanged: (newQuantity) {
-                                                  if (newQuantity != "" &&
+                                                  provider.updateQuantity(
+                                                      provider.cartItems[index]
+                                                          ['id'],
                                                       double.parse(
-                                                              newQuantity) >
-                                                          0) {
-                                                    if (!proceedNext)
-                                                      proceedNext = true;
-                                                    if (cartItems[index][
-                                                            'stock_available'] >=
-                                                        double.parse(
-                                                            newQuantity)) {
-                                                      SellDatabase().update(
-                                                          cartItems[index]
-                                                              ['id'],
-                                                          {
-                                                            'quantity':
-                                                                double.parse(
-                                                                    newQuantity)
-                                                          });
-                                                      cartList();
-                                                    } else {
-                                                      Fluttertoast.showToast(
-                                                          msg:
-                                                              "${cartItems[index]['stock_available']}${AppLocalizations.of(context).translate('stock_available')}");
-                                                    }
-                                                  } else if (newQuantity ==
-                                                      "") {
-                                                    setState(() {
-                                                      proceedNext = false;
-                                                    });
-                                                    Fluttertoast.showToast(
-                                                        msg: AppLocalizations
-                                                                .of(context)
-                                                            .translate(
-                                                                'please_enter_a_valid_quantity'));
-                                                  }
+                                                          newQuantity),
+                                                      provider.cartItems[index][
+                                                          'stock_available']);
                                                 },
                                               )),
                                     Container(
@@ -841,25 +650,13 @@ class CartState extends State<Cart> {
                                         children: <Widget>[
                                           InkWell(
                                             onTap: () {
-                                              if (cartItems[index]
-                                                      ['stock_available'] >
-                                                  cartItems[index]
-                                                      ['quantity']) {
-                                                SellDatabase().update(
-                                                    cartItems[index]['id'], {
-                                                  'quantity': cartItems[index]
-                                                          ['quantity'] +
-                                                      1
-                                                });
-                                                cartList();
-                                              } else {
-                                                var stockAvailable =
-                                                    cartItems[index]
-                                                        ['stock_available'];
-                                                Fluttertoast.showToast(
-                                                    msg:
-                                                        "$stockAvailable${AppLocalizations.of(context).translate('stock_available')}");
-                                              }
+                                              provider.incrementQuantity(
+                                                  provider.cartItems[index]
+                                                      ['id'],
+                                                  provider.cartItems[index]
+                                                      ['quantity'],
+                                                  provider.cartItems[index]
+                                                      ['stock_available']);
                                             },
                                             child: Container(
                                               padding:
@@ -887,16 +684,11 @@ class CartState extends State<Cart> {
                                           ),
                                           InkWell(
                                             onTap: () {
-                                              if (cartItems[index]['quantity'] >
-                                                  1) {
-                                                SellDatabase().update(
-                                                    cartItems[index]['id'], {
-                                                  'quantity': cartItems[index]
-                                                          ['quantity'] -
-                                                      1
-                                                });
-                                                cartList();
-                                              }
+                                              provider.decrementQuantity(
+                                                  provider.cartItems[index]
+                                                      ['id'],
+                                                  provider.cartItems[index]
+                                                      ['quantity']);
                                             },
                                             child: Container(
                                               padding:
@@ -928,8 +720,9 @@ class CartState extends State<Cart> {
                                   ],
                                 ),
                                 Visibility(
-                                    visible: (editItem == index),
-                                    child: edit(cartItems[index])),
+                                    visible: (provider.editItem == index),
+                                    child: edit(
+                                        provider.cartItems[index], provider)),
                               ],
                             ),
                           ),
@@ -944,8 +737,7 @@ class CartState extends State<Cart> {
     );
   }
 
-  //edit cart item
-  Widget edit(index) {
+  Widget edit(index, CartProvider provider) {
     return Container(
       child: Column(
         children: <Widget>[
@@ -953,14 +745,14 @@ class CartState extends State<Cart> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              (canEditPrice)
+              (provider.canEditPrice)
                   ? SizedBox(
                       width: MySize.size160,
                       height: MySize.size50,
                       child: TextFormField(
                           initialValue: index['unit_price'].toStringAsFixed(2),
                           decoration: InputDecoration(
-                            prefix: Text(symbol),
+                            prefix: Text(provider.symbol),
                             labelText: AppLocalizations.of(context)
                                 .translate('unit_price'),
                             border: themeData.inputDecorationTheme.border,
@@ -983,17 +775,17 @@ class CartState extends State<Cart> {
                             double value = Helper().validateInput(newValue);
                             SellDatabase()
                                 .update(index['id'], {'unit_price': '$value'});
-                            cartList();
+                            provider.cartList();
                           }),
                     )
                   : Container(),
-              (canEditDiscount)
+              (provider.canEditDiscount)
                   ? Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: <Widget>[
                         Text(
                             '${AppLocalizations.of(context).translate('discount_type')} : '),
-                        inLineDiscount(index),
+                        inLineDiscount(index, provider),
                       ],
                     )
                   : Container(),
@@ -1002,14 +794,14 @@ class CartState extends State<Cart> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              (canEditDiscount)
+              (provider.canEditDiscount)
                   ? SizedBox(
                       width: MySize.size160,
                       height: MySize.size50,
                       child: TextFormField(
                           initialValue: index['discount_amount'].toString(),
                           decoration: InputDecoration(
-                            prefix: Text(symbol),
+                            prefix: Text(provider.symbol),
                             labelText: AppLocalizations.of(context)
                                 .translate('discount_amount'),
                             border: themeData.inputDecorationTheme.border,
@@ -1024,17 +816,15 @@ class CartState extends State<Cart> {
                               letterSpacing: -0.2),
                           textAlign: TextAlign.end,
                           inputFormatters: [
-                            // ignore: deprecated_member_use
-                            FilteringTextInputFormatter(
-                                RegExp(r'^(\d+)?\.?\d{0,2}'),
-                                allow: true)
+                            FilteringTextInputFormatter.allow(
+                                RegExp(r'^(\d+)?\.?\d{0,2}'))
                           ],
                           keyboardType: TextInputType.number,
                           onChanged: (newValue) {
                             double value = Helper().validateInput(newValue);
                             SellDatabase().update(
                                 index['id'], {'discount_amount': '$value'});
-                            cartList();
+                            provider.cartList();
                           }),
                     )
                   : Container(),
@@ -1042,12 +832,12 @@ class CartState extends State<Cart> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text('${AppLocalizations.of(context).translate('tax')} : '),
-                  inLineTax(index),
+                  inLineTax(index, provider),
                 ],
               ),
             ],
           ),
-          (canAddInLineServiceStaff)
+          (provider.canAddInLineServiceStaff)
               ? Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
@@ -1055,7 +845,7 @@ class CartState extends State<Cart> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text('Service staff' ' : '),
-                        inLineServiceStaff(index),
+                        inLineServiceStaff(index, provider),
                       ],
                     )
                   ],
@@ -1066,34 +856,7 @@ class CartState extends State<Cart> {
     );
   }
 
-  void setTaxMap() {
-    System().get('tax').then((value) {
-      value.forEach((element) {
-        taxListMap.add({
-          'id': element['id'],
-          'name': element['name'],
-          'amount': double.parse(element['amount'].toString())
-        });
-      });
-    });
-  }
-
-  void setServiceStaffMap() {
-    System().get('serviceStaff').then((value) {
-      if (value != null) {
-        value.forEach((element) {
-          serviceStaffListMap.add({
-            'id': element['id'],
-            'name':
-                "${element['surname'] ?? ""} ${element['first_name'] ?? ""} ${element['last_name'] ?? ""}"
-          });
-        });
-      }
-    });
-  }
-
-  //inLine service staff widget
-  Widget inLineServiceStaff(index) {
+  Widget inLineServiceStaff(index, CartProvider provider) {
     return DropdownButtonHideUnderline(
       child: DropdownButton(
           dropdownColor: themeData.colorScheme.surface,
@@ -1103,7 +866,8 @@ class CartState extends State<Cart> {
           value: (index['res_service_staff_id'] != null)
               ? index['res_service_staff_id']
               : 0,
-          items: serviceStaffListMap.map<DropdownMenuItem<int>>((Map value) {
+          items:
+              provider.serviceStaffListMap.map<DropdownMenuItem<int>>((Map value) {
             return DropdownMenuItem<int>(
                 value: value['id'],
                 child: Text(
@@ -1115,15 +879,12 @@ class CartState extends State<Cart> {
           onChanged: (newValue) {
             SellDatabase().update(index['id'],
                 {'res_service_staff_id': (newValue == 0) ? null : newValue});
-            cartList();
+            provider.cartList();
           }),
     );
   }
 
-  //inLine tax widget
-  Widget inLineTax(index) {
-    //['tax_rate_id'], index['variation_id']
-    //taxId, varId
+  Widget inLineTax(index, CartProvider provider) {
     return DropdownButtonHideUnderline(
       child: DropdownButton(
           dropdownColor: themeData.colorScheme.surface,
@@ -1131,7 +892,7 @@ class CartState extends State<Cart> {
             Icons.arrow_drop_down,
           ),
           value: (index['tax_rate_id'] != null) ? index['tax_rate_id'] : 0,
-          items: taxListMap.map<DropdownMenuItem<int>>((Map value) {
+          items: provider.taxListMap.map<DropdownMenuItem<int>>((Map value) {
             return DropdownMenuItem<int>(
                 value: value['id'],
                 child: Text(
@@ -1143,13 +904,12 @@ class CartState extends State<Cart> {
           onChanged: (newValue) {
             SellDatabase().update(index['id'],
                 {'tax_rate_id': (newValue == 0) ? null : newValue});
-            cartList();
+            provider.cartList();
           }),
     );
   }
 
-  //inLine discount widget
-  Widget inLineDiscount(index) {
+  Widget inLineDiscount(index, CartProvider provider) {
     return DropdownButtonHideUnderline(
       child: DropdownButton(
           dropdownColor: themeData.colorScheme.surface,
@@ -1166,20 +926,19 @@ class CartState extends State<Cart> {
           }).toList(),
           onChanged: (newValue) {
             SellDatabase().update(index['id'], {'discount_type': '$newValue'});
-            cartList();
+            provider.cartList();
           }),
     );
   }
 
-  //discount widget
-  Widget discount() {
+  Widget discount(CartProvider provider) {
     return DropdownButtonHideUnderline(
       child: DropdownButton(
           dropdownColor: themeData.colorScheme.surface,
           icon: Icon(
             Icons.arrow_drop_down,
           ),
-          value: selectedDiscountType,
+          value: provider.selectedDiscountType,
           items: <String>['fixed', 'percentage']
               .map<DropdownMenuItem<String>>((String value) {
             return DropdownMenuItem<String>(
@@ -1188,25 +947,20 @@ class CartState extends State<Cart> {
             );
           }).toList(),
           onChanged: (newValue) {
-            setState(() {
-              selectedDiscountType = newValue.toString();
-              calculateSubtotal(
-                  selectedTaxId, selectedDiscountType, discountAmount);
-            });
+            provider.setDiscountType(newValue.toString());
           }),
     );
   }
 
-  //dropdown tax widget
-  Widget taxes() {
+  Widget taxes(CartProvider provider) {
     return DropdownButtonHideUnderline(
       child: DropdownButton(
           dropdownColor: themeData.colorScheme.surface,
           icon: Icon(
             Icons.arrow_drop_down,
           ),
-          value: selectedTaxId,
-          items: taxListMap.map<DropdownMenuItem<int>>((Map value) {
+          value: provider.selectedTaxId,
+          items: provider.taxListMap.map<DropdownMenuItem<int>>((Map value) {
             return DropdownMenuItem<int>(
                 value: value['id'],
                 child: Text(
@@ -1216,23 +970,21 @@ class CartState extends State<Cart> {
                 ));
           }).toList(),
           onChanged: (newValue) {
-            setState(() {
-              selectedTaxId = int.parse(newValue.toString());
-            });
+            provider.setTax(int.parse(newValue.toString()));
           }),
     );
   }
 
-  //dropdown service staff widget
-  Widget serviceStaffs() {
+  Widget serviceStaffs(CartProvider provider) {
     return DropdownButtonHideUnderline(
       child: DropdownButton(
           dropdownColor: themeData.colorScheme.surface,
           icon: Icon(
             Icons.arrow_drop_down,
           ),
-          value: selectedServiceStaff,
-          items: serviceStaffListMap.map<DropdownMenuItem<int>>((Map value) {
+          value: provider.selectedServiceStaff,
+          items:
+              provider.serviceStaffListMap.map<DropdownMenuItem<int>>((Map value) {
             return DropdownMenuItem<int>(
                 value: value['id'],
                 child: Text(
@@ -1242,122 +994,8 @@ class CartState extends State<Cart> {
                 ));
           }).toList(),
           onChanged: (newValue) {
-            setState(() {
-              selectedServiceStaff = int.parse(newValue.toString());
-            });
+            provider.setServiceStaff(int.parse(newValue.toString()));
           }),
     );
-  }
-
-  //calculate inline total
-  String calculateInlineUnitPrice(price, taxId, discountType, discountAmount) {
-    double subTotal;
-    num taxAmount = 0;
-    for (var value in taxListMap) {
-      if (value['id'] == taxId) {
-        taxAmount = value['amount'] as num;
-      }
-    }
-    if (discountType == 'fixed') {
-      var unitPrice = price - discountAmount;
-      subTotal = unitPrice + (unitPrice * taxAmount / 100);
-    } else {
-      var unitPrice = price - (price * discountAmount / 100);
-      subTotal = unitPrice + (unitPrice * taxAmount / 100);
-    }
-    return subTotal.toString();
-  }
-
-  //calculate subTotal
-  double calculateSubTotal() {
-    var subTotal = 0.0;
-    for (var element in cartItems) {
-      subTotal += (double.parse(calculateInlineUnitPrice(
-              element['unit_price'],
-              element['tax_rate_id'],
-              element['discount_type'],
-              element['discount_amount'])) *
-          element['quantity']);
-    }
-    return subTotal;
-  }
-
-  //calculate total
-  double calculateSubtotal(taxId, discountType, discountAmount) {
-    double subTotal = calculateSubTotal();
-    double finalTotal;
-    num taxAmount = 0;
-    for (var value in taxListMap) {
-      if (value['id'] == taxId) {
-        taxAmount = value['amount'] as num;
-      }
-    }
-
-    if (discountType == 'fixed') {
-      var total = subTotal - discountAmount;
-      finalTotal = total + (total * taxAmount / 100);
-    } else {
-      var total = subTotal - (subTotal * discountAmount / 100);
-      finalTotal = total + (total * taxAmount / 100);
-    }
-    invoiceAmount = finalTotal;
-    return finalTotal;
-  }
-
-  //fetch default discount and tax from database
-  Future<void> getDefaultValues() async {
-    var businessDetails = await System().get('business');
-    await Helper().getFormattedBusinessDetails().then((value) {
-      symbol = "${value['symbol']} ";
-    });
-    var userDetails = await System().get('loggedInUser');
-    setState(() {
-      if (userDetails['max_sales_discount_percent'] != null)
-        maxDiscountValue =
-            double.parse(userDetails['max_sales_discount_percent']);
-    });
-    if (sellDetail == null && businessDetails[0]['default_sales_tax'] != null) {
-      setState(() {
-        selectedTaxId =
-            int.parse(businessDetails[0]['default_sales_tax'].toString());
-      });
-    }
-    if (sellDetail == null &&
-        businessDetails[0]['default_sales_discount'] != null) {
-      setState(() {
-        selectedDiscountType = 'percentage';
-        discountAmount =
-            double.parse(businessDetails[0]['default_sales_discount']);
-        discountController.text = discountAmount.toString();
-        if (maxDiscountValue != null && discountAmount! > maxDiscountValue!) {
-          Fluttertoast.showToast(
-              msg:
-                  "${AppLocalizations.of(context).translate('discount_error_message')} $maxDiscountValue");
-          proceedNext = false;
-        }
-      });
-    }
-  }
-
-  //Fetch permission from database
-  Future<void> getPermission() async {
-    canEditPrice =
-        await Helper().getPermission("edit_product_price_from_pos_screen");
-    canEditDiscount =
-        await Helper().getPermission("edit_product_discount_from_pos_screen");
-    await Helper().getFormattedBusinessDetails().then((value) {
-      List enabledModules = value['enabledModules'];
-      Map<String, dynamic> posSettings = value['posSettings'];
-      if (posSettings.isNotEmpty &&
-          posSettings.containsKey("inline_service_staff")) {
-        if (posSettings["inline_service_staff"].toString() == "1") {
-          canAddInLineServiceStaff = true;
-        }
-      }
-      if (enabledModules.isNotEmpty &&
-          enabledModules.contains('service_staff')) {
-        canAddServiceStaff = true;
-      }
-    });
   }
 }

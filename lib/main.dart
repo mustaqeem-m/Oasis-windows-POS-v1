@@ -62,6 +62,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart'; // <-- required for desktop
 
+import 'package:pos_2/providers/cart_provider.dart';
+
 import 'config.dart';
 import 'helpers/AppTheme.dart';
 import 'helpers/routes.dart';
@@ -99,6 +101,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider<AppLanguage>(create: (_) => appLanguage!),
         ChangeNotifierProvider<HomeProvider>(create: (_) => HomeProvider()),
+        ChangeNotifierProvider<CartProvider>(create: (_) => CartProvider()),
       ],
       child: Consumer<AppLanguage>(
         builder: (context, model, child) {

@@ -3,6 +3,7 @@ import '../pages/checkout.dart';
 import '../pages/contact_payment.dart';
 import '../pages/contacts.dart';
 import '../pages/customer.dart';
+import '../pages/customer_display.dart';
 import '../pages/expenses.dart';
 import '../pages/follow_up.dart';
 import '../pages/field_force.dart';
@@ -29,7 +30,8 @@ class Routes {
       '/shipment': (context) => Shipment(),
       '/leads': (context) => Contacts(),
       '/followUp': (context) => FollowUp(),
-      '/fieldForce': (context) => FieldForce()
+      '/fieldForce': (context) => FieldForce(),
+      '/customer-display': (context) => CustomerDisplayScreen()
     };
   }
 }

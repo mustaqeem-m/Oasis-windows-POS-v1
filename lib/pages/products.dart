@@ -702,7 +702,9 @@ class ProductsState extends State<Products> {
           ),
           Tooltip(
             message: 'Customer Display Screen',
-            child: _buildActionIconButton(Icons.fullscreen, () {}),
+            child: _buildActionIconButton(Icons.display_settings_rounded, () {
+              Navigator.pushNamed(context, '/customer-display');
+            }),
           ),
           const Spacer(),
 
