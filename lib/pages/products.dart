@@ -1,3 +1,7 @@
+import 'package:pos_2/components/sell_return_popup.dart';
+import 'package:pos_2/components/sell_return_popup.dart';
+import 'package:pos_2/components/sell_return_popup.dart';
+import 'package:pos_2/components/recent_transactions_dialog.dart';
 import 'package:pos_2/components/service_staff_popup.dart';
 import 'package:pos_2/components/add_expense_dialog.dart';
 import 'package:pos_2/models/expense_database.dart';
@@ -472,10 +476,12 @@ class ProductsState extends State<Products> {
   Future<CloseRegisterModel> _getCloseRegisterData() async {
     final registerDetails = await _getRegisterDetailsData();
     final expenses = await ExpenseDatabase().getExpenses();
-    final totalExpenses = expenses.fold<double>(0.0, (sum, item) => sum + item['amount']);
+    final totalExpenses =
+        expenses.fold<double>(0.0, (sum, item) => sum + item['amount']);
 
     return CloseRegisterModel(
-      registerPeriod: '${DateFormat('dd MMM, yyyy hh:mm a').format(registerDetails.startDate)} - ${DateFormat('dd MMM, yyyy hh:mm a').format(registerDetails.endDate)}',
+      registerPeriod:
+          '${DateFormat('dd MMM, yyyy hh:mm a').format(registerDetails.startDate)} - ${DateFormat('dd MMM, yyyy hh:mm a').format(registerDetails.endDate)}',
       paymentDetails: registerDetails.registerEntries
           .map((e) => PaymentDetail(
                 method: e.method,
@@ -489,8 +495,10 @@ class ProductsState extends State<Products> {
         payment: '₹ ${registerDetails.totalPayment.toStringAsFixed(2)}',
         creditSales: '₹ ${registerDetails.creditSales.toStringAsFixed(2)}',
         finalSales: '₹ ${registerDetails.finalSales.toStringAsFixed(2)}',
-        expenses: '₹ ${totalExpenses.toStringAsFixed(2)}', // Replace with actual expense data if available
-        cashCalculation: '₹ ${await RegisterDatabase().getOpeningBalance()} (opening) + ₹ ${registerDetails.finalSales.toStringAsFixed(2)} (Sale) - ₹ ${registerDetails.totalRefund.toStringAsFixed(2)} (Refund) - ₹ ${totalExpenses.toStringAsFixed(2)} (Expense) = ₹ ${(await RegisterDatabase().getOpeningBalance() + registerDetails.finalSales - registerDetails.totalRefund - totalExpenses).toStringAsFixed(2)}',
+        expenses:
+            '₹ ${totalExpenses.toStringAsFixed(2)}', // Replace with actual expense data if available
+        cashCalculation:
+            '₹ ${await RegisterDatabase().getOpeningBalance()} (opening) + ₹ ${registerDetails.finalSales.toStringAsFixed(2)} (Sale) - ₹ ${registerDetails.totalRefund.toStringAsFixed(2)} (Refund) - ₹ ${totalExpenses.toStringAsFixed(2)} (Expense) = ₹ ${(await RegisterDatabase().getOpeningBalance() + registerDetails.finalSales - registerDetails.totalRefund - totalExpenses).toStringAsFixed(2)}',
       ),
       soldProducts: registerDetails.soldProducts
           .map((p) => SoldProduct(
@@ -503,7 +511,8 @@ class ProductsState extends State<Products> {
       discounts: Discounts(
         discount: '₹ ${registerDetails.discount.toStringAsFixed(2)}',
         shipping: '₹ ${registerDetails.shipping.toStringAsFixed(2)}',
-        grandTotal: '₹ ${(registerDetails.finalSales + registerDetails.shipping).toStringAsFixed(2)}',
+        grandTotal:
+            '₹ ${(registerDetails.finalSales + registerDetails.shipping).toStringAsFixed(2)}',
       ),
       soldByBrand: registerDetails.brandSales
           .map((b) => BrandSale(
@@ -517,7 +526,8 @@ class ProductsState extends State<Products> {
         totalCash: '₹ ${registerDetails.totalPayment.toStringAsFixed(2)}',
         cardSlips: '1', // Replace with actual card slips data if available
         cheques: '0', // Replace with actual cheques data if available
-        denominationNote: 'Add denominations in Settings -> Business Settings -> POS -> Cash Denominations',
+        denominationNote:
+            'Add denominations in Settings -> Business Settings -> POS -> Cash Denominations',
       ),
       closingNote: ClosingNote(
         user: registerDetails.user,
@@ -566,7 +576,8 @@ class ProductsState extends State<Products> {
 
       final sellLines = await SellDatabase().getSellLines(sale['id']);
       for (var line in sellLines) {
-        final product = await Variations().getVariationById(line['variation_id']);
+        final product =
+            await Variations().getVariationById(line['variation_id']);
         soldProducts.add(register_details.SoldProduct(
           index: soldProducts.length + 1,
           sku: product['sub_sku'],
@@ -584,7 +595,8 @@ class ProductsState extends State<Products> {
             index: existingBrand.index,
             brand: existingBrand.brand,
             quantity: existingBrand.quantity + line['quantity'],
-            total: existingBrand.total + (line['unit_price'] * line['quantity']),
+            total:
+                existingBrand.total + (line['unit_price'] * line['quantity']),
           );
         } else {
           brandSales.add(register_details.BrandSales(
@@ -600,11 +612,11 @@ class ProductsState extends State<Products> {
     final totalPayment = totalSell - totalRefund;
     final finalSales = totalPayment - creditSales;
     final openingBalance = await RegisterDatabase().getOpeningBalance();
-    final computedTotal =
-        openingBalance + totalSell - totalRefund;
+    final computedTotal = openingBalance + totalSell - totalRefund;
 
-    final locationData = locationListMap
-        .firstWhere((loc) => loc['id'] == selectedLocationId, orElse: () => {'name': 'Unknown'});
+    final locationData = locationListMap.firstWhere(
+        (loc) => loc['id'] == selectedLocationId,
+        orElse: () => {'name': 'Unknown'});
 
     final token = await System().getToken();
     final userDetails = await User().get(token);
@@ -653,7 +665,8 @@ class ProductsState extends State<Products> {
           ),
           Tooltip(
             message: 'Close register',
-            child: _buildActionIconButton(Icons.close, _showCloseRegisterDialog, color: Colors.red),
+            child: _buildActionIconButton(Icons.close, _showCloseRegisterDialog,
+                color: Colors.red),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30.0),
@@ -670,14 +683,8 @@ class ProductsState extends State<Products> {
               _showCalculatorPopup(context);
             }),
           ),
-          Tooltip(
-            message: 'Sell return',
-            child: _buildActionIconButton(Icons.undo_outlined, () {}),
-          ),
-          Tooltip(
-            message: 'Minimize Window',
-            child: _buildActionIconButton(Icons.minimize, () {}),
-          ),
+          const SellReturnPopup(),
+
           Tooltip(
             message: 'View suspended sales',
             child: _buildActionIconButton(Icons.pause, () {}),
@@ -1566,20 +1573,16 @@ class ProductsState extends State<Products> {
             ),
           ),
           const SizedBox(width: 16),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              const Text('Total Payable:',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              Text(
-                '₹${_totalPayable.toStringAsFixed(2)}',
-                style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green),
-              ),
-            ],
+          ElevatedButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return RecentTransactionsDialog();
+                },
+              );
+            },
+            child: const Text('Recent Transactions'),
           ),
         ],
       ),

@@ -160,12 +160,27 @@ class SellDatabase {
   }
 
   //fetch current sales from database
-  Future<List> getSells({bool? all}) async {
+  Future<List> getSells({bool? all, String? status, int? limit}) async {
     final db = await dbProvider.database;
-    var response = (all == true)
-        ? await db.query('sell', orderBy: 'id DESC')
-        : await db.query('sell',
-            orderBy: 'id DESC', where: 'is_quotation = ?', whereArgs: [0]);
+
+    String query =
+        'SELECT S.*, C.name as customer_name FROM sell AS S LEFT JOIN contact AS C ON S.contact_id = C.id';
+    List<dynamic> whereArgs = [];
+
+    if (all != true) {
+      String statusToFilter = status ?? 'final';
+      query += ' WHERE S.status = ?';
+      whereArgs.add(statusToFilter);
+    }
+
+    query += ' ORDER BY S.id DESC';
+
+    if (limit != null) {
+      query += ' LIMIT ?';
+      whereArgs.add(limit);
+    }
+
+    var response = await db.rawQuery(query, whereArgs);
     return response;
   }
 

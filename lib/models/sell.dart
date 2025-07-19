@@ -279,6 +279,12 @@ class Sell {
     return await SellDatabase().getSellLinesByStatus(0);
   }
 
+  Future<List<Map<String, dynamic>>> getSells(
+      {int? limit, String? status}) async {
+    return (await SellDatabase().getSells(limit: limit, status: status))
+        .cast<Map<String, dynamic>>();
+  }
+
   //refresh sale
   Map<String, dynamic> createSellMap(Map sell, change, pending) {
     Map<String, dynamic> sale = {
