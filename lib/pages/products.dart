@@ -1,3 +1,8 @@
+import 'package:pos_2/apis/commission_agent.dart';
+import 'package:pos_2/apis/printer.dart';
+import 'package:pos_2/apis/service_staff.dart';
+import 'package:pos_2/apis/table.dart';
+import 'package:pos_2/apis/types_of_service.dart';
 import 'package:pos_2/components/discount_dialog.dart';
 import 'package:pos_2/providers/cart_provider.dart';
 import 'package:pos_2/components/sell_return_popup.dart';
@@ -51,7 +56,17 @@ class ProductsState extends State<Products> {
   List products = [];
   List<Map<String, dynamic>> cartLines = [];
   List<Map<String, dynamic>> _customers = [];
+  List<dynamic> _commissionAgents = [];
+  List<dynamic> _typesOfService = [];
+  List<dynamic> _tables = [];
+  List<dynamic> _serviceStaff = [];
+  List<dynamic> _printers = [];
   int? _selectedCustomerId;
+  int? _selectedCommissionAgentId;
+  int? _selectedTypesOfServiceId;
+  int? _selectedTableId;
+  int? _selectedServiceStaffId;
+  int? _selectedPrinterId;
   static int themeType = 1;
   late ThemeData themeData;
   bool _isLoading = true;
@@ -120,6 +135,11 @@ class ProductsState extends State<Products> {
     await subCategoryList(categoryId);
     await brandList();
     await _getCustomers();
+    await _getCommissionAgents();
+    await _getTypesOfService();
+    await _getTables();
+    await _getServiceStaff();
+    await _getPrinters();
     await Helper().syncCallLogs();
     await _getCartLines();
     if (mounted) {
@@ -145,6 +165,56 @@ class ProductsState extends State<Products> {
           homeProvider.updateSelectedCustomer(walkIn);
         }
       });
+    }
+  }
+
+  Future<void> _getCommissionAgents() async {
+    final agents = await CommissionAgentApi().get();
+    if (mounted) {
+      setState(() {
+        _commissionAgents = agents;
+      });
+    }
+  }
+
+  Future<void> _getTypesOfService() async {
+    final services = await TypesOfServiceApi().get();
+    if (mounted) {
+      setState(() {
+        _typesOfService = services;
+      });
+    }
+  }
+
+  Future<void> _getTables() async {
+    final tables = await TableApi().get();
+    if (mounted) {
+      setState(() {
+        _tables = tables;
+      });
+    }
+  }
+
+  Future<void> _getServiceStaff() async {
+    final staff = await ServiceStaffApi().get();
+    if (mounted) {
+      setState(() {
+        _serviceStaff = staff;
+      });
+    }
+  }
+
+  Future<void> _getPrinters() async {
+    final printers = await PrinterApi().get();
+    if (mounted) {
+      setState(() {
+        _printers = printers;
+        if (_printers.isNotEmpty) {
+          _selectedPrinterId = _printers.first['id'];
+        }
+      });
+      ToastHelper.show(
+          context, "Printers loaded: ${_printers.length}. Selected ID: $_selectedPrinterId");
     }
   }
 
@@ -914,12 +984,7 @@ class ProductsState extends State<Products> {
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: _buildDropdownField(
-                icon: MdiIcons.printerOutline,
-                label: 'Printer Type',
-                value: 'Thermal',
-                onTap: () {},
-              ),
+              child: _buildPrinterDropdown(),
             ),
           ],
         ),
@@ -928,23 +993,11 @@ class ProductsState extends State<Products> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
-              child: _buildDropdownField(
-                icon: MdiIcons.accountTieOutline,
-                label: 'Commission Agent',
-                value: 'Select Agent',
-                onTap: () {},
-              ),
+              child: _buildCommissionAgentDropdown(),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: _buildDropdownField(
-                icon: MdiIcons.roomServiceOutline,
-                label: 'Types of Service',
-                value: 'Select Service',
-                onTap: () {},
-                trailing: const Icon(Icons.info_outline,
-                    size: 18, color: Colors.grey),
-              ),
+              child: _buildTypesOfServiceDropdown(),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -962,21 +1015,11 @@ class ProductsState extends State<Products> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
-              child: _buildDropdownField(
-                icon: MdiIcons.tableFurniture,
-                label: 'Table',
-                value: 'Select Table',
-                onTap: () {},
-              ),
+              child: _buildTableDropdown(),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: _buildDropdownField(
-                icon: MdiIcons.accountHardHat,
-                label: 'Service Staff',
-                value: 'Select Staff',
-                onTap: () {},
-              ),
+              child: _buildServiceStaffDropdown(),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -1060,6 +1103,233 @@ class ProductsState extends State<Products> {
                   }
                 },
                 hint: const Text("Select Customer"),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrinterDropdown() {
+    return Container(
+      height: 58,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 3,
+            )
+          ]),
+      child: Row(
+        children: [
+          Icon(MdiIcons.printerOutline, color: Colors.grey[600]),
+          const SizedBox(width: 12),
+          Expanded(
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                dropdownColor: Colors.white,
+                isExpanded: true,
+                value: _selectedPrinterId,
+                items: _printers.map((printer) {
+                  return DropdownMenuItem<int>(
+                    value: printer['id'],
+                    child: Text(printer['name'] ?? 'Unknown'),
+                  );
+                }).toList(),
+                onChanged: _printers.isEmpty
+                    ? null
+                    : (value) {
+                        setState(() {
+                          _selectedPrinterId = value;
+                        });
+                      },
+                hint: const Text("Select Printer"),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCommissionAgentDropdown() {
+    return Container(
+      height: 58,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 3,
+            )
+          ]),
+      child: Row(
+        children: [
+          Icon(MdiIcons.accountTieOutline, color: Colors.grey[600]),
+          const SizedBox(width: 12),
+          Expanded(
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                dropdownColor: Colors.white,
+                isExpanded: true,
+                value: _selectedCommissionAgentId,
+                items: _commissionAgents.map((agent) {
+                  return DropdownMenuItem<int>(
+                    value: agent['id'],
+                    child: Text(agent['user_full_name'] ?? 'Unknown'),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedCommissionAgentId = value;
+                  });
+                },
+                hint: const Text("Select Commission Agent"),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTypesOfServiceDropdown() {
+    return Container(
+      height: 58,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 3,
+            )
+          ]),
+      child: Row(
+        children: [
+          Icon(MdiIcons.roomServiceOutline, color: Colors.grey[600]),
+          const SizedBox(width: 12),
+          Expanded(
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                dropdownColor: Colors.white,
+                isExpanded: true,
+                value: _selectedTypesOfServiceId,
+                items: _typesOfService.map((service) {
+                  return DropdownMenuItem<int>(
+                    value: service['id'],
+                    child: Text(service['name'] ?? 'Unknown'),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedTypesOfServiceId = value;
+                  });
+                },
+                hint: const Text("Select Service"),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTableDropdown() {
+    return Container(
+      height: 58,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 3,
+            )
+          ]),
+      child: Row(
+        children: [
+          Icon(MdiIcons.tableFurniture, color: Colors.grey[600]),
+          const SizedBox(width: 12),
+          Expanded(
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                dropdownColor: Colors.white,
+                isExpanded: true,
+                value: _selectedTableId,
+                items: _tables.map((table) {
+                  return DropdownMenuItem<int>(
+                    value: table['id'],
+                    child: Text(table['name'] ?? 'Unknown'),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedTableId = value;
+                  });
+                },
+                hint: const Text("Select Table"),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildServiceStaffDropdown() {
+    return Container(
+      height: 58,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 3,
+            )
+          ]),
+      child: Row(
+        children: [
+          Icon(MdiIcons.accountHardHat, color: Colors.grey[600]),
+          const SizedBox(width: 12),
+          Expanded(
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                dropdownColor: Colors.white,
+                isExpanded: true,
+                value: _selectedServiceStaffId,
+                items: _serviceStaff.map((staff) {
+                  return DropdownMenuItem<int>(
+                    value: staff['id'],
+                    child: Text(staff['user_full_name'] ?? 'Unknown'),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedServiceStaffId = value;
+                  });
+                },
+                hint: const Text("Select Staff"),
               ),
             ),
           ),
