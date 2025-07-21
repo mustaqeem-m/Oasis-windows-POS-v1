@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:pos_2/components/shipping_modal.dart';
 import 'package:pos_2/helpers/toast_helper.dart';
 
 import '../helpers/AppTheme.dart';
@@ -45,6 +46,7 @@ class CheckOutState extends State<CheckOut> {
       staffNote = new TextEditingController(),
       shippingDetails = new TextEditingController(),
       shippingCharges = new TextEditingController();
+  String? shippingAddress, shippingStatus, deliveredTo, deliveryPerson;
   bool _printInvoice = true,
       printWebInvoice = false,
       saleCreated = false,
@@ -425,56 +427,7 @@ class CheckOutState extends State<CheckOut> {
                       ),
                     ),
                   ),
-                  Row(
-                    children: [
-                      Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: <Widget>[
-                            Text(
-                                AppLocalizations.of(context)
-                                        .translate('shipping_charges') +
-                                    ' : ',
-                                style: AppTheme.getTextStyle(
-                                    themeData.textTheme.bodyLarge,
-                                    color: themeData.colorScheme.onSurface,
-                                    fontWeight: 600,
-                                    muted: true)),
-                            SizedBox(
-                                height: MySize.size40,
-                                width: MySize.safeWidth! * 0.5,
-                                child: TextFormField(
-                                    controller: shippingCharges,
-                                    decoration: InputDecoration(
-                                      prefix: Text(symbol),
-                                    ),
-                                    textAlign: TextAlign.end,
-                                    //input formatter will allow only 2 digits after decimal
-                                    inputFormatters: [
-                                      // ignore: deprecated_member_use
-                                      FilteringTextInputFormatter(
-                                          RegExp(r'^(\d+)?\.?\d{0,2}'),
-                                          allow: true)
-                                    ],
-                                    keyboardType: TextInputType.number,
-                                    onChanged: (value) {
-                                      invoiceAmount =
-                                          argument!['invoiceAmount'] +
-                                              Helper().validateInput(value);
-                                      calculateMultiPayment();
-                                    })),
-                            Padding(padding: EdgeInsets.symmetric(vertical: 5)),
-                            SizedBox(
-                              width: MySize.safeWidth! * 0.8,
-                              child: TextFormField(
-                                  controller: shippingDetails,
-                                  decoration: InputDecoration(
-                                      hintText: AppLocalizations.of(context)
-                                          .translate('shipping_details')),
-                                  onChanged: (value) async {}),
-                            ),
-                          ]),
-                    ],
-                  ),
+                  _buildShippingSection(),
                   Container(
                     child: GridView.count(
                         shrinkWrap: true,
@@ -1052,5 +1005,89 @@ class CheckOutState extends State<CheckOut> {
         return alert;
       },
     );
+  }
+
+  Widget _buildShippingSection() {
+    return Padding(
+      padding: EdgeInsets.all(MySize.size8!),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppLocalizations.of(context).translate('shipping'),
+                  style: AppTheme.getTextStyle(
+                    themeData.textTheme.titleMedium,
+                    fontWeight: 700,
+                  ),
+                ),
+                SizedBox(height: MySize.size8),
+                Text(
+                  "${AppLocalizations.of(context).translate('shipping_charges')}: ${shippingCharges.text}",
+                ),
+                Text(
+                  "${AppLocalizations.of(context).translate('shipping_details')}: ${shippingDetails.text}",
+                ),
+                if (shippingAddress != null && shippingAddress!.isNotEmpty)
+                  Text(
+                    "${AppLocalizations.of(context).translate('shipping_address')}: $shippingAddress",
+                  ),
+                if (shippingStatus != null && shippingStatus!.isNotEmpty)
+                  Text(
+                    "${AppLocalizations.of(context).translate('shipping_status')}: $shippingStatus",
+                  ),
+                if (deliveredTo != null && deliveredTo!.isNotEmpty)
+                  Text(
+                    "${AppLocalizations.of(context).translate('delivered_to')}: $deliveredTo",
+                  ),
+                if (deliveryPerson != null && deliveryPerson!.isNotEmpty)
+                  Text(
+                    "${AppLocalizations.of(context).translate('delivery_person')}: $deliveryPerson",
+                  ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.edit),
+            onPressed: _showShippingModal,
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showShippingModal() async {
+    final result = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return ShippingModal(
+          shippingDetails: shippingDetails.text,
+          shippingAddress: shippingAddress,
+          shippingCharges: shippingCharges.text,
+          shippingStatus: shippingStatus,
+          deliveredTo: deliveredTo,
+          deliveryPerson: deliveryPerson,
+        );
+      },
+    );
+
+    if (result != null) {
+      setState(() {
+        shippingDetails.text = result['shippingDetails'];
+        shippingAddress = result['shippingAddress'];
+        shippingCharges.text = result['shippingCharges'];
+        shippingStatus = result['shippingStatus'];
+        deliveredTo = result['deliveredTo'];
+        deliveryPerson = result['deliveryPerson'];
+
+        // Recalculate total amount
+        invoiceAmount = argument!['invoiceAmount'] +
+            (double.tryParse(shippingCharges.text) ?? 0.0);
+        calculateMultiPayment();
+      });
+    }
   }
 }

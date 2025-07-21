@@ -117,6 +117,8 @@
   "cannot_change_location": "Cannot change location",
   "shipping_charges": "Shipping charges",
   "shipping_details": "Shipping details",
+  "shipping_status": "Shipping Status",
+  "delivery_person": "Delivery Person",
   "refresh": "Refresh",
   "payment_successful": "Payment Successful",
   "contact_payment": "Customer payment",

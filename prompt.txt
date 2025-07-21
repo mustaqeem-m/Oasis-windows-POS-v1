@@ -1,28 +1,58 @@
-When the user selects a tax percentage from the Order Tax dropdown (e.g., GST@5%, GST@18%, etc.) and clicks the Update button, the following behavior must occur dynamically:
 
-✅ Expected Behavior:
-Calculate the Tax Amount:
+When the user clicks the edit (🖊) icon next to Shipping, display a modal titled "Shipping" with a structured form layout.
 
-Multiply the cart subtotal by the selected tax percentage.
+🧾 Modal Field Layout (Left to Right, Top to Bottom):
+🔸 Row 1 (Two Half-Width Textareas):
+Shipping Details* (Required)
 
-Example: If subtotal is ₹200.00 and tax is 5%, Order Tax = ₹10.00
+Multiline input box (left side, 50% width)
 
-Display Tax Amount:
+Shipping Address
 
-Immediately update the ₹0.00 label below "Order Tax (+)" in the cart summary section with the newly calculated tax amount (e.g., ₹10.00).
+Multiline input box (right side, 50% width)
 
-This value must be dynamically fetched and calculated — not hardcoded.
+🔸 Row 2:
+Shipping Charges* (Required)
 
-Update Total Payable:
+Numeric input field (left side, 50% width)
 
-Add the Order Tax amount to the Total Payable value at the bottom bar (green strip).
+Shipping Status
 
-Example: Total Payable = Subtotal + Tax → ₹200.00 + ₹10.00 = ₹210.00
+Dropdown (right side, 50% width)
 
-Reflect this update instantly in the bottom right corner UI (Total Payable: ₹210.00)
+Static options (predefined):
 
-DO NOT update the main "Total" on the right panel. Only Total Payable must include tax.
+Ordered
 
-⚠️ Bug:
-Currently, after clicking Update, the value below Order Tax remains ₹0.00 and Total Payable is not increasing — even though a valid tax was selected.
+Packed
 
+Shipped
+
+Delivered
+
+Cancelled
+
+🔸 Row 3:
+Delivered To
+
+Single-line text field (left side, 50% width)
+
+Delivery Person
+
+Dropdown (right side, 50% width)
+
+Dynamically fetch delivery personnel list from backend
+
+🔄 Behavior:
+On clicking Update, all input data must be saved and synced with the order.
+
+Shipping Charges (if non-zero) should reflect in the order summary but only affect the Total Payable, not the item total.
+
+Cancel closes the modal with no changes.
+
+🔍 UX/Size Notes:
+All text fields and dropdowns are aligned in a 2-column grid layout (50% width each).
+
+Textareas are larger and multiline for better detail entry.
+
+Delivery Person and Shipping Status are both dropdowns, sized to fit the column.

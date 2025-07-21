@@ -340,6 +340,19 @@ class Helper {
   //fetch formatted business details
   Future<Map<String, dynamic>> getFormattedBusinessDetails() async {
     List business = await System().get('business');
+    if (business.isEmpty) {
+      return {
+        'symbol': '₹',
+        'name': 'Business Name',
+        'logo': Config().defaultBusinessImage,
+        'currencyPrecision': Config.currencyPrecision,
+        'quantityPrecision': Config.quantityPrecision,
+        'taxLabel': '',
+        'taxNumber': '',
+        'enabledModules': [],
+        'posSettings': []
+      };
+    }
     String? symbol = '₹',
         name = business[0]['name'],
         logo = business[0]['logo'],
@@ -371,7 +384,8 @@ class Helper {
   Future<bool> getPermission(String permissionFor) async {
     bool permission = false;
     await System().getPermission().then((value) {
-      if (value[0] == 'all' || value.contains("$permissionFor")) {
+      if ((value.isNotEmpty && value[0] == 'all') ||
+          value.contains(permissionFor)) {
         permission = true;
       }
     });

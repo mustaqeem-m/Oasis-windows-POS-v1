@@ -8,6 +8,7 @@ import 'package:pos_2/models/expense_database.dart';
 import 'package:pos_2/components/open_register_dialog.dart';
 import 'package:pos_2/models/register_database.dart';
 import 'package:pos_2/components/close_register_dialog.dart';
+import 'package:pos_2/components/shipping_modal.dart';
 import 'package:pos_2/components/calculator_popup.dart';
 import 'package:pos_2/components/register_details/register_details_dialog.dart';
 import 'package:pos_2/models/contact_model.dart';
@@ -45,6 +46,7 @@ class Products extends StatefulWidget {
 }
 
 class ProductsState extends State<Products> {
+  double _shippingCharges = 0.0;
   final CartProvider _cartProvider = CartProvider();
   List products = [];
   List<Map<String, dynamic>> cartLines = [];
@@ -409,6 +411,24 @@ class ProductsState extends State<Products> {
         borderRadius: BorderRadius.circular(10),
       ),
     );
+  }
+
+  Future<void> _showShippingDialog() async {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (BuildContext context) {
+        return ShippingModal(
+          shippingCharges: _shippingCharges.toString(),
+        );
+      },
+    );
+
+    if (result != null && result['shippingCharges'] != null) {
+      setState(() {
+        _shippingCharges =
+            double.tryParse(result['shippingCharges'].toString()) ?? 0.0;
+      });
+    }
   }
 
   @override
@@ -992,6 +1012,12 @@ class ProductsState extends State<Products> {
   }
 
   Widget _buildCustomerDropdown() {
+    // Defensive check to prevent RangeError
+    if (_selectedCustomerId != null &&
+        !_customers.any((c) => c['id'] == _selectedCustomerId)) {
+      _selectedCustomerId = _customers.isNotEmpty ? _customers.first['id'] : null;
+    }
+
     return Container(
       height: 58,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -1275,9 +1301,9 @@ class ProductsState extends State<Products> {
               ),
               _buildChargeItem(
                 label: 'Shipping (+)',
-                value: '₹${0.0.toStringAsFixed(2)}',
+                value: '₹${_shippingCharges.toStringAsFixed(2)}',
                 onInfoTap: () {},
-                onEditTap: () {},
+                onEditTap: _showShippingDialog,
               ),
               _buildChargeItem(
                 label: 'Packing Charge (+)',
@@ -1856,6 +1882,7 @@ class ProductsState extends State<Products> {
     }
 
     total += orderTaxAmount;
+    total += _shippingCharges;
     return total;
   }
 
