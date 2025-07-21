@@ -504,6 +504,7 @@ class ProductsState extends State<Products> {
   @override
   Widget build(BuildContext context) {
     themeData = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return ChangeNotifierProvider.value(
       value: _cartProvider,
@@ -519,24 +520,17 @@ class ProductsState extends State<Products> {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            flex: 7, // Left panel for cart
-                            child: _buildLeftPanel(),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            flex: 3, // Right panel for products
-                            child: _buildRightPanel(),
-                          ),
-                        ],
-                      ),
+                      child: _buildLeftPanel(),
                     ),
                   ),
                 ],
               ),
+        endDrawer: SizedBox(
+          width: screenWidth * 0.4,
+          child: Drawer(
+            child: _buildRightPanel(),
+          ),
+        ),
         bottomNavigationBar: _buildStickyBottomBar(),
       ),
     );
@@ -771,6 +765,12 @@ class ProductsState extends State<Products> {
           const Spacer(),
 
           // Action Buttons
+          Tooltip(
+            message: 'Show Products',
+            child: _buildActionIconButton(Icons.grid_view, () {
+              _scaffoldKey.currentState!.openEndDrawer();
+            }),
+          ),
           Tooltip(
             message: 'Back',
             child: _buildActionIconButton(Icons.arrow_back, () {}),
@@ -1695,32 +1695,35 @@ class ProductsState extends State<Products> {
   }
 
   Widget _buildRightPanel() {
-    return Column(
-      children: [
-        _buildSearchAndFilterHeader(),
-        const SizedBox(height: 16),
-        Expanded(
-          child: (canViewProducts)
-              ? (selectedLocationId == 0)
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.location_on),
-                          Text(AppLocalizations.of(context)
-                              .translate('please_set_a_location')),
-                        ],
-                      ),
-                    )
-                  : _productsGrid()
-              : Center(
-                  child: Text(
-                    AppLocalizations.of(context).translate('unauthorised'),
-                    style: const TextStyle(color: Colors.black),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          _buildSearchAndFilterHeader(),
+          const SizedBox(height: 16),
+          Expanded(
+            child: (canViewProducts)
+                ? (selectedLocationId == 0)
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.location_on),
+                            Text(AppLocalizations.of(context)
+                                .translate('please_set_a_location')),
+                          ],
+                        ),
+                      )
+                    : _productsGrid()
+                : Center(
+                    child: Text(
+                      AppLocalizations.of(context).translate('unauthorised'),
+                      style: const TextStyle(color: Colors.black),
+                    ),
                   ),
-                ),
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 

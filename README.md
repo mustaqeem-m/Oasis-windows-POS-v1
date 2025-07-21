@@ -153,3 +153,132 @@ The main purpose of this screen is to allow users to input details about an expe
 - `ExpenseManagement`: A model class used to structure the expense data before sending it to the API.
 - `Helper` & `ToastHelper`: Utility classes for common functions like checking connectivity and displaying user-friendly messages (toasts).
 - `AppTheme`, `SizeConfig`, `MyLocalizations`: Helper classes for managing UI theme, screen size responsiveness, and internationalization (text translation).
+
+# BTS api call
+
+- our app is a person in a restaurant (let's call her Ada). The restaurant's kitchen is the Server, where all the data (the food) is stored.
+
+  Now, Ada can't just walk into the kitchen. She needs a Waiter to take her order to the kitchen and bring the food back.
+
+  In your app, the lib/apis/ directory is full of these "waiters". The most important one is lib/apis/api.dart, which is like the head waiter who knows the basic rules for talking to the kitchen.
+
+  Let's look at the code. First, I'll read the main "waiter" file, api.dart.Of course! Let's break down how the app fetches data, explaining it like you're 10.
+
+  Imagine your app is a person in a restaurant (let's call her Ada). The restaurant's kitchen is the Server, where all the data (the food) is stored.
+
+  Now, Ada can't just walk into the kitchen. She needs a Waiter to take her order to the kitchen and bring the food back.
+
+  In your app, the lib/apis/ directory is full of these "waiters". The most important one is lib/apis/api.dart, which is like the head waiter who knows the basic rules for talking to the kitchen.
+
+  Let's look at the code. First, I'll read the main "waiter" file, api.dart.
+  ╭─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+  │ ✔ ReadFile lib\apis\api.dart │
+  ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+  ✦ Excellent. I've read the "head waiter" file, lib/apis/api.dart.
+
+  This file does two main things:
+
+  1.  It knows the kitchen's address:
+
+  1 String apiUrl = Config.baseUrl + 'connector/api/';
+  This line builds the basic address for all API calls, like https://your-website.com/connector/api/.
+
+  2.  It knows how to talk to the kitchen staff (the server): The getHeader function prepares the "special language" (headers) needed for any request, especially the Authorization part, which is
+      like a secret password to prove you're allowed to ask for data.
+
+  1 getHeader(String? token) {
+  2 return {
+  3 'Content-Type': 'application/json',
+  4 'Accept': 'application/json',
+  5 'Authorization': 'Bearer $token'
+  6 };
+  7 }
+
+  Now, let's see how another, more specific "waiter" uses this. We'll look at lib/apis/user.dart to see how it fetches user details.
+  ╭─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+  │ ✔ ReadFile lib\apis\user.dart │
+  ╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+  ✦ Great! Now we have the second piece.
+
+  Here is the whole story of how the app gets data, from start to finish.
+
+  The Analogy:
+
+  - Your App: Ada, sitting at the table.
+  - The Server (Kitchen): Where the data (food) is made.
+  - lib/apis/api.dart: The Head Waiter. Knows the kitchen's address and the rules.
+  - lib/apis/user.dart: A Specialist Waiter. Only handles orders about users.
+
+  ***
+
+  The Step-by-Step Action
+
+  Let's say Ada (your app) wants to get the details of the currently logged-in user.
+
+  Step 1: Ada gives an order to the Specialist Waiter.
+
+  The app calls the get() function inside the user.dart file.
+
+  Step 2: The Specialist Waiter prepares the order.
+
+  This waiter already knows the kitchen's main address from the Head Waiter (.../connector/api/). It just adds its specific request: user/loggedin.
+
+  Look at this code from lib/apis/user.dart:
+
+        1 class User extends Api { // "extends Api" means it learns from the Head Waiter
+        2   Future<Map> get(String? token) async {
+        3     // 1. It builds the full address for the kitchen
+        4     String url = "${apiUrl}user/loggedin";
+        5
+        6     // 2. It gets the secret password from the Head Waiter (getHeader)
+        7     //    and sends the final order to the kitchen.
+        8     var response = await http.get(Uri.parse(url), headers: getHeader(token));
+        9
+
+  10 // 3. It gets the food (data) and puts it on a plate the app can understand.
+  11 var userDetails = jsonDecode(response.body);
+  12 Map userDetailsMap = userDetails['data'];
+  13 return userDetailsMap;
+  14 }
+  15 }
+
+  The Flow is:
+
+  1.  A screen in your app says, "I need the user's details!"
+  2.  It calls the get() method in the User class.
+  3.  The get() method builds the full URL: https://your-website.com/connector/api/user/loggedin.
+  4.  It calls getHeader() to get the required Authorization token (the secret password).
+  5.  It uses http.get() to send the request to the server.
+  6.  The server sends back the user's data.
+  7.  jsonDecode converts the data from a plain string into a Map that Dart can use.
+  8.  The app gets the data and can now display the user's name, email, etc.
+
+  So, api.dart provides the basic tools (the URL and headers), and other files like user.dart, sell.dart, etc., use those tools to make specific requests for different types of data.
+
+  Yes, that's exactly right! You've got the main idea perfectly.
+
+  Think of it like this:
+
+  - api.dart is the Head Waiter. It knows the restaurant's address and the basic rules for talking to the kitchen.
+
+  - attendance.dart, commission_agent.dart, contact.dart, printer.dart, and all the others in the lib/apis/ folder are Specialist Waiters.
+
+  Each specialist waiter learns the basic rules from the Head Waiter and then adds their own specific knowledge.
+
+  - The Attendance Waiter knows how to ask the kitchen for attendance records.
+  - The Commission Waiter knows how to ask for commission agent data.
+  - The Contact Waiter knows how to ask for customer information.
+
+  They all extend Api, which is the code equivalent of "learning from the Head Waiter."
+
+  Let's quickly peek at one more file, attendance.dart, to prove it.
+  ╭───────────────────────────────────────╮
+  │ ✔ ReadFile lib\apis\attendance.dart │
+  ╰───────────────────────────────────────╯
+  ✦ See? Right at the top:
+
+  1 class AttendanceApi extends Api {
+
+  It does the exact same thing we saw in user.dart. It extends Api so it can use this.apiUrl and this.getHeader() without having to define them again.
+
+  This is a very smart and common way to write code. It keeps everything organized and avoids repeating the same code over and over.
