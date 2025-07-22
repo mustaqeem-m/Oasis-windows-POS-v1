@@ -97,28 +97,30 @@ class Sell {
         } else {
           var sell = jsonEncode({'sells': sale});
           var result = await SellApi().create(sell);
-          await SellDatabase().updateSells(element['id'], {
-            'is_synced': 1,
-            'transaction_id': result['transaction_id'],
-            'invoice_url': result['invoice_url']
-          });
-          if (result['payment_lines'] != null) {
-            //delete existing paymentLines with reference to sellId
-            await PaymentDatabase().delete(element['id']);
-            //update paymentId and isReturn for each sellPayment
-            result['payment_lines'].forEach((paymentLine) async {
-              await PaymentDatabase().store({
-                'sell_id': element['id'],
-                'method': paymentLine['method'],
-                'amount': paymentLine['amount'],
-                'note': paymentLine['note'],
-                'payment_id': paymentLine['id'],
-                'is_return': paymentLine['is_return'],
-                'account_id': paymentLine['account_id']
-              });
+          if (result.isNotEmpty) {
+            await SellDatabase().updateSells(element['id'], {
+              'is_synced': 1,
+              'transaction_id': result['transaction_id'],
+              'invoice_url': result['invoice_url']
             });
+            if (result['payment_lines'] != null) {
+              //delete existing paymentLines with reference to sellId
+              await PaymentDatabase().delete(element['id']);
+              //update paymentId and isReturn for each sellPayment
+              result['payment_lines'].forEach((paymentLine) async {
+                await PaymentDatabase().store({
+                  'sell_id': element['id'],
+                  'method': paymentLine['method'],
+                  'amount': paymentLine['amount'],
+                  'note': paymentLine['note'],
+                  'payment_id': paymentLine['id'],
+                  'is_return': paymentLine['is_return'],
+                  'account_id': paymentLine['account_id']
+                });
+              });
+            }
           }
-                }
+        }
       }
     });
     return true;
