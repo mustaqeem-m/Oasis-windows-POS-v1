@@ -115,18 +115,9 @@ class _HomeState extends State<Home> {
                   onPressed: () async {
                     SharedPreferences prefs =
                         await SharedPreferences.getInstance();
-                    await SellDatabase().getNotSyncedSells().then((value) {
-                      if (value.isEmpty) {
-                        prefs.setInt('prevUserId', USERID!);
-                        prefs.remove('userId');
-                        Navigator.pushReplacementNamed(context, '/login');
-                      } else {
-                        ToastHelper.show(
-                            context,
-                            AppLocalizations.of(context)
-                                .translate('sync_all_sales_before_logout'));
-                      }
-                    });
+                    prefs.setInt('prevUserId', USERID!);
+                    prefs.remove('userId');
+                    Navigator.pushReplacementNamed(context, '/login');
                   },
                   child: Text(
                     AppLocalizations.of(context).translate('logout'),

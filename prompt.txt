@@ -1,11 +1,9 @@
-> when i clickon dropdown in cehckout page it shows exception like     
+when i click on logout 
 
- Exception has occurred.
-_AssertionError ('package:flutter/src/material/dropdown.dart': Failed assertion: line 1003 pos 10: 'items == null ||
-             items.isEmpty ||
-             value == null ||
-             items.where((DropdownMenuItem<T> item) {
-                   return item.value == value;
-                 }).length ==
-                 1': There should be exactly one item with [DropdownButton]'s value: cash. 
-Either zero or 2 or more [DropdownMenuItem]s were detected with the same value)
+in product.dart line 117 setState(() {});
+
+Exception has occurred.
+FlutterError (setState() called after dispose(): ProductsState#78b28(lifecycle state: defunct, not mounted)
+This error happens if you call setState() on a State object for a widget that no longer appears in the widget tree (e.g., whose parent widget no longer includes the widget in its build). This error can occur when code calls setState() from a timer or an animation callback.
+The preferred solution is to cancel the timer or stop listening to the animation in the dispose() callback. Another solution is to check the "mounted" property of this object before calling setState() to ensure the object is still in the tree.
+This error might indicate a memory leak if setState() is being called because another object is retaining a reference to this State object after it has been removed from the tree. To avoid memory leaks, consider breaking the reference to this object during dispose().)

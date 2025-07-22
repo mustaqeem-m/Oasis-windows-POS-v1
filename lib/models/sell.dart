@@ -21,9 +21,8 @@ class Sell {
           'contact_id': element['contact_id'],
           'transaction_date': element['transaction_date'],
           'invoice_no': element['invoice_no'],
-          'status': (element['is_quotation'].toString() == '1') ? 'draft' : element['status'],
-          'sub_status':
-              (element['is_quotation'].toString() == '1') ? 'quotation' : null,
+          'status': element['status'],
+          'is_quotation': element['is_quotation'],
           'tax_rate_id':
               (element['tax_rate_id'] == 0) ? null : element['tax_rate_id'],
           'res_waiter_id':

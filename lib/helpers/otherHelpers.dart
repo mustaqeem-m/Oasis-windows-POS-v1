@@ -275,7 +275,7 @@ class Helper {
   //share invoice
   // savePdf(sellId, taxId, context, invoiceNo, {invoice}) async {
   //   String _invoice = (invoice != null)
-  //       ? invoice
+  //       ?  invoice
   //       : await InvoiceFormatter().generateInvoice(sellId, taxId, context);
 
   //   final pdf = pw.Document();
