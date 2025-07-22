@@ -260,7 +260,7 @@ class Helper {
   //share invoice
   // savePdf(sellId, taxId, context, invoiceNo, {invoice}) async {
   //   String _invoice = (invoice != null)
-  //       ? invoice
+  // ? invoice
   //       : await InvoiceFormatter().generateInvoice(sellId, taxId, context);
   //   var targetPath = await getTemporaryDirectory();
   //   var targetFileName = "invoice_no: ${Random().nextInt(100)}";
@@ -272,9 +272,7 @@ class Helper {
   //   //to get file path use generatedPdfFile.path
   // }
 
-  
-
-    //share invoice
+  //share invoice
   // savePdf(sellId, taxId, context, invoiceNo, {invoice}) async {
   //   String _invoice = (invoice != null)
   //       ? invoice
@@ -311,31 +309,30 @@ class Helper {
   // }
 
   Future<String> savePdf(sellId, taxId, context, invoiceNo, {invoice}) async {
-  // Step 1: Generate invoice HTML if not provided
-  String _invoice = (invoice != null)
-      ? invoice
-      : await InvoiceFormatter().generateInvoice(sellId, taxId, context);
+    // Step 1: Generate invoice HTML if not provided
+    String _invoice = (invoice != null)
+        ? invoice
+        : await InvoiceFormatter().generateInvoice(sellId, taxId, context);
 
-  // Step 2: Convert HTML to PDF bytes (forced to A4 size)
-  final pdfBytes = await Printing.convertHtml(
-    format: PdfPageFormat.a4,
-    html: _invoice,
-  );
+    // Step 2: Convert HTML to PDF bytes (forced to A4 size)
+    final pdfBytes = await Printing.convertHtml(
+      format: PdfPageFormat.a4,
+      html: _invoice,
+    );
 
-  // Step 3: Get system's temporary directory
-  final dir = await getTemporaryDirectory();
+    // Step 3: Get system's temporary directory
+    final dir = await getTemporaryDirectory();
 
-  // Step 4: Define file path and create file
-  final filePath = '${dir.path}/Invoice_$invoiceNo.pdf';
-  final file = File(filePath);
+    // Step 4: Define file path and create file
+    final filePath = '${dir.path}/Invoice_$invoiceNo.pdf';
+    final file = File(filePath);
 
-  // Step 5: Save the bytes to the file
-  await file.writeAsBytes(pdfBytes);
+    // Step 5: Save the bytes to the file
+    await file.writeAsBytes(pdfBytes);
 
-  // Step 6: Return file path (useful for sharing/opening later)
-  return filePath;
-}
-
+    // Step 6: Return file path (useful for sharing/opening later)
+    return filePath;
+  }
 
   //fetch formatted business details
   Future<Map<String, dynamic>> getFormattedBusinessDetails() async {

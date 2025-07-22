@@ -878,19 +878,15 @@ class CheckOutState extends State<CheckOut> {
                 .printDocument(sellId, argument!['taxId'], context,
                     invoice: response.body)
                 .then((value) {
-              Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  (argument!['sellId'] == null) ? '/products' : '/sale',
-                  ModalRoute.withName('/home'));
+              Navigator.popUntil(
+                  context, ModalRoute.withName('/home'));
             });
           } else {
             await Helper()
                 .printDocument(sellId, argument!['taxId'], context)
                 .then((value) {
-              Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  (argument!['sellId'] == null) ? '/products' : '/sale',
-                  ModalRoute.withName('/home'));
+              Navigator.popUntil(
+                  context, ModalRoute.withName('/home'));
             });
           }
         } else {
@@ -911,19 +907,15 @@ class CheckOutState extends State<CheckOut> {
                 .savePdf(sellId, argument!['taxId'], context, invoiceNo,
                     invoice: response.body)
                 .then((value) {
-              Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  (argument!['sellId'] == null) ? '/products' : '/sale',
-                  ModalRoute.withName('/home'));
+              Navigator.popUntil(
+                  context, ModalRoute.withName('/home'));
             });
           } else {
             await Helper()
                 .savePdf(sellId, argument!['taxId'], context, invoiceNo)
                 .then((value) {
-              Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  (argument!['sellId'] == null) ? '/products' : '/sale',
-                  ModalRoute.withName('/home'));
+              Navigator.popUntil(
+                  context, ModalRoute.withName('/home'));
             });
           }
         } else {

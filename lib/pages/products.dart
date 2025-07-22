@@ -213,8 +213,8 @@ class ProductsState extends State<Products> {
           _selectedPrinterId = _printers.first['id'];
         }
       });
-      ToastHelper.show(
-          context, "Printers loaded: ${_printers.length}. Selected ID: $_selectedPrinterId");
+      // ToastHelper.show(
+      //     context, "Printers loaded: ${_printers.length}. Selected ID: $_selectedPrinterId");
     }
   }
 
@@ -1058,7 +1058,8 @@ class ProductsState extends State<Products> {
     // Defensive check to prevent RangeError
     if (_selectedCustomerId != null &&
         !_customers.any((c) => c['id'] == _selectedCustomerId)) {
-      _selectedCustomerId = _customers.isNotEmpty ? _customers.first['id'] : null;
+      _selectedCustomerId =
+          _customers.isNotEmpty ? _customers.first['id'] : null;
     }
 
     return Container(
@@ -1563,7 +1564,8 @@ class ProductsState extends State<Products> {
               ),
               _buildChargeItem(
                 label: 'Order Tax (+)',
-                value: '₹${_cartProvider.orderTaxAmount?.toStringAsFixed(2) ?? '0.00'}',
+                value:
+                    '₹${_cartProvider.orderTaxAmount?.toStringAsFixed(2) ?? '0.00'}',
                 onInfoTap: () {},
                 onEditTap: () {
                   _showEditTaxDialog();
@@ -2250,6 +2252,7 @@ class ProductsState extends State<Products> {
       Provider.of<HomeProvider>(context, listen: false).resetCustomer();
     }
   }
+
   void _showEditTaxDialog() {
     showDialog(
         context: context,
@@ -2262,7 +2265,8 @@ class ProductsState extends State<Products> {
                 DropdownButtonFormField<int>(
                   dropdownColor: Colors.white,
                   value: _cartProvider.selectedTaxId,
-                  items: _cartProvider.taxListMap.map<DropdownMenuItem<int>>((Map value) {
+                  items: _cartProvider.taxListMap
+                      .map<DropdownMenuItem<int>>((Map value) {
                     return DropdownMenuItem<int>(
                       value: value['id'],
                       child: Text(value['name']),
