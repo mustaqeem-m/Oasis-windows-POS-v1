@@ -786,7 +786,7 @@ class CheckOutState extends State<CheckOut> {
         staffNote: staffNote.text,
         taxId: argument!['taxId'],
         serviceStaffId: argument!['serviceStaff'],
-        isQuotation: 0);
+                isQuotation: argument!['is_quotation'] ?? 0);
 
     var response;
     if (sellId != null) {

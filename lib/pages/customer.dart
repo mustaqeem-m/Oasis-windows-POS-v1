@@ -171,7 +171,8 @@ class _CustomerState extends State<Customer> {
                           (argument?['invoiceAmount'] as num? ?? 0).toDouble(),
                       customerId: selectedCustomer['id'],
                       serviceStaff: argument?['serviceStaff'] ?? 0,
-                      sellId: argument?['sellId'])),
+                      sellId: argument?['sellId'],
+                      isQuotation: argument!['is_quotation'])),
             ],
           ),
         ));

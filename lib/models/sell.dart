@@ -21,7 +21,7 @@ class Sell {
           'contact_id': element['contact_id'],
           'transaction_date': element['transaction_date'],
           'invoice_no': element['invoice_no'],
-          'status': element['status'],
+          'status': (element['is_quotation'].toString() == '1') ? 'draft' : element['status'],
           'sub_status':
               (element['is_quotation'].toString() == '1') ? 'quotation' : null,
           'tax_rate_id':
@@ -249,7 +249,8 @@ class Sell {
       'note': '',
       'is_completed': 0,
       'res_service_staff_id': null,
-      'product_image_url': product['product_image_url']
+      'product_image_url': product['product_image_url'],
+      'stock_available': product['stock_available']
     };
 
     //check if item is added to cart/not
