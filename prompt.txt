@@ -1,58 +1,11 @@
+> when i clickon dropdown in cehckout page it shows exception like     
 
-When the user clicks the edit (🖊) icon next to Shipping, display a modal titled "Shipping" with a structured form layout.
-
-🧾 Modal Field Layout (Left to Right, Top to Bottom):
-🔸 Row 1 (Two Half-Width Textareas):
-Shipping Details* (Required)
-
-Multiline input box (left side, 50% width)
-
-Shipping Address
-
-Multiline input box (right side, 50% width)
-
-🔸 Row 2:
-Shipping Charges* (Required)
-
-Numeric input field (left side, 50% width)
-
-Shipping Status
-
-Dropdown (right side, 50% width)
-
-Static options (predefined):
-
-Ordered
-
-Packed
-
-Shipped
-
-Delivered
-
-Cancelled
-
-🔸 Row 3:
-Delivered To
-
-Single-line text field (left side, 50% width)
-
-Delivery Person
-
-Dropdown (right side, 50% width)
-
-Dynamically fetch delivery personnel list from backend
-
-🔄 Behavior:
-On clicking Update, all input data must be saved and synced with the order.
-
-Shipping Charges (if non-zero) should reflect in the order summary but only affect the Total Payable, not the item total.
-
-Cancel closes the modal with no changes.
-
-🔍 UX/Size Notes:
-All text fields and dropdowns are aligned in a 2-column grid layout (50% width each).
-
-Textareas are larger and multiline for better detail entry.
-
-Delivery Person and Shipping Status are both dropdowns, sized to fit the column.
+ Exception has occurred.
+_AssertionError ('package:flutter/src/material/dropdown.dart': Failed assertion: line 1003 pos 10: 'items == null ||
+             items.isEmpty ||
+             value == null ||
+             items.where((DropdownMenuItem<T> item) {
+                   return item.value == value;
+                 }).length ==
+                 1': There should be exactly one item with [DropdownButton]'s value: cash. 
+Either zero or 2 or more [DropdownMenuItem]s were detected with the same value)
