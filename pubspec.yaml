@@ -105,7 +105,7 @@ dependencies:
   printing: ^5.11.0
   provider: any
   qr: any
-  search_choices: any
+  dropdown_search: ^5.0.6
   # share: any
   share_plus: ^7.2.1
   shared_preferences: any

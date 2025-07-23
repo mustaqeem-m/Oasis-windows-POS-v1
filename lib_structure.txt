@@ -1,0 +1,114 @@
+Folder PATH listing for volume Windows
+Volume serial number is 0A08-123B
+C:\USERS\ADMIN\DOCUMENTS\MUSTAQEEM_GIT\OASIS_WINDOWS_POS_V1\LIB
+¦   config.dart
+¦   main.dart
+¦   
++---apis
+¦       api.dart
+¦       attendance.dart
+¦       commission_agent.dart
+¦       contact.dart
+¦       contact_payment.dart
+¦       expenses.dart
+¦       field_force.dart
+¦       follow_up.dart
+¦       printer.dart
+¦       sell.dart
+¦       service_staff.dart
+¦       shipment.dart
+¦       system.dart
+¦       table.dart
+¦       tax.dart
+¦       types_of_service.dart
+¦       user.dart
+¦       variations.dart
+¦       
++---components
+¦   ¦   add_expense_dialog.dart
+¦   ¦   barcode_scanner.dart
+¦   ¦   calculator_popup.dart
+¦   ¦   close_register_dialog.dart
+¦   ¦   discount_dialog.dart
+¦   ¦   open_register_dialog.dart
+¦   ¦   recent_transactions_dialog.dart
+¦   ¦   sell_return_popup.dart
+¦   ¦   service_staff_popup.dart
+¦   ¦   shipping_modal.dart
+¦   ¦   
+¦   +---expenses
+¦   ¦       card_header.dart
+¦   ¦       expense_details_card.dart
+¦   ¦       location_and_tax_section.dart
+¦   ¦       payment_card.dart
+¦   ¦       submit_button.dart
+¦   ¦       
+¦   +---home
+¦   ¦       check_io.dart
+¦   ¦       home_drawer.dart
+¦   ¦       payment_details.dart
+¦   ¦       statistics.dart
+¦   ¦       suspended_sales_modal.dart
+¦   ¦       
+¦   +---register_details
+¦           register_details_dialog.dart
+¦           
++---helpers
+¦       AppTheme.dart
+¦       AppThemeNotifier.dart
+¦       generators.dart
+¦       otherHelpers.dart
+¦       routes.dart
+¦       SizeConfig.dart
+¦       style.dart
+¦       toast_helper.dart
+¦       
++---locale
+¦       MyLocalizations.dart
+¦       
++---models
+¦       attendance.dart
+¦       call_log.dart
+¦       close_register_model.dart
+¦       contact_model.dart
+¦       database.dart
+¦       expenses.dart
+¦       expense_database.dart
+¦       field_force.dart
+¦       invoice.dart
+¦       paymentDatabase.dart
+¦       product_model.dart
+¦       qr.dart
+¦       register_database.dart
+¦       register_details_models.dart
+¦       register_entry.dart
+¦       sell.dart
+¦       sellDatabase.dart
+¦       shipment.dart
+¦       system.dart
+¦       variations.dart
+¦       
++---pages
+¦       add_visit.dart
+¦       cart.dart
+¦       checkout.dart
+¦       contacts.dart
+¦       contact_payment.dart
+¦       customer.dart
+¦       customer_display.dart
+¦       elements.dart
+¦       expenses.dart
+¦       field_force.dart
+¦       follow_up.dart
+¦       forms.dart
+¦       home.dart
+¦       login.dart
+¦       products.dart
+¦       sales.dart
+¦       shipment.dart
+¦       splash.dart
+¦       
++---providers
+        cart_provider.dart
+        home_provider.dart
+        

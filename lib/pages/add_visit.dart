@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pos_2/helpers/toast_helper.dart';
-import 'package:search_choices/search_choices.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 
 import '../apis/field_force.dart';
 import '../config.dart';
@@ -136,7 +136,8 @@ class _NewVisitFormState extends State<NewVisitForm> {
                                   style: AppTheme.getTextStyle(
                                     themeData.textTheme.titleMedium,
                                     fontWeight: 600,
-                                    color: themeData.colorScheme.primaryContainer,
+                                    color:
+                                        themeData.colorScheme.primaryContainer,
                                   ),
                                 ),
                                 Padding(
@@ -179,7 +180,8 @@ class _NewVisitFormState extends State<NewVisitForm> {
                                   style: AppTheme.getTextStyle(
                                     themeData.textTheme.titleMedium,
                                     fontWeight: 600,
-                                    color: themeData.colorScheme.primaryContainer,
+                                    color:
+                                        themeData.colorScheme.primaryContainer,
                                   ),
                                 ),
                                 Padding(
@@ -323,7 +325,10 @@ class _NewVisitFormState extends State<NewVisitForm> {
                               // Fluttertoast.showToast(
                               //     msg: AppLocalizations.of(context)
                               //         .translate('please_set_contact'));
-                              ToastHelper.show(context, AppLocalizations.of(context).translate('please_set_contact'));
+                              ToastHelper.show(
+                                  context,
+                                  AppLocalizations.of(context)
+                                      .translate('please_set_contact'));
                             }
 
                             if (await Helper().checkConnectivity()) {
@@ -351,7 +356,10 @@ class _NewVisitFormState extends State<NewVisitForm> {
                                     // Fluttertoast.showToast(
                                     //     msg: AppLocalizations.of(context)
                                     //         .translate('status_updated'));
-                                    ToastHelper.show(context, AppLocalizations.of(context).translate('status_updated'));
+                                    ToastHelper.show(
+                                        context,
+                                        AppLocalizations.of(context)
+                                            .translate('status_updated'));
                                   }
                                   Navigator.pop(context);
                                 });
@@ -376,35 +384,22 @@ class _NewVisitFormState extends State<NewVisitForm> {
 
   //dropdown widget for selecting customer
   Widget customerList() {
-    return SearchChoices.single(
-      underline: Visibility(
-        child: Container(),
-        visible: false,
-      ),
-      displayClearIcon: false,
-      value: jsonEncode(selectedCustomer),
-      items: customerListMap.map<DropdownMenuItem<String>>((Map value) {
-        return DropdownMenuItem<String>(
-            value: jsonEncode(value),
-            child: Container(
-              width: MySize.screenWidth! * 0.8,
-              child: Text("${value['name']} (${value['mobile'] ?? ' - '})",
-                  softWrap: true,
-                  maxLines: 5,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTheme.getTextStyle(themeData.textTheme.bodyMedium,
-                      color: themeData.colorScheme.onSurface)),
-            ));
+    return DropdownSearch<String>(
+      // mode: Mode.MENU,
+      // showSelectedItems: true,
+      items: customerListMap.map<String>((Map value) {
+        return jsonEncode(value);
       }).toList(),
-      // value: customerListMap[0],
-      iconEnabledColor: Colors.blue,
-      iconDisabledColor: Colors.black,
+      itemAsString: (String? item) {
+        Map<String, dynamic> decodedItem = jsonDecode(item!);
+        return "${decodedItem['name']} (${decodedItem['mobile'] ?? ' - '})";
+      },
       onChanged: (value) async {
         setState(() {
-          selectedCustomer = jsonDecode(value);
+          selectedCustomer = jsonDecode(value!);
         });
       },
-      isExpanded: true,
+      selectedItem: jsonEncode(selectedCustomer),
     );
   }
 

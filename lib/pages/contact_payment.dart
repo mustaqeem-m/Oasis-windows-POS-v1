@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:pos_2/helpers/toast_helper.dart';
-import 'package:search_choices/search_choices.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 
 import '../apis/contact_payment.dart';
 import '../helpers/AppTheme.dart';
@@ -217,20 +217,22 @@ class _ContactPaymentState extends State<ContactPayment> {
             // Fluttertoast.showToast(
             //     msg: AppLocalizations.of(context)
             //         .translate('payment_successful'));
-            ToastHelper.show(context, AppLocalizations.of(context).translate('payment_successful'));
+            ToastHelper.show(context,
+                AppLocalizations.of(context).translate('payment_successful'));
           });
         } else {
           // Fluttertoast.showToast(
           //     msg: AppLocalizations.of(context)
           //         .translate('error_invalid_location'));
-                  ToastHelper.show(context, AppLocalizations.of(context).translate('error_invalid_location'));
+          ToastHelper.show(context,
+              AppLocalizations.of(context).translate('error_invalid_location'));
         }
       }
     } else {
       // Fluttertoast.showToast(
       //     msg: AppLocalizations.of(context).translate('check_connectivity'));
-      ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
-
+      ToastHelper.show(context,
+          AppLocalizations.of(context).translate('check_connectivity'));
     }
   }
 
@@ -243,33 +245,19 @@ class _ContactPaymentState extends State<ContactPayment> {
           style: AppTheme.getTextStyle(themeData.textTheme.titleLarge,
               fontWeight: 700, letterSpacing: -0.2),
         ),
-        SearchChoices.single(
-          underline: Visibility(
-            child: Container(),
-            visible: false,
-          ),
-          displayClearIcon: false,
-          value: jsonEncode(selectedCustomer),
-          items: customerListMap.map<DropdownMenuItem<String>>((Map value) {
-            return DropdownMenuItem<String>(
-                value: jsonEncode(value),
-                child: Container(
-                  width: MySize.screenWidth! * 0.8,
-                  child: Text("${value['name']} (${value['mobile'] ?? ' - '})",
-                      softWrap: true,
-                      maxLines: 5,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTheme.getTextStyle(
-                          themeData.textTheme.bodyMedium,
-                          color: themeData.colorScheme.onSurface)),
-                ));
+        DropdownSearch<String>(
+          // mode: Mode.MENU,
+          // showSelectedItems: true,
+          items: customerListMap.map<String>((Map value) {
+            return jsonEncode(value);
           }).toList(),
-          // value: customerListMap[0],
-          iconEnabledColor: Colors.blue,
-          iconDisabledColor: Colors.black,
+          itemAsString: (String? item) {
+            Map<String, dynamic> decodedItem = jsonDecode(item!);
+            return "${decodedItem['name']} (${decodedItem['mobile'] ?? ' - '})";
+          },
           onChanged: (value) async {
             setState(() {
-              selectedCustomer = jsonDecode(value);
+              selectedCustomer = jsonDecode(value!);
             });
             var newValue = selectedCustomer['id'];
             if (newValue != 0) {
@@ -307,12 +295,14 @@ class _ContactPaymentState extends State<ContactPayment> {
                 // Fluttertoast.showToast(
                 //     msg: AppLocalizations.of(context)
                 //         .translate('check_connectivity'));
-                ToastHelper.show(context, AppLocalizations.of(context).translate('check_connectivity'));
-
+                ToastHelper.show(
+                    context,
+                    AppLocalizations.of(context)
+                        .translate('check_connectivity'));
               }
             }
           },
-          isExpanded: true,
+          selectedItem: jsonEncode(selectedCustomer),
         )
       ],
     );

@@ -7,7 +7,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:pos_2/helpers/toast_helper.dart';
 import 'package:pos_2/providers/home_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:search_choices/search_choices.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 
 import '../apis/contact.dart';
 import '../helpers/AppTheme.dart';
@@ -127,16 +127,18 @@ class _CustomerState extends State<Customer> {
         bottomNavigationBar: Visibility(
           visible: (selectedCustomer['id'] != 0),
           child: Row(
-            mainAxisAlignment: (argument != null && argument!['is_quotation'] == null)
-                ? MainAxisAlignment.spaceAround
-                : MainAxisAlignment.center,
+            mainAxisAlignment:
+                (argument != null && argument!['is_quotation'] == null)
+                    ? MainAxisAlignment.spaceAround
+                    : MainAxisAlignment.center,
             children: [
               Visibility(
                 visible: argument != null && argument!['is_quotation'] == null,
                 child: TextButton(
                   onPressed: (addQuotation),
                   style: TextButton.styleFrom(
-                      foregroundColor: Colors.black, backgroundColor: style.StyleColors().mainColor(1),
+                      foregroundColor: Colors.black,
+                      backgroundColor: style.StyleColors().mainColor(1),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(40.0),
                       )),
@@ -317,8 +319,8 @@ class _CustomerState extends State<Customer> {
                                           hintStyle: themeData
                                               .textTheme.titleSmall!
                                               .merge(TextStyle(
-                                                  color: themeData.colorScheme
-                                                      .onSurface)),
+                                                  color: themeData
+                                                      .colorScheme.onSurface)),
                                           hintText: AppLocalizations.of(context)
                                               .translate('prefix'),
                                           border: UnderlineInputBorder(
@@ -373,8 +375,8 @@ class _CustomerState extends State<Customer> {
                                           hintStyle: themeData
                                               .textTheme.titleSmall!
                                               .merge(TextStyle(
-                                                  color: themeData.colorScheme
-                                                      .onSurface)),
+                                                  color: themeData
+                                                      .colorScheme.onSurface)),
                                           hintText: AppLocalizations.of(context)
                                               .translate('first_name'),
                                           border: UnderlineInputBorder(
@@ -424,8 +426,8 @@ class _CustomerState extends State<Customer> {
                                           hintStyle: themeData
                                               .textTheme.titleSmall!
                                               .merge(TextStyle(
-                                                  color: themeData.colorScheme
-                                                      .onSurface)),
+                                                  color: themeData
+                                                      .colorScheme.onSurface)),
                                           hintText: AppLocalizations.of(context)
                                               .translate('middle_name'),
                                           border: UnderlineInputBorder(
@@ -469,8 +471,8 @@ class _CustomerState extends State<Customer> {
                                           hintStyle: themeData
                                               .textTheme.titleSmall!
                                               .merge(TextStyle(
-                                                  color: themeData.colorScheme
-                                                      .onSurface)),
+                                                  color: themeData
+                                                      .colorScheme.onSurface)),
                                           hintText: AppLocalizations.of(context)
                                               .translate('last_name'),
                                           border: UnderlineInputBorder(
@@ -532,8 +534,8 @@ class _CustomerState extends State<Customer> {
                                 children: <Widget>[
                                   TextFormField(
                                     controller: addressLine1,
-                                    style: themeData.textTheme.titleSmall!.merge(
-                                        TextStyle(
+                                    style: themeData.textTheme.titleSmall!
+                                        .merge(TextStyle(
                                             color: themeData
                                                 .colorScheme.onSurface)),
                                     decoration: InputDecoration(
@@ -573,8 +575,8 @@ class _CustomerState extends State<Customer> {
                                   ),
                                   TextFormField(
                                     controller: addressLine2,
-                                    style: themeData.textTheme.titleSmall!.merge(
-                                        TextStyle(
+                                    style: themeData.textTheme.titleSmall!
+                                        .merge(TextStyle(
                                             color: themeData
                                                 .colorScheme.onSurface)),
                                     decoration: InputDecoration(
@@ -651,8 +653,8 @@ class _CustomerState extends State<Customer> {
                                         return null;
                                       }
                                     },
-                                    style: themeData.textTheme.titleSmall!.merge(
-                                        TextStyle(
+                                    style: themeData.textTheme.titleSmall!
+                                        .merge(TextStyle(
                                             color: themeData
                                                 .colorScheme.onSurface)),
                                     decoration: InputDecoration(
@@ -727,8 +729,8 @@ class _CustomerState extends State<Customer> {
                                           controller: city,
                                           style: themeData.textTheme.titleSmall!
                                               .merge(TextStyle(
-                                                  color: themeData.colorScheme
-                                                      .onSurface)),
+                                                  color: themeData
+                                                      .colorScheme.onSurface)),
                                           decoration: InputDecoration(
                                             hintStyle: themeData
                                                 .textTheme.titleSmall!
@@ -773,8 +775,8 @@ class _CustomerState extends State<Customer> {
                                           controller: state,
                                           style: themeData.textTheme.titleSmall!
                                               .merge(TextStyle(
-                                                  color: themeData.colorScheme
-                                                      .onSurface)),
+                                                  color: themeData
+                                                      .colorScheme.onSurface)),
                                           decoration: InputDecoration(
                                             hintStyle: themeData
                                                 .textTheme.titleSmall!
@@ -825,8 +827,8 @@ class _CustomerState extends State<Customer> {
                                           controller: country,
                                           style: themeData.textTheme.titleSmall!
                                               .merge(TextStyle(
-                                                  color: themeData.colorScheme
-                                                      .onSurface)),
+                                                  color: themeData
+                                                      .colorScheme.onSurface)),
                                           decoration: InputDecoration(
                                             hintStyle: themeData
                                                 .textTheme.titleSmall!
@@ -872,8 +874,8 @@ class _CustomerState extends State<Customer> {
                                           keyboardType: TextInputType.number,
                                           style: themeData.textTheme.titleSmall!
                                               .merge(TextStyle(
-                                                  color: themeData.colorScheme
-                                                      .onSurface)),
+                                                  color: themeData
+                                                      .colorScheme.onSurface)),
                                           decoration: InputDecoration(
                                             hintStyle: themeData
                                                 .textTheme.titleSmall!
@@ -992,36 +994,24 @@ class _CustomerState extends State<Customer> {
 
   //dropdown widget for selecting customer
   Widget customerList() {
-    return SearchChoices.single(
-      underline: Visibility(
-        child: Container(),
-        visible: false,
-      ),
-      displayClearIcon: false,
-      value: jsonEncode(selectedCustomer),
-      items: customerListMap.map<DropdownMenuItem<String>>((Map value) {
-        return DropdownMenuItem<String>(
-            value: jsonEncode(value),
-            child: Container(
-              width: MySize.screenWidth! * 0.8,
-              child: Text("${value['name']} (${value['mobile'] ?? ' - '})",
-                  softWrap: true,
-                  maxLines: 5,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTheme.getTextStyle(themeData.textTheme.bodyMedium,
-                      color: themeData.colorScheme.onSurface)),
-            ));
+    return DropdownSearch<String>(
+      // mode: Mode.MENU,
+      // showSelectedItems: true,
+      items: customerListMap.map<String>((Map value) {
+        return jsonEncode(value);
       }).toList(),
-      iconEnabledColor: Colors.blue,
-      iconDisabledColor: Colors.black,
+      itemAsString: (String? item) {
+        Map<String, dynamic> decodedItem = jsonDecode(item!);
+        return "${decodedItem['name']} (${decodedItem['mobile'] ?? ' - '})";
+      },
       onChanged: (newValue) {
         setState(() {
-          selectedCustomer = jsonDecode(newValue);
+          selectedCustomer = jsonDecode(newValue!);
           Provider.of<HomeProvider>(context, listen: false)
               .updateSelectedCustomer(selectedCustomer);
         });
       },
-      isExpanded: true,
+      selectedItem: jsonEncode(selectedCustomer),
     );
   }
 

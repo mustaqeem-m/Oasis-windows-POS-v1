@@ -6,7 +6,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:search_choices/search_choices.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -1479,31 +1479,22 @@ class _SalesState extends State<Sales> {
   }
 
   Widget customers() {
-    return SearchChoices.single(
-      underline: Visibility(
-        child: Container(),
-        visible: false,
-      ),
-      displayClearIcon: false,
-      value: jsonEncode(selectedCustomer),
-      items: customerListMap.map<DropdownMenuItem<String>>((Map value) {
-        return DropdownMenuItem<String>(
-            value: jsonEncode(value),
-            child: Container(
-              width: MySize.screenWidth! * 0.8,
-              child: Text("${value['name']} (${value['mobile'] ?? ' - '})",
-                  softWrap: true,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTheme.getTextStyle(themeData.textTheme.bodyMedium,
-                      color: themeData.colorScheme.onSurface)),
-            ));
+    return DropdownSearch<String>(
+      // mode: Mode.MENU,
+      // showSelectedItems: true,
+      items: customerListMap.map<String>((Map value) {
+        return jsonEncode(value);
       }).toList(),
+      itemAsString: (String? item) {
+        Map<String, dynamic> decodedItem = jsonDecode(item!);
+        return "${decodedItem['name']} (${decodedItem['mobile'] ?? ' - '})";
+      },
       onChanged: (value) async {
         setState(() {
-          selectedCustomer = jsonDecode(value);
+          selectedCustomer = jsonDecode(value!);
         });
       },
-      isExpanded: true,
+      selectedItem: jsonEncode(selectedCustomer),
     );
   }
 

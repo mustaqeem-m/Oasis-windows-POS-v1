@@ -42,6 +42,7 @@ import 'package:pos_2/apis/user.dart';
 import 'package:pos_2/models/close_register_model.dart';
 import 'package:pos_2/models/register_details_models.dart' as register_details;
 import 'package:pos_2/components/home/suspended_sales_modal.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 
 class Products extends StatefulWidget {
   const Products({super.key});
@@ -1081,29 +1082,37 @@ class ProductsState extends State<Products> {
           Icon(MdiIcons.accountOutline, color: Colors.grey[600]),
           const SizedBox(width: 12),
           Expanded(
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<int>(
-                dropdownColor: Colors.white,
-                isExpanded: true,
-                value: _selectedCustomerId,
-                items: _customers.map((customer) {
-                  return DropdownMenuItem<int>(
-                    value: customer['id'],
-                    child: Text(customer['name'] ?? 'Unknown'),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    final selected = _customers
-                        .firstWhere((element) => element['id'] == value);
-                    Provider.of<HomeProvider>(context, listen: false)
-                        .updateSelectedCustomer(selected);
-                    setState(() {
-                      _selectedCustomerId = value;
-                    });
-                  }
-                },
-                hint: const Text("Select Customer"),
+            child: DropdownSearch<int>(
+              items: _customers.map((customer) {
+                return customer['id'] as int;
+              }).toList(),
+              itemAsString: (int? id) {
+                final customer = _customers.firstWhere((c) => c['id'] == id,
+                    orElse: () => {'name': ''});
+                return customer['name'] ?? '';
+              },
+              selectedItem: _selectedCustomerId,
+              onChanged: (int? value) {
+                if (value != null) {
+                  final selected = _customers
+                      .firstWhere((element) => element['id'] == value);
+                  Provider.of<HomeProvider>(context, listen: false)
+                      .updateSelectedCustomer(selected);
+                  setState(() {
+                    _selectedCustomerId = value;
+                  });
+                }
+              },
+              popupProps: PopupProps.menu(
+                showSearchBox: true,
+                searchFieldProps: TextFieldProps(
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    hintText: "Search for a customer",
+                  ),
+                ),
               ),
             ),
           ),
@@ -1924,7 +1933,7 @@ class ProductsState extends State<Products> {
                     ),
                   ),
                   TextSpan(
-                    text: '$symbol${_totalPayable.toStringAsFixed(2)}',
+                    text: '₹ ${_totalPayable.toStringAsFixed(2)}',
                     style: const TextStyle(
                       color: Colors.green,
                       fontSize: 20,

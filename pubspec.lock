@@ -217,6 +217,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  dropdown_search:
+    dependency: "direct main"
+    description:
+      name: dropdown_search
+      sha256: "55106e8290acaa97ed15bea1fdad82c3cf0c248dd410e651f5a8ac6870f783ab"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.6"
   equatable:
     dependency: transitive
     description:
@@ -917,14 +925,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-  search_choices:
-    dependency: "direct main"
-    description:
-      name: search_choices
-      sha256: "44b0e00b45b72e69ee4e1350e2794134151d2a34ac668f2a7b6049b142d9b642"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.3.1"
   share_plus:
     dependency: "direct main"
     description:
