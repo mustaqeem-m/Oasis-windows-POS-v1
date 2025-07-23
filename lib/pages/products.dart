@@ -755,76 +755,79 @@ class ProductsState extends State<Products> {
         color: Colors.white,
         border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
       ),
-      child: Row(
-        children: [
-          // Location Dropdown
-          _buildLocationDropdown(),
-          const SizedBox(width: 16),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            // Location Dropdown
+            _buildLocationDropdown(),
+            const SizedBox(width: 16),
 
-          // Datetime Picker
-          _buildDateTimePicker(),
-          const Spacer(),
+            // Datetime Picker
+            _buildDateTimePicker(),
+            const SizedBox(width: 16),
 
-          // Action Buttons
-          Tooltip(
-            message: 'Show Products',
-            child: _buildActionIconButton(Icons.grid_view, () {
-              _scaffoldKey.currentState!.openEndDrawer();
-            }),
-          ),
-          Tooltip(
-            message: 'Back',
-            child: _buildActionIconButton(Icons.arrow_back, () {}),
-          ),
-          Tooltip(
-            message: 'Close register',
-            child: _buildActionIconButton(Icons.close, _showCloseRegisterDialog,
-                color: Colors.red),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30.0),
-            child: const ServiceStaffPopup(),
-          ),
-          Tooltip(
-            message: 'Open Cash Register',
-            child: _buildActionIconButton(
-                Icons.business_center_outlined, _showRegisterDetails),
-          ),
-          Tooltip(
-            message: 'Calculator Popup',
-            child: _buildActionIconButton(Icons.calculate_outlined, () {
-              _showCalculatorPopup(context);
-            }),
-          ),
-          const SellReturnPopup(),
+            // Action Buttons
+            Tooltip(
+              message: 'Show Products',
+              child: _buildActionIconButton(Icons.grid_view, () {
+                _scaffoldKey.currentState!.openEndDrawer();
+              }),
+            ),
+            Tooltip(
+              message: 'Back',
+              child: _buildActionIconButton(Icons.arrow_back, () {}),
+            ),
+            Tooltip(
+              message: 'Close register',
+              child: _buildActionIconButton(Icons.close, _showCloseRegisterDialog,
+                  color: Colors.red),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30.0),
+              child: const ServiceStaffPopup(),
+            ),
+            Tooltip(
+              message: 'Open Cash Register',
+              child: _buildActionIconButton(
+                  Icons.business_center_outlined, _showRegisterDetails),
+            ),
+            Tooltip(
+              message: 'Calculator Popup',
+              child: _buildActionIconButton(Icons.calculate_outlined, () {
+                _showCalculatorPopup(context);
+              }),
+            ),
+            const SellReturnPopup(),
 
-          Tooltip(
-            message: 'View suspended sales',
-            child: _buildActionIconButton(Icons.pause, () {
-              _showSuspendedSalesModal(context);
-            }),
-          ),
-          Tooltip(
-            message: 'Customer Display Screen',
-            child: _buildActionIconButton(Icons.display_settings_rounded, () {
-              Navigator.pushNamed(context, '/customer-display');
-            }),
-          ),
-          const Spacer(),
+            Tooltip(
+              message: 'View suspended sales',
+              child: _buildActionIconButton(Icons.pause, () {
+                _showSuspendedSalesModal(context);
+              }),
+            ),
+            Tooltip(
+              message: 'Customer Display Screen',
+              child: _buildActionIconButton(Icons.display_settings_rounded, () {
+                Navigator.pushNamed(context, '/customer-display');
+              }),
+            ),
+            const SizedBox(width: 16),
 
-          // Far Right Buttons
-          _buildTextIconButton(
-              'Repair', Icons.build_outlined, Colors.lightBlue),
-          const SizedBox(width: 30),
-          _buildTextIconButton(
-              'Add Expense', Icons.add_card_outlined, Colors.transparent,
-              borderColor: Colors.black, onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) => const AddExpenseDialog(),
-            );
-          }),
-        ],
+            // Far Right Buttons
+            _buildTextIconButton(
+                'Repair', Icons.build_outlined, Colors.lightBlue),
+            const SizedBox(width: 30),
+            _buildTextIconButton(
+                'Add Expense', Icons.add_card_outlined, Colors.transparent,
+                borderColor: Colors.black, onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => const AddExpenseDialog(),
+              );
+            }),
+          ],
+        ),
       ),
     );
   }
@@ -963,95 +966,97 @@ class ProductsState extends State<Products> {
   }
 
   Widget _buildCustomerAndInputSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: _buildCustomerDropdown(),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildDropdownField(
-                icon: MdiIcons.tagOutline,
-                label: 'Price Type',
-                value: 'Default Selling Price',
-                onTap: () {
-                  // TODO: Implement price type selection
-                },
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: _buildCustomerDropdown(),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildPrinterDropdown(),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: _buildCommissionAgentDropdown(),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildTypesOfServiceDropdown(),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildDropdownField(
-                icon: MdiIcons.calendarBlankOutline,
-                label: 'Date',
-                value: DateFormat('dd MMM, yyyy').format(DateTime.now()),
-                onTap: () {},
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: _buildTableDropdown(),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildServiceStaffDropdown(),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Container(
-                height: 56,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey[300]!),
-                ),
-                child: Row(
-                  children: [
-                    Checkbox(
-                      value: false,
-                      onChanged: (val) {},
-                      activeColor: themeData.primaryColor,
-                    ),
-                    const SizedBox(width: 8),
-                    const Text('Kitchen Order'),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.info_outline,
-                        size: 18, color: Colors.grey),
-                  ],
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildDropdownField(
+                  icon: MdiIcons.tagOutline,
+                  label: 'Price Type',
+                  value: 'Default Selling Price',
+                  onTap: () {
+                    // TODO: Implement price type selection
+                  },
                 ),
               ),
-            ),
-          ],
-        ),
-      ],
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildPrinterDropdown(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: _buildCommissionAgentDropdown(),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildTypesOfServiceDropdown(),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildDropdownField(
+                  icon: MdiIcons.calendarBlankOutline,
+                  label: 'Date',
+                  value: DateFormat('dd MMM, yyyy').format(DateTime.now()),
+                  onTap: () {},
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: _buildTableDropdown(),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildServiceStaffDropdown(),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Container(
+                  height: 56,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: Row(
+                    children: [
+                      Checkbox(
+                        value: false,
+                        onChanged: (val) {},
+                        activeColor: themeData.primaryColor,
+                      ),
+                      const SizedBox(width: 8),
+                      const Text('Kitchen Order'),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.info_outline,
+                          size: 18, color: Colors.grey),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -1083,6 +1088,7 @@ class ProductsState extends State<Products> {
           const SizedBox(width: 12),
           Expanded(
             child: DropdownSearch<int>(
+              key: UniqueKey(),
               items: _customers.map((customer) {
                 return customer['id'] as int;
               }).toList(),
@@ -1403,109 +1409,112 @@ class ProductsState extends State<Products> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: CachedNetworkImage(
-                imageUrl: line['product_image_url'] ?? '',
-                width: 64,
-                height: 64,
-                fit: BoxFit.cover,
-                placeholder: (context, url) =>
-                    Image.asset('assets/images/default_product.png'),
-                errorWidget: (context, url, error) =>
-                    Image.asset('assets/images/default_product.png'),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: CachedNetworkImage(
+                  imageUrl: line['product_image_url'] ?? '',
+                  width: 64,
+                  height: 64,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) =>
+                      Image.asset('assets/images/default_product.png'),
+                  errorWidget: (context, url, error) =>
+                      Image.asset('assets/images/default_product.png'),
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(line['product_name'] ?? '',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16)),
+                    const SizedBox(height: 4),
+                    Text(
+                        'Code: ${line['sub_sku'] ?? 'N/A'} | Stock: ${line['stock_available'] ?? 'N/A'}',
+                        style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Row(
                 children: [
-                  Text(line['product_name'] ?? '',
+                  IconButton(
+                      icon: const Icon(Icons.remove_circle_outline,
+                          color: Colors.red),
+                      onPressed: () =>
+                          _updateCartItemQuantity(lineId, quantity, -1)),
+                  Text(quantity.toStringAsFixed(0),
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16)),
-                  const SizedBox(height: 4),
-                  Text(
-                      'Code: ${line['sub_sku'] ?? 'N/A'} | Stock: ${line['stock_available'] ?? 'N/A'}',
-                      style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                          fontSize: 16, fontWeight: FontWeight.bold)),
+                  IconButton(
+                      icon: const Icon(Icons.add_circle_outline,
+                          color: Colors.green),
+                      onPressed: () =>
+                          _updateCartItemQuantity(lineId, quantity, 1)),
                 ],
               ),
-            ),
-            const SizedBox(width: 12),
-            Row(
-              children: [
-                IconButton(
-                    icon: const Icon(Icons.remove_circle_outline,
-                        color: Colors.red),
-                    onPressed: () =>
-                        _updateCartItemQuantity(lineId, quantity, -1)),
-                Text(quantity.toStringAsFixed(0),
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.bold)),
-                IconButton(
-                    icon: const Icon(Icons.add_circle_outline,
-                        color: Colors.green),
-                    onPressed: () =>
-                        _updateCartItemQuantity(lineId, quantity, 1)),
-              ],
-            ),
-            const SizedBox(width: 12),
-            SizedBox(
-              width: 100,
-              child: DropdownButtonFormField<String>(
-                dropdownColor: Colors.white,
-                value: 'Pieces',
-                items: ['Pieces', 'Kg', 'Box'].map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (_) {},
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.grey[300]!),
+              const SizedBox(width: 12),
+              SizedBox(
+                width: 100,
+                child: DropdownButtonFormField<String>(
+                  dropdownColor: Colors.white,
+                  value: 'Pieces',
+                  items: ['Pieces', 'Kg', 'Box'].map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (_) {},
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            SizedBox(
-              width: 80,
-              child: TextFormField(
-                initialValue: price.toStringAsFixed(2),
-                textAlign: TextAlign.right,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.grey[300]!),
+              const SizedBox(width: 12),
+              SizedBox(
+                width: 80,
+                child: TextFormField(
+                  initialValue: price.toStringAsFixed(2),
+                  textAlign: TextAlign.right,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    ),
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            SizedBox(
-              width: 90,
-              child: Text(
-                '$symbol${total.toStringAsFixed(2)}',
-                textAlign: TextAlign.right,
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              const SizedBox(width: 12),
+              SizedBox(
+                width: 90,
+                child: Text(
+                  '$symbol${total.toStringAsFixed(2)}',
+                  textAlign: TextAlign.right,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 16),
+                ),
               ),
-            ),
-            IconButton(
-              icon: Icon(MdiIcons.closeCircleOutline, color: Colors.red),
-              onPressed: () => _removeCartItem(lineId),
-            ),
-          ],
+              IconButton(
+                icon: Icon(MdiIcons.closeCircleOutline, color: Colors.red),
+                onPressed: () => _removeCartItem(lineId),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1556,44 +1565,54 @@ class ProductsState extends State<Products> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildChargeItem(
-                label: 'Discount (-)',
-                value:
-                    '${_cartProvider.selectedDiscountType == 'fixed' ? '₹' : ''}${_cartProvider.discountAmount?.toStringAsFixed(2) ?? '0.00'}${_cartProvider.selectedDiscountType == 'percentage' ? '%' : ''}',
-                onInfoTap: () {},
-                onEditTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (_) => ChangeNotifierProvider.value(
-                      value: _cartProvider,
-                      child: const DiscountDialog(),
-                    ),
-                  );
-                },
+              Flexible(
+                child: _buildChargeItem(
+                  label: 'Discount (-)',
+                  value:
+                      '${_cartProvider.selectedDiscountType == 'fixed' ? '₹' : ''}${_cartProvider.discountAmount?.toStringAsFixed(2) ?? '0.00'}${_cartProvider.selectedDiscountType == 'percentage' ? '%' : ''}',
+                  onInfoTap: () {},
+                  onEditTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => ChangeNotifierProvider.value(
+                        value: _cartProvider,
+                        child: const DiscountDialog(),
+                      ),
+                    );
+                  },
+                ),
               ),
-              _buildChargeItem(
-                label: 'Order Tax (+)',
-                value:
-                    '₹${_cartProvider.orderTaxAmount?.toStringAsFixed(2) ?? '0.00'}',
-                onInfoTap: () {},
-                onEditTap: () {
-                  _showEditTaxDialog();
-                },
+              Flexible(
+                child: _buildChargeItem(
+                  label: 'Order Tax (+)',
+                  value:
+                      '₹${_cartProvider.orderTaxAmount?.toStringAsFixed(2) ?? '0.00'}',
+                  onInfoTap: () {},
+                  onEditTap: () {
+                    _showEditTaxDialog();
+                  },
+                ),
               ),
-              _buildChargeItem(
-                label: 'Shipping (+)',
-                value: '₹${_shippingCharges.toStringAsFixed(2)}',
-                onInfoTap: () {},
-                onEditTap: _showShippingDialog,
+              Flexible(
+                child: _buildChargeItem(
+                  label: 'Shipping (+)',
+                  value: '₹${_shippingCharges.toStringAsFixed(2)}',
+                  onInfoTap: () {},
+                  onEditTap: _showShippingDialog,
+                ),
               ),
-              _buildChargeItem(
-                label: 'Packing Charge (+)',
-                value: '₹${0.0.toStringAsFixed(2)}',
-                onInfoTap: () {},
+              Flexible(
+                child: _buildChargeItem(
+                  label: 'Packing Charge (+)',
+                  value: '₹${0.0.toStringAsFixed(2)}',
+                  onInfoTap: () {},
+                ),
               ),
-              _buildChargeItem(
-                label: 'Round Off',
-                value: 0.0.toStringAsFixed(2),
+              Flexible(
+                child: _buildChargeItem(
+                  label: 'Round Off',
+                  value: 0.0.toStringAsFixed(2),
+                ),
               ),
             ],
           )

@@ -1,9 +1,29 @@
-when i click on logout 
+════════ Exception caught by rendering library ═════════════════════════════════
+A RenderFlex overflowed by 21 pixels on the bottom.
+The relevant error-causing widget was:
+    Column Column:file:///C:/Users/Admin/Documents/Mustaqeem_git/oasis_windows_pos_v1/lib/pages/products.dart:1686:22
+════════════════════════════════════════════════════════════════════════════════
 
-in product.dart line 117 setState(() {});
+════════ Exception caught by rendering library ═════════════════════════════════
+A RenderFlex overflowed by 5.6 pixels on the right.
+The relevant error-causing widget was:
+    Row Row:file:///C:/Users/Admin/Documents/Mustaqeem_git/oasis_windows_pos_v1/lib/pages/products.dart:1894:14
+════════════════════════════════════════════════════════════════════════════════
 
-Exception has occurred.
-FlutterError (setState() called after dispose(): ProductsState#78b28(lifecycle state: defunct, not mounted)
-This error happens if you call setState() on a State object for a widget that no longer appears in the widget tree (e.g., whose parent widget no longer includes the widget in its build). This error can occur when code calls setState() from a timer or an animation callback.
-The preferred solution is to cancel the timer or stop listening to the animation in the dispose() callback. Another solution is to check the "mounted" property of this object before calling setState() to ensure the object is still in the tree.
-This error might indicate a memory leak if setState() is being called because another object is retaining a reference to this State object after it has been removed from the tree. To avoid memory leaks, consider breaking the reference to this object during dispose().)
+════════ Exception caught by rendering library ═════════════════════════════════
+A RenderFlex overflowed by 1.8 pixels on the right.
+The relevant error-causing widget was:
+    Row Row:file:///C:/Users/Admin/Documents/Mustaqeem_git/oasis_windows_pos_v1/lib/pages/products.dart:1039:24
+════════════════════════════════════════════════════════════════════════════════
+
+════════ Exception caught by rendering library ═════════════════════════════════
+A RenderFlex overflowed by 21 pixels on the bottom.
+The relevant error-causing widget was:
+    Column Column:file:///C:/Users/Admin/Documents/Mustaqeem_git/oasis_windows_pos_v1/lib/pages/products.dart:1686:22
+════════════════════════════════════════════════════════════════════════════════
+
+════════ Exception caught by rendering library ═════════════════════════════════
+A RenderFlex overflowed by 11 pixels on the right.
+The relevant error-causing widget was:
+    Row Row:file:///C:/Users/Admin/Documents/Mustaqeem_git/oasis_windows_pos_v1/lib/pages/products.dart:1560:11
+════════════════════════════════════════════════════════════════════════════════
