@@ -1428,7 +1428,8 @@ class ProductsState extends State<Products> {
                 ),
               ),
               const SizedBox(width: 12),
-              Expanded(
+              SizedBox(
+                width: 200, // Constrain the width of the Column
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
