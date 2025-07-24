@@ -15,6 +15,7 @@ import 'package:pos_2/models/register_database.dart';
 import 'package:pos_2/components/close_register_dialog.dart';
 import 'package:pos_2/components/shipping_modal.dart';
 import 'package:pos_2/components/calculator_popup.dart';
+import 'package:pos_2/components/print_receipt_dialog.dart';
 import 'package:pos_2/components/register_details/register_details_dialog.dart';
 import 'package:pos_2/models/contact_model.dart';
 import 'dart:convert';
@@ -1929,8 +1930,7 @@ class ProductsState extends State<Products> {
                       color: Colors.blue,
                       onPressed: () => _goToCheckout('multiple_pay')),
                   _buildPaymentButton('Cash', Icons.money_outlined,
-                      color: Colors.green,
-                      onPressed: () => _goToCheckout('cash')),
+                      color: Colors.green, onPressed: _handleCashPayment),
                   _buildPaymentButton('Cancel', Icons.cancel_outlined,
                       color: Colors.red,
                       onPressed: _showCancelConfirmationDialog),
@@ -2207,6 +2207,66 @@ class ProductsState extends State<Products> {
             discountAmount: 0));
   }
 
+  Future<void> _handleCashPayment() async {
+    if (cartLines.isEmpty) {
+      ToastHelper.show(
+          context, AppLocalizations.of(context).translate('cart_is_empty'));
+      return;
+    }
+
+    // 1. Save the sale
+    final saleId = await _saveSale('final');
+    if (saleId == null) {
+      ToastHelper.show(context, 'Error: Could not save sale.');
+      return;
+    }
+
+    // 2. Add payment record
+    await PaymentDatabase().store({
+      'sell_id': saleId,
+      'amount': _totalPayable,
+      'method': 'cash',
+    });
+
+    // 3. Show success message
+    ToastHelper.show(context, "Sale added successfully");
+
+    // 4. Fetch data for receipt
+    final saleDetailsList = await SellDatabase().getSellBySellId(saleId);
+    if (saleDetailsList.isEmpty) {
+      ToastHelper.show(context, 'Error: Could not retrieve sale details.');
+      return;
+    }
+    final saleDetails = saleDetailsList.first;
+    final sellLines = await SellDatabase().getSellLines(saleId);
+    final payment = await PaymentDatabase().get(saleId);
+
+    // 5. Clear cart and reset customer
+    await Sell().resetCart();
+    _getCartLines();
+    Provider.of<HomeProvider>(context, listen: false).resetCustomer();
+
+    // 6. Show printer dialog
+    _showPrinterDialog(saleId, saleDetails, sellLines, payment);
+  }
+
+  Future<void> _showPrinterDialog(int sellId, Map<String, dynamic> saleDetails,
+      List<Map<String, dynamic>> sellLines, List<dynamic> payment) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return PrintReceiptDialog(
+          sellId: sellId,
+          printers: _printers,
+          selectedPrinterId: _selectedPrinterId,
+          saleDetails: saleDetails,
+          sellLines: sellLines,
+          payment: payment,
+        );
+      },
+    );
+  }
+
   Future<void> _showCancelConfirmationDialog({bool isNewSale = false}) async {
     return showDialog<void>(
       context: context,
@@ -2250,13 +2310,13 @@ class ProductsState extends State<Products> {
     ToastHelper.show(context, "Sale cancelled");
   }
 
-  Future<void> _saveSale(String status) async {
+  Future<int?> _saveSale(String status) async {
     if (cartLines.isEmpty) {
       if (mounted) {
         ToastHelper.show(
             context, AppLocalizations.of(context).translate('cart_is_empty'));
       }
-      return;
+      return null;
     }
 
     Map<String, dynamic> sale = await Sell().createSell(
@@ -2272,14 +2332,13 @@ class ProductsState extends State<Products> {
     int sellId = await SellDatabase().storeSell(sale);
     await SellDatabase().updateSellLine({'sell_id': sellId, 'is_completed': 1});
 
-    if (mounted) {
+    if (status != 'final' && mounted) {
       ToastHelper.show(context, 'Sale saved as $status');
-    }
-    await Sell().resetCart();
-    _getCartLines();
-    if (mounted) {
+      await Sell().resetCart();
+      _getCartLines();
       Provider.of<HomeProvider>(context, listen: false).resetCustomer();
     }
+    return sellId;
   }
 
   void _showEditTaxDialog() {

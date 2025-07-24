@@ -46,7 +46,7 @@ class PaymentDatabase {
       ];
     else
       columns = ['amount', 'method', 'note', 'account_id'];
-    var response = db.query('sell_payments',
+    var response = await db.query('sell_payments',
         columns: columns,
         where: 'sell_id = ? ORDER BY is_return',
         whereArgs: [sellId]);

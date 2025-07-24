@@ -27,22 +27,11 @@ class SellDatabase {
   }
 
   //fetch sell_lines by sell_id
-  Future<List> getSellLines(sellId) async {
+  Future<List<Map<String, dynamic>>> getSellLines(sellId) async {
     final db = await dbProvider.database;
-    var response = await db.query('sell_lines',
-        columns: [
-          'product_id',
-          'variation_id',
-          'quantity',
-          'unit_price',
-          'tax_rate_id',
-          'discount_amount',
-          'discount_type',
-          'note',
-          'res_service_staff_id'
-        ],
-        where: "sell_id = ?",
-        whereArgs: [sellId]);
+    var response = await db.rawQuery(
+        'SELECT SL.*, V.display_name as product_name, V.sub_sku, V.product_image_url, SL.stock_available FROM sell_lines AS SL JOIN variations AS V ON SL.variation_id = V.variation_id WHERE SL.sell_id = ?',
+        [sellId]);
     return response;
   }
 
