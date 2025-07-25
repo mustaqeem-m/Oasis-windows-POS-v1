@@ -235,6 +235,11 @@ class Sell {
             ? await getUnitPrice(double.parse(product['unit_price'].toString()),
                 product['tax_rate_id'])
             : product['unit_price'];
+
+    if (price == 0.00) {
+      price = product['unit_price'];
+    }
+
     var sellLine = {
       'sell_id': sellId,
       'product_id': product['product_id'],
