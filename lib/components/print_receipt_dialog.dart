@@ -256,8 +256,8 @@ class _PrintReceiptDialogState extends State<PrintReceiptDialog> {
       children: [
         pw.Center(
             child: pw.Text('Oasis POS',
-                style:
-                    pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold))),
+                style: pw.TextStyle(
+                    fontSize: 24, fontWeight: pw.FontWeight.bold))),
         pw.SizedBox(height: 16),
         pw.Text('Invoice No: ${widget.saleDetails['invoice_no'] ?? ''}'),
         pw.Text(
