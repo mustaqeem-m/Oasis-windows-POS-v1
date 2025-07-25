@@ -781,7 +781,8 @@ class ProductsState extends State<Products> {
             ),
             Tooltip(
               message: 'Close register',
-              child: _buildActionIconButton(Icons.close, _showCloseRegisterDialog,
+              child: _buildActionIconButton(
+                  Icons.close, _showCloseRegisterDialog,
                   color: Colors.red),
             ),
             Padding(
@@ -1440,7 +1441,8 @@ class ProductsState extends State<Products> {
                     const SizedBox(height: 4),
                     Text(
                         'Code: ${line['sub_sku'] ?? 'N/A'} | Stock: ${line['stock_available'] ?? 'N/A'}',
-                        style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                        style:
+                            const TextStyle(color: Colors.grey, fontSize: 12)),
                   ],
                 ),
               ),
@@ -1501,7 +1503,7 @@ class ProductsState extends State<Products> {
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 472),
               SizedBox(
                 width: 90,
                 child: Text(
