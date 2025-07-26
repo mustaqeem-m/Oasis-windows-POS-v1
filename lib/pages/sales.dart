@@ -169,7 +169,6 @@ class _SalesState extends State<Sales> {
           ]),
         ),
         body: TabBarView(children: [currentSales(), allSales()]),
-        
       ),
     );
   }
@@ -276,8 +275,8 @@ class _SalesState extends State<Sales> {
             'id': element['id'],
             'transaction_date': element['transaction_date'],
             'invoice_no': element['invoice_no'],
-            'customer_name': customerDetail['name'],
-            'mobile': customerDetail['mobile'],
+            'customer_name': (customerDetail != null) ? customerDetail['name'] : 'Walk-In Customer',
+            'mobile': (customerDetail != null) ? customerDetail['mobile'] : '',
             'contact_id': element['contact_id'],
             'location_id': element['location_id'],
             'location_name': locationName,

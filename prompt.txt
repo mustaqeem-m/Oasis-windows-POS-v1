@@ -1,8 +1,9 @@
-in print_receipt_dialog.dart : 
+in sales.dart , 
 
-final paid = widget.payment.fold(0.0, (sum, item) => sum + item['amount']);
+'customer_name': customerDetail['name'],
 
-The operator '+' can't be unconditionally invoked because the receiver can be 'null'.
-Try adding a null check to the target ('!')
+Exception has occurred.
+NoSuchMethodError (NoSuchMethodError: The method '[]' was called on null.
+Receiver: null
+Tried calling: []("name"))
 
-some error in + operator here 

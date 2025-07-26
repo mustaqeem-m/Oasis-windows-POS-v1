@@ -116,7 +116,9 @@ class ProductsState extends State<Products> {
   }
 
   void _onCartProviderChanged() {
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void _showSuspendedSalesModal(BuildContext context) async {

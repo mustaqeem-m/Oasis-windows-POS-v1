@@ -226,9 +226,9 @@ class System {
       'serviceStaff'
     ];
     Contact().emptyContact();
-    colNames.forEach((element) async {
-      await db.delete('system', where: 'key = ?', whereArgs: ['$element']);
-    });
+    for (var element in colNames) {
+      await db.delete('system', where: 'key = ?', whereArgs: [element]);
+    }
     await SystemApi().store();
   }
 }
