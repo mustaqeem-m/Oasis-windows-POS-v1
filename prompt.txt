@@ -1,9 +1,4 @@
-in sales.dart , 
+════════ Exception caught by animation library ═════════════════════════════════
+The provided ScrollController is attached to more than one ScrollPosition.
 
-'customer_name': customerDetail['name'],
-
-Exception has occurred.
-NoSuchMethodError (NoSuchMethodError: The method '[]' was called on null.
-Receiver: null
-Tried calling: []("name"))
-
+in sales paage

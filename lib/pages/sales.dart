@@ -32,7 +32,7 @@ class Sales extends StatefulWidget {
 class _SalesState extends State<Sales> {
   List sellList = [];
   List<String> paymentStatuses = ['all'], invoiceStatuses = ['final', 'draft'];
-  ScrollController _scrollController = new ScrollController();
+  ScrollController _scrollController = new ScrollController(),  _scrollController2 = new ScrollController();
   bool isLoading = false,
       synced = true,
       canViewSell = false,
@@ -42,7 +42,7 @@ class _SalesState extends State<Sales> {
       changeUrl = false;
   Map<dynamic, dynamic> selectedLocation = {'id': 0, 'name': 'All'},
       selectedCustomer = {'id': 0, 'name': 'All', 'mobile': ''};
-  String selectedPaymentStatus = '';
+  String selectedPaymentStatus = 'all';
   String? startDateRange, endDateRange; // selectedInvoiceStatus = 'all';
   List<Map<dynamic, dynamic>> allSalesListMap = [],
       customerListMap = [
@@ -69,12 +69,19 @@ class _SalesState extends State<Sales> {
         setAllSalesList();
       }
     });
+    _scrollController2.addListener(() {
+      if (_scrollController2.position.pixels ==
+          _scrollController2.position.maxScrollExtent) {
+        setAllSalesList();
+      }
+    });
     Helper().syncCallLogs();
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _scrollController2.dispose();
     super.dispose();
   }
 
@@ -187,19 +194,15 @@ class _SalesState extends State<Sales> {
     }
     if (await Helper().getPermission("view_paid_sells_only")) {
       paymentStatuses.add('paid');
-      selectedPaymentStatus = 'paid';
     }
     if (await Helper().getPermission("view_due_sells_only")) {
       paymentStatuses.add('due');
-      selectedPaymentStatus = 'due';
     }
     if (await Helper().getPermission("view_partial_sells_only")) {
       paymentStatuses.add('partial');
-      selectedPaymentStatus = 'partial';
     }
     if (await Helper().getPermission("view_overdue_sells_only")) {
       paymentStatuses.add('overdue');
-      selectedPaymentStatus = 'overdue';
     }
     //await Helper().getPermission("sell.view")
     if (await Helper().getPermission("direct_sell.view")) {
@@ -275,7 +278,9 @@ class _SalesState extends State<Sales> {
             'id': element['id'],
             'transaction_date': element['transaction_date'],
             'invoice_no': element['invoice_no'],
-            'customer_name': (customerDetail != null) ? customerDetail['name'] : 'Walk-In Customer',
+            'customer_name': (customerDetail != null)
+                ? customerDetail['name']
+                : 'Walk-In Customer',
             'mobile': (customerDetail != null) ? customerDetail['mobile'] : '',
             'contact_id': element['contact_id'],
             'location_id': element['location_id'],
@@ -741,7 +746,7 @@ class _SalesState extends State<Sales> {
                     ? ListView.builder(
                         padding: EdgeInsets.all(10),
                         shrinkWrap: true,
-                        controller: _scrollController,
+                        controller: _scrollController2,
                         itemCount: allSalesListMap.length + 1,
                         itemBuilder: (context, index) {
                           if (index == allSalesListMap.length) {
