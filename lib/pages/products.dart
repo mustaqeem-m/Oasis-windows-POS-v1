@@ -2243,7 +2243,7 @@ class ProductsState extends State<Products> {
     });
 
     // 3. Show success message
-    ToastHelper.show(context, "Sale added successfully");
+    ToastHelper.showSuccessToast(context, "Sale added successfully");
 
     // 4. Fetch data for receipt
     final saleDetailsList = await SellDatabase().getSellBySellId(saleId);

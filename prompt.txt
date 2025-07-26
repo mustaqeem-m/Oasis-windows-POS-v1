@@ -1,5 +1,6 @@
-if (info.isNotEmpty && info[0]['payment_lines'] != null)
-
-NoSuchMethodError (NoSuchMethodError: The method '[]' was called on null.
-Receiver: null
-Tried calling: []("payment_lines"))
+#0      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:368:7)
+platform_channel.dart:368
+<asynchronous suspension>
+#1      Fluttertoast.showToast (package:fluttertoast/fluttertoast.dart:116:17)
+fluttertoast.dart:116
+<asynchronous suspension>
