@@ -309,3 +309,9 @@ And anywhere else in your app (like in the \_buildReceiptPreview method):
 - Text means: "Create a Flutter Text widget to show on the screen."
 
 It's a standard and necessary practice in Dart to keep the two libraries from getting confused.
+
+- the long loading time is due to the sequential nature of the data fetching operations when the product page is initialized. I can significantly improve this by running these operations
+  in parallel.
+
+- by refactoring the \_initializePage method in lib/pages/products.dart to use Future.wait. This will allow the application to fetch all the necessary data concurrently, which should
+  dramatically reduce the loading time.

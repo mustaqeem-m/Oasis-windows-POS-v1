@@ -16,13 +16,15 @@ class SellApi extends Api {
     var info = jsonDecode(response.body);
     var result;
 
-    if (info.isNotEmpty && info[0]['payment_lines'] != null) {
+    if (info != null && info.isNotEmpty && info[0]['payment_lines'] != null) {
       result = {
         'transaction_id': info[0]['id'],
         'payment_lines': info[0]['payment_lines'],
         'invoice_url': info[0]['invoice_url']
       };
-    } else if (info.isNotEmpty && info[0]['is_quotation'] != null) {
+    } else if (info != null &&
+        info.isNotEmpty &&
+        info[0]['is_quotation'] != null) {
       result = {
         'transaction_id': info[0]['id'],
         'invoice_url': info[0]['invoice_url']

@@ -134,18 +134,23 @@ class ProductsState extends State<Products> {
   Future<void> _initializePage() async {
     await System().refresh();
     _cartProvider.init(null);
-    await setLocationMap();
-    await categoryList();
-    await subCategoryList(categoryId);
-    await brandList();
-    await _getCustomers();
-    await _getCommissionAgents();
-    await _getTypesOfService();
-    await _getTables();
-    await _getServiceStaff();
-    await _getPrinters();
+
+    await Future.wait<dynamic>([
+      setLocationMap(),
+      categoryList(),
+      subCategoryList(categoryId),
+      brandList(),
+      _getCustomers(),
+      _getCommissionAgents(),
+      _getTypesOfService(),
+      _getTables(),
+      _getServiceStaff(),
+      _getPrinters(),
+      _getCartLines(),
+    ]);
+
     await Helper().syncCallLogs();
-    await _getCartLines();
+
     if (mounted) {
       setState(() {
         _isLoading = false;

@@ -1,9 +1,5 @@
- ProductsState.categoryList (package:pos_2/pages/products.dart:355:41)
-products.dart:355
-<asynchronous suspension>
-#3      ProductsState._initializePage (package:pos_2/pages/products.dart:138:5)
-products.dart:138
-<asynchronous suspension>
+if (info.isNotEmpty && info[0]['payment_lines'] != null)
 
-
-i receive a unmount error still from above part in products.dart 📄
+NoSuchMethodError (NoSuchMethodError: The method '[]' was called on null.
+Receiver: null
+Tried calling: []("payment_lines"))
