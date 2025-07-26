@@ -1,4 +1,6 @@
-'method': paymentMethods[0]['name'],
+ScaffoldMessenger.of(context).showSnackBar( 
 
 Exception has occurred.
-RangeError (RangeError (length): Invalid value: Valid value range is empty: 0)
+FlutterError (Looking up a deactivated widget's ancestor is unsafe.
+At this point the state of the widget's element tree is no longer stable.
+To safely refer to a widget's ancestor in its dispose() method, save a reference to the ancestor by calling dependOnInheritedWidgetOfExactType() in the widget's didChangeDependencies() method.)

@@ -236,6 +236,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
       await ExpenseApi().create(expenseData).then((_) {
         Navigator.of(context).pop(true); // Return true to indicate success
       }).catchError((error) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to add expense: $error')));
       });
     }
