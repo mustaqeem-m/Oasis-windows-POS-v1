@@ -107,6 +107,7 @@ class _SalesState extends State<Sales> {
     });
     await System().refreshPermissionList().then((value) async {
       await getPermission().then((value) {
+        if (!mounted) return;
         changeUrl = true;
         onFilter();
       });
@@ -121,49 +122,6 @@ class _SalesState extends State<Sales> {
       child: Scaffold(
         appBar: AppBar(
           elevation: 0,
-          title: Text(AppLocalizations.of(context).translate('sales'),
-              style: AppTheme.getTextStyle(themeData.textTheme.titleLarge,
-                  fontWeight: 600)),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () async {
-                if (await Helper().checkConnectivity()) {
-                  showDialog(
-                    barrierDismissible: true,
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        content: Row(
-                          children: [
-                            CircularProgressIndicator(),
-                            Container(
-                                margin: EdgeInsets.only(left: 5),
-                                child: Text(AppLocalizations.of(context)
-                                    .translate('sync_in_progress'))),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                  await Sell().createApiSell(syncAll: true).then((value) {
-                    Navigator.pop(context);
-                    setState(() {
-                      synced = true;
-                      sells();
-                    });
-                  });
-                } else
-                  Fluttertoast.showToast(
-                      msg: AppLocalizations.of(context)
-                          .translate('check_connectivity'));
-              },
-              child: Text(
-                AppLocalizations.of(context).translate('sync'),
-                style: AppTheme.getTextStyle(themeData.textTheme.titleMedium,
-                    fontWeight: (synced) ? 500 : 900, letterSpacing: -0.2),
-              ),
-            ),
-          ],
           bottom: TabBar(tabs: [
             Tab(
                 icon: Icon(Icons.line_weight),
@@ -371,6 +329,7 @@ class _SalesState extends State<Sales> {
     var pendingAmount = 0.0;
     var totalAmount = 0.0;
     List sell = await SellDatabase().getSellByTransactionId(sells['id']);
+    if (!mounted) return;
     await PaymentDatabase().get(sell[0]['id'], allColumns: true).then((value) {
       value.forEach((element) {
         if (element['is_return'] == 1) {
@@ -385,6 +344,7 @@ class _SalesState extends State<Sales> {
     }
     Map<String, dynamic> sellMap =
         Sell().createSellMap(sells, changeReturn, pendingAmount);
+    if (!mounted) return;
     await SellDatabase().updateSells(sell[0]['id'], sellMap);
   }
 
@@ -409,6 +369,7 @@ class _SalesState extends State<Sales> {
       nextPage = (nextPage ?? '') +
           "&start_date=$startDateRange&end_date=$endDateRange";
     }
+    if (!mounted) return;
     changeUrl = true;
     setAllSalesList();
   }
@@ -547,6 +508,7 @@ class _SalesState extends State<Sales> {
             children: [
               GestureDetector(
                 onTap: () {
+                  if (!mounted) return;
                   setState(() {
                     showFilter = !showFilter;
                   });
@@ -696,6 +658,7 @@ class _SalesState extends State<Sales> {
                                             fontWeight: 600),
                                       ),
                                       onPressed: () {
+                                        if (!mounted) return;
                                         setState(() {
                                           selectedLocation = locationListMap[0];
                                           selectedCustomer = customerListMap[0];
@@ -797,6 +760,7 @@ class _SalesState extends State<Sales> {
             selectionMode: DateRangePickerSelectionMode.range,
             onSelectionChanged: (DateRangePickerSelectionChangedArgs args) {
               if (args.value.startDate != null) {
+                if (!mounted) return;
                 setState(() {
                   startDateRange = DateFormat('yyyy-MM-dd')
                       .format(args.value.startDate)
@@ -804,6 +768,7 @@ class _SalesState extends State<Sales> {
                 });
               }
               if (args.value.endDate != null) {
+                if (!mounted) return;
                 setState(() {
                   endDateRange = DateFormat('yyyy-MM-dd')
                       .format(args.value.endDate)
@@ -826,12 +791,13 @@ class _SalesState extends State<Sales> {
                       side: BorderSide(color: themeData.colorScheme.primary)),
                 ),
                 onPressed: () {
-                  setState(() {
-                    startDateRange = null;
-                    endDateRange = null;
-                  });
-                  Navigator.pop(context);
-                },
+              if (!mounted) return;
+              setState(() {
+                startDateRange = null;
+                endDateRange = null;
+              });
+              Navigator.pop(context);
+            },
                 child: Text(
                   AppLocalizations.of(context).translate('reset'),
                   style: AppTheme.getTextStyle(themeData.textTheme.titleLarge,
@@ -1494,6 +1460,7 @@ class _SalesState extends State<Sales> {
         return "${decodedItem['name']} (${decodedItem['mobile'] ?? ' - '})";
       },
       onChanged: (value) async {
+        if (!mounted) return;
         setState(() {
           selectedCustomer = jsonDecode(value!);
         });
@@ -1505,6 +1472,7 @@ class _SalesState extends State<Sales> {
   Widget locations() {
     return PopupMenuButton(
         onSelected: (Map<dynamic, dynamic> item) {
+          if (!mounted) return;
           setState(() {
             selectedLocation = item;
           });
@@ -1552,6 +1520,7 @@ class _SalesState extends State<Sales> {
   Widget paymentStatus() {
     return PopupMenuButton(
       onSelected: (String item) {
+        if (!mounted) return;
         setState(() {
           selectedPaymentStatus = item;
         });
@@ -1603,6 +1572,7 @@ class _SalesState extends State<Sales> {
   Widget invoiceStatus() {
     return PopupMenuButton(
       onSelected: (item) {
+        if (!mounted) return;
         setState(() {
           // selectedInvoiceStatus = item;
         });

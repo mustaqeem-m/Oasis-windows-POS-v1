@@ -268,9 +268,11 @@ class ProductsState extends State<Products> {
       ToastHelper.show(context,
           AppLocalizations.of(context).translate('no_subscription_found'));
     }
+    if (!mounted) return;
     await Helper().getFormattedBusinessDetails().then((value) {
       symbol = '${value['symbol']} ';
     });
+    if (!mounted) return;
     setDefaultLocation(selectedLocationId);
     await productList(resetOffset: true);
   }
@@ -348,6 +350,7 @@ class ProductsState extends State<Products> {
 
   Future<void> categoryList() async {
     List<dynamic> categories = await System().getCategories();
+    if (!mounted) return;
     _categoryMenuItems.clear();
     _categoryMenuItems.add(
       DropdownMenuItem(
@@ -368,6 +371,7 @@ class ProductsState extends State<Products> {
 
   Future<void> subCategoryList(int parentId) async {
     List<dynamic> subCategories = await System().getSubCategories(parentId);
+    if (!mounted) return;
     _subCategoryMenuItems.clear();
     _subCategoryMenuItems.add(
       DropdownMenuItem(
@@ -388,6 +392,7 @@ class ProductsState extends State<Products> {
 
   Future<void> brandList() async {
     List<dynamic> brands = await System().getBrands();
+    if (!mounted) return;
     _brandsMenuItems.clear();
     _brandsMenuItems.add(
       DropdownMenuItem(

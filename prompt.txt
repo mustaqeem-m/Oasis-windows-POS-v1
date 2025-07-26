@@ -1,4 +1,9 @@
-════════ Exception caught by animation library ═════════════════════════════════
-The provided ScrollController is attached to more than one ScrollPosition.
+ ProductsState.categoryList (package:pos_2/pages/products.dart:355:41)
+products.dart:355
+<asynchronous suspension>
+#3      ProductsState._initializePage (package:pos_2/pages/products.dart:138:5)
+products.dart:138
+<asynchronous suspension>
 
-in sales paage
+
+i receive a unmount error still from above part in products.dart 📄
