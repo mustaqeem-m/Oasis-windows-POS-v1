@@ -179,512 +179,512 @@ class CheckOutState extends State<CheckOut> {
         ));
   }
 
+  Widget _buildPaymentMethodsList() {
+    return ListView.builder(
+        physics: const ScrollPhysics(),
+        shrinkWrap: true,
+        itemCount: payments.length,
+        itemBuilder: (context, index) {
+          return Card(
+            margin: EdgeInsets.all(MySize.size5!),
+            shadowColor: Colors.blue,
+            child: Padding(
+              padding: EdgeInsets.all(MySize.size8!),
+              child: Column(children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                            '${AppLocalizations.of(context).translate('amount')} : ',
+                            style: AppTheme.getTextStyle(
+                                themeData.textTheme.bodyLarge!,
+                                color: themeData.colorScheme.onSurface,
+                                fontWeight: 600,
+                                muted: true)),
+                        SizedBox(
+                            height: MySize.size40,
+                            width: MySize.safeWidth! * 0.50,
+                            child: TextFormField(
+                                decoration: InputDecoration(
+                                  prefix: Text(symbol),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                  ),
+                                ),
+                                textAlign: TextAlign.end,
+                                initialValue: payments[index]['amount']
+                                    .toStringAsFixed(2),
+                                //input formatter will allow only 2 digits after decimal
+                                inputFormatters: [
+                                  // ignore: deprecated_member_use
+                                  FilteringTextInputFormatter(
+                                      RegExp(r'^(\d+)?\.?\d{0,2}'),
+                                      allow: true)
+                                ],
+                                keyboardType: TextInputType.number,
+                                onChanged: (value) {
+                                  payments[index]['amount'] =
+                                      Helper().validateInput(value);
+                                  calculateMultiPayment();
+                                }))
+                      ],
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: MySize.size6!),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      children: <Widget>[
+                        Text(
+                            '${AppLocalizations.of(context).translate('payment_method')} : ',
+                            style: AppTheme.getTextStyle(
+                                themeData.textTheme.bodyLarge!,
+                                color: themeData.colorScheme.onSurface,
+                                fontWeight: 600,
+                                muted: true)),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                                color: themeData.colorScheme.onSurface,
+                                width: 1.0),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton(
+                                dropdownColor: themeData.colorScheme.surface,
+                                icon: const Icon(
+                                  Icons.arrow_drop_down,
+                                ),
+                                value: payments[index]['method'],
+                                //index['tax_rate_id'],
+                                items: paymentMethods
+                                    .map<DropdownMenuItem<String>>((Map value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value['name'],
+                                    child: SizedBox(
+                                      width: MySize.screenWidth! * 0.35,
+                                      child: Text(value['value'],
+                                          softWrap: true,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: AppTheme.getTextStyle(
+                                              themeData.textTheme.bodyLarge!,
+                                              color: themeData
+                                                  .colorScheme.onSurface,
+                                              fontWeight: 800,
+                                              muted: true)),
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (newValue) {
+                                  for (var element in paymentMethods) {
+                                    if (element['name'] == newValue) {
+                                      setState(() {
+                                        payments[index]['method'] = newValue;
+                                        payments[index]['account_id'] =
+                                            element['account_id'];
+                                      });
+                                    }
+                                  }
+                                }),
+                          ),
+                        )
+                      ],
+                    ),
+                    Column(
+                      children: <Widget>[
+                        Text(
+                            '${AppLocalizations.of(context).translate('payment_account')} : ',
+                            style: AppTheme.getTextStyle(
+                                themeData.textTheme.bodyLarge!,
+                                color: themeData.colorScheme.onSurface,
+                                fontWeight: 600,
+                                muted: true)),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                                color: themeData.colorScheme.onSurface,
+                                width: 1.0),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton(
+                                dropdownColor: themeData.colorScheme.surface,
+                                icon: const Icon(
+                                  Icons.arrow_drop_down,
+                                ),
+                                value: payments[index]['account_id'],
+                                //index['tax_rate_id'],
+                                items: paymentAccounts
+                                    .map<DropdownMenuItem<int>>((Map value) {
+                                  return DropdownMenuItem<int>(
+                                    value: value['id'],
+                                    child: SizedBox(
+                                      width: MySize.screenWidth! * 0.35,
+                                      child: Text(value['name'],
+                                          softWrap: true,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: AppTheme.getTextStyle(
+                                              themeData.textTheme.bodyLarge!,
+                                              color: themeData
+                                                  .colorScheme.onSurface,
+                                              fontWeight: 800,
+                                              muted: true)),
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    payments[index]['account_id'] = newValue;
+                                  });
+                                }),
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+                Row(
+                  children: <Widget>[
+                    SizedBox(
+                      width: MySize.safeWidth! * 0.8,
+                      child: TextFormField(
+                          decoration: InputDecoration(
+                              hintText: AppLocalizations.of(context)
+                                  .translate('payment_note'),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              )),
+                          onChanged: (value) {
+                            payments[index]['note'] = value;
+                          }),
+                    ),
+                    Expanded(
+                        child: (index > 0)
+                            ? IconButton(
+                                icon: Icon(
+                                  MdiIcons.deleteForeverOutline,
+                                  size: MySize.size40,
+                                  color: Colors.black,
+                                ),
+                                onPressed: () {
+                                  alertConfirm(context, index);
+                                })
+                            : Container())
+                  ],
+                ),
+              ]),
+            ),
+          );
+        });
+  }
+
+  Widget _buildAddPaymentButton() {
+    return OutlinedButton.icon(
+      icon: Icon(MdiIcons.plus),
+      label: Text(
+        AppLocalizations.of(context).translate('add_payment'),
+        style: AppTheme.getTextStyle(
+          themeData.textTheme.titleMedium!,
+          fontWeight: 700,
+          color: themeData.colorScheme.primary,
+        ),
+      ),
+      style: OutlinedButton.styleFrom(
+        side: BorderSide(
+          color: themeData.colorScheme.primary,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(MySize.size8!),
+        ),
+        padding: EdgeInsets.symmetric(
+            vertical: MySize.size12!, horizontal: MySize.size16!),
+      ),
+      onPressed: paymentMethods.isEmpty
+          ? null
+          : () {
+              setState(() {
+                payments.add({
+                  'amount': pendingAmount,
+                  'method': paymentMethods[0]['name'],
+                  'note': '',
+                  'account_id': paymentMethods[0]['account_id'],
+                });
+                calculateMultiPayment();
+              });
+            },
+    );
+  }
+
+  Widget _buildPaymentSummary() {
+    return GridView.count(
+        shrinkWrap: true,
+        physics: const ClampingScrollPhysics(),
+        crossAxisCount: 2,
+        padding: EdgeInsets.all(MySize.size16!),
+        mainAxisSpacing: MySize.size16!,
+        childAspectRatio: 2.5,
+        crossAxisSpacing: MySize.size16!,
+        children: <Widget>[
+          block(
+            amount: Helper().formatCurrency(invoiceAmount),
+            subject: AppLocalizations.of(context).translate('total_payble'),
+            backgroundColor: Colors.blue,
+            textColor: Colors.blue,
+            icon: MdiIcons.cashMultiple,
+          ),
+          block(
+            amount: Helper().formatCurrency(totalPaying),
+            subject: AppLocalizations.of(context).translate('total_paying'),
+            backgroundColor: Colors.red,
+            textColor: Colors.red,
+            icon: MdiIcons.cashCheck,
+          ),
+          block(
+            amount: Helper().formatCurrency(changeReturn),
+            subject: AppLocalizations.of(context).translate('change_return'),
+            backgroundColor: Colors.green,
+            textColor: Colors.green,
+            icon: MdiIcons.cashRefund,
+          ),
+          block(
+            amount: Helper().formatCurrency(pendingAmount),
+            subject: AppLocalizations.of(context).translate('balance'),
+            backgroundColor: Colors.orange,
+            textColor: Colors.orange,
+            icon: MdiIcons.cashMinus,
+          ),
+        ]);
+  }
+
+  Widget _buildNotesSection() {
+    return Padding(
+      padding: EdgeInsets.all(MySize.size8!),
+      child: Column(
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Column(children: <Widget>[
+                Text(
+                    '${AppLocalizations.of(context).translate('sell_note')} : ',
+                    style: AppTheme.getTextStyle(themeData.textTheme.bodyLarge!,
+                        color: themeData.colorScheme.onSurface,
+                        fontWeight: 600,
+                        muted: true)),
+                SizedBox(
+                    height: MySize.size80,
+                    width: MySize.screenWidth! * 0.40,
+                    child: TextFormField(
+                      controller: saleNote,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                    ))
+              ]),
+              Column(
+                children: <Widget>[
+                  Text(
+                      '${AppLocalizations.of(context).translate('staff_note')} : ',
+                      style: AppTheme.getTextStyle(
+                          themeData.textTheme.bodyLarge!,
+                          color: themeData.colorScheme.onSurface,
+                          fontWeight: 600,
+                          muted: true)),
+                  SizedBox(
+                    height: MySize.size80,
+                    width: MySize.screenWidth! * 0.40,
+                    child: TextFormField(
+                      controller: staffNote,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          _buildInvoiceLayoutRadioButtons(),
+          SizedBox(height: MySize.size16!),
+          _buildFinalizeButtons(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInvoiceLayoutRadioButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          flex: 1,
+          child: Row(
+            children: [
+              Radio(
+                value: "Mobile",
+                groupValue: invoiceType,
+                onChanged: (value) {
+                  setState(() {
+                    invoiceType = value.toString();
+                    printWebInvoice = false;
+                  });
+                },
+                toggleable: true,
+              ),
+              Expanded(
+                child: Text(
+                  AppLocalizations.of(context).translate('mobile_layout'),
+                  maxLines: 2,
+                  style: AppTheme.getTextStyle(themeData.textTheme.bodyMedium!,
+                      color: themeData.colorScheme.onSurface, fontWeight: 600),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          flex: 1,
+          child: Row(
+            children: [
+              Radio(
+                value: "Web",
+                groupValue: invoiceType,
+                onChanged: (value) async {
+                  if (await Helper().checkConnectivity()) {
+                    setState(() {
+                      invoiceType = value.toString();
+                      printWebInvoice = true;
+                    });
+                  } else {
+                    ToastHelper.show(
+                        context,
+                        AppLocalizations.of(context)
+                            .translate('check_connectivity'));
+                  }
+                },
+                toggleable: true,
+              ),
+              Expanded(
+                child: Text(
+                  AppLocalizations.of(context).translate('web_layout'),
+                  maxLines: 2,
+                  style: AppTheme.getTextStyle(themeData.textTheme.bodyMedium!,
+                      color: themeData.colorScheme.onSurface, fontWeight: 600),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFinalizeButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          flex: 1,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                backgroundColor: themeData.colorScheme.onPrimary, elevation: 5),
+            onPressed: () {
+              _printInvoice = false;
+              if (pendingAmount >= 0.01) {
+                alertPending(context);
+              } else {
+                if (!saleCreated) {
+                  onSubmit();
+                }
+              }
+            },
+            child: Text(
+              AppLocalizations.of(context).translate('finalize_n_share'),
+              style: AppTheme.getTextStyle(
+                themeData.textTheme.titleMedium!,
+                fontWeight: 700,
+                color: themeData.colorScheme.onSecondary,
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: MySize.size10!),
+        ),
+        Expanded(
+          flex: 1,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                backgroundColor: themeData.colorScheme.primary, elevation: 5),
+            onPressed: () {
+              _printInvoice = true;
+              if (pendingAmount >= 0.01) {
+                alertPending(context);
+              } else {
+                if (!saleCreated) {
+                  onSubmit();
+                }
+              }
+            },
+            child: Text(
+              AppLocalizations.of(context).translate('finalize_n_print'),
+              style: AppTheme.getTextStyle(
+                themeData.textTheme.titleMedium!,
+                fontWeight: 700,
+                color: themeData.colorScheme.onSecondary,
+              ),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
   //payment widget
   Widget paymentBox() {
     if (paymentMethods.isEmpty && payments.isEmpty) {
-      return Center(
+      return const Center(
         child: Text('No payment methods available.'),
       );
     }
     return Container(
       margin: EdgeInsets.all(MySize.size3!),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          ListView.builder(
-              physics: ScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: payments.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  margin: EdgeInsets.all(MySize.size5!),
-                  shadowColor: Colors.blue,
-                  child: Padding(
-                    padding: EdgeInsets.all(MySize.size8!),
-                    child: Column(children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                  '${AppLocalizations.of(context).translate('amount')} : ',
-                                  style: AppTheme.getTextStyle(
-                                      themeData.textTheme.bodyLarge!,
-                                      color: themeData.colorScheme.onSurface,
-                                      fontWeight: 600,
-                                      muted: true)),
-                              SizedBox(
-                                  height: MySize.size40,
-                                  width: MySize.safeWidth! * 0.50,
-                                  child: TextFormField(
-                                      decoration: InputDecoration(
-                                        prefix: Text(symbol),
-                                        border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                        ),
-                                      ),
-                                      textAlign: TextAlign.end,
-                                      initialValue: payments[index]['amount']
-                                          .toStringAsFixed(2),
-                                      //input formatter will allow only 2 digits after decimal
-                                      inputFormatters: [
-                                        // ignore: deprecated_member_use
-                                        FilteringTextInputFormatter(
-                                            RegExp(r'^(\d+)?\.?\d{0,2}'),
-                                            allow: true)
-                                      ],
-                                      keyboardType: TextInputType.number,
-                                      onChanged: (value) {
-                                        payments[index]['amount'] =
-                                            Helper().validateInput(value);
-                                        calculateMultiPayment();
-                                      }))
-                            ],
-                          ),
-                        ],
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: MySize.size6!),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            children: <Widget>[
-                              Text(
-                                  '${AppLocalizations.of(context).translate('payment_method')} : ',
-                                  style: AppTheme.getTextStyle(
-                                      themeData.textTheme.bodyLarge!,
-                                      color: themeData.colorScheme.onSurface,
-                                      fontWeight: 600,
-                                      muted: true)),
-                              Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      color: themeData.colorScheme.onSurface,
-                                      width: 1.0),
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton(
-                                      dropdownColor:
-                                          themeData.colorScheme.surface,
-                                      icon: Icon(
-                                        Icons.arrow_drop_down,
-                                      ),
-                                      value: payments[index]['method'],
-                                      //index['tax_rate_id'],
-                                      items: paymentMethods
-                                          .map<DropdownMenuItem<String>>(
-                                              (Map value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value['name'],
-                                          child: SizedBox(
-                                            width: MySize.screenWidth! * 0.35,
-                                            child: Text(value['value'],
-                                                softWrap: true,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: AppTheme.getTextStyle(
-                                                    themeData
-                                                        .textTheme.bodyLarge!,
-                                                    color: themeData
-                                                        .colorScheme.onSurface,
-                                                    fontWeight: 800,
-                                                    muted: true)),
-                                          ),
-                                        );
-                                      }).toList(),
-                                      onChanged: (newValue) {
-                                        for (var element in paymentMethods) {
-                                          if (element['name'] == newValue) {
-                                            setState(() {
-                                              payments[index]['method'] =
-                                                  newValue;
-                                              payments[index]['account_id'] =
-                                                  element['account_id'];
-                                            });
-                                          }
-                                        }
-                                      }),
-                                ),
-                              )
-                            ],
-                          ),
-                          Column(
-                            children: <Widget>[
-                              Text(
-                                  '${AppLocalizations.of(context).translate('payment_account')} : ',
-                                  style: AppTheme.getTextStyle(
-                                      themeData.textTheme.bodyLarge!,
-                                      color: themeData.colorScheme.onSurface,
-                                      fontWeight: 600,
-                                      muted: true)),
-                              Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                      color: themeData.colorScheme.onSurface,
-                                      width: 1.0),
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton(
-                                      dropdownColor:
-                                          themeData.colorScheme.surface,
-                                      icon: Icon(
-                                        Icons.arrow_drop_down,
-                                      ),
-                                      value: payments[index]['account_id'],
-                                      //index['tax_rate_id'],
-                                      items: paymentAccounts
-                                          .map<DropdownMenuItem<int>>(
-                                              (Map value) {
-                                        return DropdownMenuItem<int>(
-                                          value: value['id'],
-                                          child: SizedBox(
-                                            width: MySize.screenWidth! * 0.35,
-                                            child: Text(value['name'],
-                                                softWrap: true,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: AppTheme.getTextStyle(
-                                                    themeData
-                                                        .textTheme.bodyLarge!,
-                                                    color: themeData
-                                                        .colorScheme.onSurface,
-                                                    fontWeight: 800,
-                                                    muted: true)),
-                                          ),
-                                        );
-                                      }).toList(),
-                                      onChanged: (newValue) {
-                                        setState(() {
-                                          payments[index]['account_id'] =
-                                              newValue;
-                                        });
-                                      }),
-                                ),
-                              )
-                            ],
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: <Widget>[
-                          SizedBox(
-                            width: MySize.safeWidth! * 0.8,
-                            child: TextFormField(
-                                decoration: InputDecoration(
-                                    hintText: AppLocalizations.of(context)
-                                        .translate('payment_note'),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                    )),
-                                onChanged: (value) {
-                                  payments[index]['note'] = value;
-                                }),
-                          ),
-                          Expanded(
-                              child: (index > 0)
-                                  ? IconButton(
-                                      icon: Icon(
-                                        MdiIcons.deleteForeverOutline,
-                                        size: MySize.size40,
-                                        color: Colors.black,
-                                      ),
-                                      onPressed: () {
-                                        alertConfirm(context, index);
-                                      })
-                                  : Container())
-                        ],
-                      ),
-                    ]),
-                  ),
-                );
-              }),
+          _buildPaymentMethodsList(),
+          SizedBox(height: MySize.size16!),
           Card(
+            elevation: 2,
             margin: EdgeInsets.all(MySize.size5!),
             child: Container(
-              padding: EdgeInsets.all(MySize.size5!),
+              padding: EdgeInsets.all(MySize.size16!),
               child: Column(
                 children: <Widget>[
-                  OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(
-                        color: themeData.colorScheme.primary,
-                      ),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        payments.add({
-                          'amount': pendingAmount,
-                          'method': paymentMethods[0]['name'],
-                          'note': '',
-                          'account_id': paymentMethods[0]['account_id'],
-                        });
-                        calculateMultiPayment();
-                      });
-                    },
-                    child: Text(
-                      AppLocalizations.of(context).translate('add_payment'),
-                      style: AppTheme.getTextStyle(
-                        themeData.textTheme.titleMedium!,
-                        fontWeight: 700,
-                        color: themeData.colorScheme.primary,
-                      ),
-                    ),
-                  ),
+                  _buildAddPaymentButton(),
+                  SizedBox(height: MySize.size16!),
                   _buildShippingSection(),
-                  Container(
-                    child: GridView.count(
-                        shrinkWrap: true,
-                        physics: ClampingScrollPhysics(),
-                        crossAxisCount: 2,
-                        padding: EdgeInsets.only(
-                            left: MySize.size16!,
-                            right: MySize.size16!,
-                            top: MySize.size16!),
-                        mainAxisSpacing: MySize.size16!,
-                        childAspectRatio: 8 / 3,
-                        crossAxisSpacing: MySize.size16!,
-                        children: <Widget>[
-                          block(
-                            amount: Helper().formatCurrency(invoiceAmount),
-                            subject:
-                                '${AppLocalizations.of(context).translate('total_payble')} : ',
-                            backgroundColor: Colors.blue,
-                            textColor: themeData.colorScheme.onSurface,
-                          ),
-                          block(
-                            amount: Helper().formatCurrency(totalPaying),
-                            subject:
-                                '${AppLocalizations.of(context).translate('total_paying')} : ',
-                            backgroundColor: Colors.red,
-                            textColor: themeData.colorScheme.onSurface,
-                          ),
-                          block(
-                            amount: Helper().formatCurrency(changeReturn),
-                            subject:
-                                '${AppLocalizations.of(context).translate('change_return')} : ',
-                            backgroundColor: Colors.green,
-                            textColor: (changeReturn >= 0.01)
-                                ? Colors.red
-                                : themeData.colorScheme.onSurface,
-                          ),
-                          block(
-                            amount: Helper().formatCurrency(pendingAmount),
-                            subject:
-                                '${AppLocalizations.of(context).translate('balance')} : ',
-                            backgroundColor: Colors.orange,
-                            textColor: (pendingAmount >= 0.01)
-                                ? Colors.red
-                                : themeData.colorScheme.onSurface,
-                          ),
-                        ]),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(MySize.size8!),
-                    child: Column(
-                      children: <Widget>[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Column(children: <Widget>[
-                              Text(
-                                  '${AppLocalizations.of(context).translate('sell_note')} : ',
-                                  style: AppTheme.getTextStyle(
-                                      themeData.textTheme.bodyLarge!,
-                                      color: themeData.colorScheme.onSurface,
-                                      fontWeight: 600,
-                                      muted: true)),
-                              SizedBox(
-                                  height: MySize.size80,
-                                  width: MySize.screenWidth! * 0.40,
-                                  child: TextFormField(
-                                    controller: saleNote,
-                                    decoration: InputDecoration(
-                                      border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                    ),
-                                  ))
-                            ]),
-                            Column(
-                              children: <Widget>[
-                                Text(
-                                    '${AppLocalizations.of(context).translate('staff_note')} : ',
-                                    style: AppTheme.getTextStyle(
-                                        themeData.textTheme.bodyLarge!,
-                                        color: themeData.colorScheme.onSurface,
-                                        fontWeight: 600,
-                                        muted: true)),
-                                SizedBox(
-                                  height: MySize.size80,
-                                  width: MySize.screenWidth! * 0.40,
-                                  child: TextFormField(
-                                    controller: staffNote,
-                                    decoration: InputDecoration(
-                                      border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        // GestureDetector(onTap: () {setState(() {shareInvoice = !shareInvoice;_printInvoice = !_printInvoice;});}, child: Row(children: <Widget>[Checkbox(value: shareInvoice, onChanged: (newValue) {setState(() {shareInvoice = !shareInvoice;_printInvoice = !_printInvoice;});}), Text("Share invoice : ", /* "${AppLocalizations.of(context).translate('print_invoice')} : ",*/style: AppTheme.getTextStyle(themeData.textTheme.bodyLarge, color: themeData.colorScheme.onBackground, fontWeight: 600, muted: true))],),), GestureDetector(onTap: () {setState(() {shareInvoice = !shareInvoice;_printInvoice = !_printInvoice;});}, child: Row(children: <Widget>[Checkbox(value: _printInvoice, onChanged: (newValue) {setState(() {shareInvoice = !shareInvoice;_printInvoice = !_printInvoice;});}), Text("${AppLocalizations.of(context).translate('print_invoice')} : ", style: AppTheme.getTextStyle(themeData.textTheme.bodyLarge, color: themeData.colorScheme.onBackground, fontWeight: 600, muted: true))],),),
-                        Container(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                flex: 1,
-                                child: Row(
-                                  children: [
-                                    Radio(
-                                      value: "Mobile",
-                                      groupValue: invoiceType,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          invoiceType = value.toString();
-                                          printWebInvoice = false;
-                                        });
-                                      },
-                                      toggleable: true,
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                        AppLocalizations.of(context)
-                                            .translate('mobile_layout'),
-                                        maxLines: 2,
-                                        style: AppTheme.getTextStyle(
-                                            themeData.textTheme.bodyMedium!,
-                                            color:
-                                                themeData.colorScheme.onSurface,
-                                            fontWeight: 600),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Expanded(
-                                flex: 1,
-                                child: Row(
-                                  children: [
-                                    Radio(
-                                      value: "Web",
-                                      groupValue: invoiceType,
-                                      onChanged: (value) async {
-                                        if (await Helper()
-                                            .checkConnectivity()) {
-                                          setState(() {
-                                            invoiceType = value.toString();
-                                            printWebInvoice = true;
-                                          });
-                                        } else {
-                                          // Fluttertoast.showToast(
-                                          //     msg: AppLocalizations.of(context)
-                                          //         .translate(
-                                          //             'check_connectivity'));
-                                          ToastHelper.show(
-                                              context,
-                                              AppLocalizations.of(context)
-                                                  .translate(
-                                                      'check_connectivity'));
-                                        }
-                                      },
-                                      toggleable: true,
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                        AppLocalizations.of(context)
-                                            .translate('web_layout'),
-                                        maxLines: 2,
-                                        style: AppTheme.getTextStyle(
-                                            themeData.textTheme.bodyMedium!,
-                                            color:
-                                                themeData.colorScheme.onSurface,
-                                            fontWeight: 600),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              flex: 1,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        themeData.colorScheme.onPrimary,
-                                    elevation: 5),
-                                onPressed: () {
-                                  _printInvoice = false;
-                                  if (pendingAmount >= 0.01) {
-                                    alertPending(context);
-                                  } else {
-                                    if (!saleCreated) {
-                                      onSubmit();
-                                    }
-                                  }
-                                },
-                                child: Text(
-                                  AppLocalizations.of(context)
-                                      .translate('finalize_n_share'),
-                                  style: AppTheme.getTextStyle(
-                                    themeData.textTheme.titleMedium!,
-                                    fontWeight: 700,
-                                    color: themeData.colorScheme.onSecondary,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: MySize.size10!),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        themeData.colorScheme.primary,
-                                    elevation: 5),
-                                onPressed: () {
-                                  _printInvoice = true;
-                                  if (pendingAmount >= 0.01) {
-                                    alertPending(context);
-                                  } else {
-                                    if (!saleCreated) {
-                                      onSubmit();
-                                    }
-                                  }
-                                },
-                                child: Text(
-                                  AppLocalizations.of(context)
-                                      .translate('finalize_n_print'),
-                                  style: AppTheme.getTextStyle(
-                                    themeData.textTheme.titleMedium!,
-                                    fontWeight: 700,
-                                    color: themeData.colorScheme.onSecondary,
-                                  ),
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ],
-                    ),
-                  )
+                  Divider(height: MySize.size32!),
+                  _buildPaymentSummary(),
+                  SizedBox(height: MySize.size16!),
+                  _buildNotesSection(),
                 ],
               ),
             ),
@@ -695,35 +695,49 @@ class CheckOutState extends State<CheckOut> {
   }
 
   Card block(
-      {Color? backgroundColor, String? subject, amount, Color? textColor}) {
+      {Color? backgroundColor,
+      String? subject,
+      amount,
+      Color? textColor,
+      IconData? icon}) {
     ThemeData themeData = Theme.of(context);
     return Card(
-      clipBehavior: Clip.antiAliasWithSaveLayer,
+      elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(MySize.size8!),
+        borderRadius: BorderRadius.circular(MySize.size12!),
       ),
-      child: SizedBox(
-        height: MySize.size30,
-        child: Container(
-          padding: EdgeInsets.all(MySize.size2!),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: <Widget>[
-              Text(
-                subject!,
-                style: AppTheme.getTextStyle(themeData.textTheme.bodyLarge!,
-                    color: themeData.colorScheme.onSurface,
-                    fontWeight: 800,
-                    muted: true),
+      color: backgroundColor?.withOpacity(0.1),
+      child: Container(
+        padding: EdgeInsets.all(MySize.size16!),
+        child: Row(
+          children: <Widget>[
+            if (icon != null)
+              Icon(
+                icon,
+                color: textColor,
+                size: MySize.size28!,
               ),
-              Text(
-                "$symbol $amount",
-                overflow: TextOverflow.ellipsis,
-                style: AppTheme.getTextStyle(themeData.textTheme.bodyLarge!,
-                    color: textColor, fontWeight: 600, muted: true),
-              ),
-            ],
-          ),
+            SizedBox(width: MySize.size12!),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  subject!,
+                  style: AppTheme.getTextStyle(themeData.textTheme.bodyMedium!,
+                      color: textColor?.withOpacity(0.7), fontWeight: 600),
+                ),
+                Text(
+                  "$symbol $amount",
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTheme.getTextStyle(
+                      themeData.textTheme.headlineSmall!,
+                      color: textColor,
+                      fontWeight: 700),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -878,23 +892,20 @@ class CheckOutState extends State<CheckOut> {
                 .printDocument(sellId, argument!['taxId'], context,
                     invoice: response.body)
                 .then((value) {
-              Navigator.popUntil(
-                  context, ModalRoute.withName('/home'));
+              Navigator.popUntil(context, ModalRoute.withName('/home'));
             });
           } else {
             await Helper()
                 .printDocument(sellId, argument!['taxId'], context)
                 .then((value) {
-              Navigator.popUntil(
-                  context, ModalRoute.withName('/home'));
+              Navigator.popUntil(context, ModalRoute.withName('/home'));
             });
           }
         } else {
           Helper()
               .printDocument(sellId, argument!['taxId'], context)
               .then((value) {
-            Navigator.popUntil(
-                context, ModalRoute.withName('/home'));
+            Navigator.popUntil(context, ModalRoute.withName('/home'));
           });
         }
       } else {
@@ -905,23 +916,20 @@ class CheckOutState extends State<CheckOut> {
                 .savePdf(sellId, argument!['taxId'], context, invoiceNo,
                     invoice: response.body)
                 .then((value) {
-              Navigator.popUntil(
-                  context, ModalRoute.withName('/home'));
+              Navigator.popUntil(context, ModalRoute.withName('/home'));
             });
           } else {
             await Helper()
                 .savePdf(sellId, argument!['taxId'], context, invoiceNo)
                 .then((value) {
-              Navigator.popUntil(
-                  context, ModalRoute.withName('/home'));
+              Navigator.popUntil(context, ModalRoute.withName('/home'));
             });
           }
         } else {
           Helper()
               .savePdf(sellId, argument!['taxId'], context, invoiceNo)
               .then((value) {
-            Navigator.popUntil(
-                context, ModalRoute.withName('/home'));
+            Navigator.popUntil(context, ModalRoute.withName('/home'));
           });
         }
       }

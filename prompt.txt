@@ -1,6 +1,4 @@
-#0      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:368:7)
-platform_channel.dart:368
-<asynchronous suspension>
-#1      Fluttertoast.showToast (package:fluttertoast/fluttertoast.dart:116:17)
-fluttertoast.dart:116
-<asynchronous suspension>
+'method': paymentMethods[0]['name'],
+
+Exception has occurred.
+RangeError (RangeError (length): Invalid value: Valid value range is empty: 0)
