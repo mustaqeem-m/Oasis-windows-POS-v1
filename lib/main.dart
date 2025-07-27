@@ -59,6 +59,7 @@ import 'dart:io'; // <-- required for Platform chec    ks
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:pos_2/helpers/http_override.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart'; // <-- required for desktop
 
@@ -71,6 +72,10 @@ import 'locale/MyLocalizations.dart';
 import 'providers/home_provider.dart';
 
 void main() async {
+  // WARNING: This is a security risk and should not be used in production.
+  // This override is intended for development purposes only, to bypass certificate
+  // validation for servers with self-signed certificates.
+  HttpOverrides.global = MyHttpOverrides();
   WidgetsFlutterBinding.ensureInitialized();
 
   // ✅ FFI Initialization for Windows/Linux/macOS

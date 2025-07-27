@@ -49,7 +49,7 @@ class Attendance {
 
   Future<bool> getAttendanceStatus(userId) async {
     var result = await AttendanceApi().getAttendanceDetails(userId);
-    if (result.length > 0) {
+    if (result != null && result.length > 0) {
       if (result['clock_out_time'] != null)
         return false;
       else

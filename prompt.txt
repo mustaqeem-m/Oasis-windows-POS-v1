@@ -1,9 +1,3 @@
+ in products.dart line 160 await Future.wait<dynamic>([ error is  
 
-
-════════ Exception caught by rendering library ═════════════════════════════════
-RenderBox was not laid out: RenderIgnorePointer#ecd00 relayoutBoundary=up14 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
-'package:flutter/src/rendering/box.dart':
-Failed assertion: line 2251 pos 12: 'hasSize'
-The relevant error-causing widget was:
-    GridView GridView:file:///C:/Users/Admin/Documents/Mustaqeem_git/oasis_windows_pos_v1/lib/pages/products.dart:2013:20
-════════════════════════════════════════════════════════════════════════════════
+│  > HandshakeException (HandshakeException: Connection terminated during handshake) 

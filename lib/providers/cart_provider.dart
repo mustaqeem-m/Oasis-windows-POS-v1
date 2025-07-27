@@ -289,8 +289,9 @@ class CartProvider with ChangeNotifier {
         await Helper().getPermission("edit_product_discount_from_pos_screen");
     await Helper().getFormattedBusinessDetails().then((value) {
       List enabledModules = value['enabledModules'];
-      Map<String, dynamic> posSettings = value['posSettings'];
-      if (posSettings.isNotEmpty &&
+      Map<String, dynamic>? posSettings = value['posSettings'];
+      if (posSettings != null &&
+          posSettings.isNotEmpty &&
           posSettings.containsKey("inline_service_staff")) {
         if (posSettings["inline_service_staff"].toString() == "1") {
           canAddInLineServiceStaff = true;
