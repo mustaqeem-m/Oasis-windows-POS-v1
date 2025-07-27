@@ -1879,7 +1879,9 @@ class ProductsState extends State<Products> {
                         ),
                       )
                     : Column(children: [
-                        _productsGrid(),
+                        Expanded(
+                          child: _productsGrid(),
+                        ),
                       ])
                 : Center(
                     child: Text(
