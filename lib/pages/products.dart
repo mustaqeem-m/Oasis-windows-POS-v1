@@ -100,6 +100,9 @@ class ProductsState extends State<Products> {
   String symbol = '';
   final searchController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _productSearchFocusNode = FocusNode();
+  final _productSearchController = TextEditingController();
+  List<dynamic> _suggestedProducts = [];
 
   @override
   void dispose() {
@@ -113,6 +116,7 @@ class ProductsState extends State<Products> {
     themeData = AppTheme.getThemeFromThemeMode(themeType);
     _initializePage();
     _cartProvider.addListener(_onCartProviderChanged);
+    _productSearchFocusNode.requestFocus();
   }
 
   void _onCartProviderChanged() {
@@ -531,6 +535,7 @@ class ProductsState extends State<Products> {
             : Column(
                 children: [
                   _buildTopBar(),
+                  _buildProductSearchField(),
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
@@ -758,6 +763,119 @@ class ProductsState extends State<Products> {
       user: userDetails['first_name'] + ' ' + userDetails['last_name'],
       email: userDetails['email'],
       location: locationData['name'],
+    );
+  }
+
+  Future<void> _onSearchChanged(String searchTerm) async {
+    if (searchTerm.isEmpty) {
+      if (mounted) {
+        setState(() {
+          _suggestedProducts = [];
+        });
+      }
+      return;
+    }
+
+    findSellingPriceGroupId(selectedLocationId);
+    final variations = await Variations().get(
+      searchTerm: searchTerm,
+      locationId: selectedLocationId,
+    );
+
+    List<dynamic> newProducts = [];
+    for (var product in variations) {
+      dynamic price;
+      if (product['selling_price_group'] != null) {
+        jsonDecode(product['selling_price_group']).forEach((element) {
+          if (element['key'] == sellingPriceGroupId) {
+            price = double.parse(element['value'].toString());
+          }
+        });
+      }
+      newProducts.add(ProductModel().product(product, price));
+    }
+
+    final exactMatch = newProducts.firstWhere(
+      (p) =>
+          p['sub_sku']?.toLowerCase() == searchTerm.toLowerCase() ||
+          p['display_name']?.toLowerCase() == searchTerm.toLowerCase(),
+      orElse: () => null,
+    );
+
+    if (exactMatch != null && newProducts.length == 1) {
+      await onTapProduct(exactMatch);
+      _productSearchController.clear();
+      if (mounted) {
+        setState(() {
+          _suggestedProducts = [];
+        });
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          _suggestedProducts = newProducts;
+        });
+      }
+    }
+  }
+
+  Widget _buildProductSearchField() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: _productSearchController,
+            focusNode: _productSearchFocusNode,
+            onChanged: _onSearchChanged,
+            decoration: InputDecoration(
+              hintText: 'Search by Product Name or SKU...',
+              prefixIcon: Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              suffixIcon: IconButton(
+                icon: Icon(Icons.clear),
+                onPressed: () {
+                  _productSearchController.clear();
+                  setState(() {
+                    _suggestedProducts = [];
+                  });
+                },
+              ),
+            ),
+          ),
+          if (_suggestedProducts.isNotEmpty)
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: 250,
+              ),
+              child: Card(
+                elevation: 4,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _suggestedProducts.length,
+                  itemBuilder: (context, index) {
+                    final product = _suggestedProducts[index];
+                    return ListTile(
+                      title: Text(product['display_name']),
+                      subtitle: Text(
+                          'SKU: ${product['sub_sku']} - Stock: ${product['stock_available'] ?? 'N/A'}'),
+                      onTap: () {
+                        onTapProduct(product);
+                        _productSearchController.clear();
+                        setState(() {
+                          _suggestedProducts = [];
+                        });
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -1760,7 +1878,9 @@ class ProductsState extends State<Products> {
                           ],
                         ),
                       )
-                    : _productsGrid()
+                    : Column(children: [
+                        _productsGrid(),
+                      ])
                 : Center(
                     child: Text(
                       AppLocalizations.of(context).translate('unauthorised'),
