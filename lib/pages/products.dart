@@ -1269,6 +1269,7 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
               },
               popupProps: PopupProps.menu(
                 showSearchBox: true,
+                constraints: BoxConstraints(maxHeight: 300),
                 searchFieldProps: TextFieldProps(
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
