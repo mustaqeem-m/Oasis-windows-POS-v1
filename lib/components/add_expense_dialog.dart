@@ -82,12 +82,18 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
     await _fetchExpenseForUsers();
 
     // Initialize payment dropdowns with default "select" values
-    paymentMethods = [{'name': 'name', 'value': 'Select Method', 'account_id': null}];
+    paymentMethods = [
+      {'name': 'name', 'value': 'Select Method', 'account_id': null}
+    ];
     selectedPaymentMethod = paymentMethods.first;
-    paymentAccounts = [{'id': null, 'name': "None"}];
+    paymentAccounts = [
+      {'id': null, 'name': "None"}
+    ];
     selectedPaymentAccount = paymentAccounts.first;
-    
-    expenseSubCategories = [{'id': 0, 'name': 'Select Sub Category'}];
+
+    expenseSubCategories = [
+      {'id': 0, 'name': 'Select Sub Category'}
+    ];
     selectedExpenseSubCategory = expenseSubCategories.first;
 
     setState(() {
@@ -97,7 +103,9 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
 
   Future<void> _fetchLocations() async {
     var locations = await System().get('location');
-    locationListMap = [{'id': 0, 'name': 'Select Location'}];
+    locationListMap = [
+      {'id': 0, 'name': 'Select Location'}
+    ];
     if (locations is List) {
       locationListMap.addAll(List<Map<String, dynamic>>.from(locations));
     }
@@ -106,7 +114,9 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
 
   Future<void> _fetchTaxes() async {
     var taxes = await System().get('tax');
-    taxListMap = [{'id': 0, 'name': 'Select Tax', 'amount': 0}];
+    taxListMap = [
+      {'id': 0, 'name': 'Select Tax', 'amount': 0}
+    ];
     if (taxes is List) {
       taxListMap.addAll(List<Map<String, dynamic>>.from(taxes));
     }
@@ -115,7 +125,9 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
 
   Future<void> _fetchExpenseCategories() async {
     var categories = await ExpenseApi().get();
-    expenseCategories = [{'id': 0, 'name': 'Select Category'}];
+    expenseCategories = [
+      {'id': 0, 'name': 'Select Category'}
+    ];
     if (categories is List) {
       expenseCategories.addAll(List<Map<String, dynamic>>.from(categories));
     }
@@ -124,7 +136,9 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
 
   Future<void> _fetchExpenseForUsers() async {
     var users = await System().get('users');
-    expenseForUsers = [{'id': 0, 'name': 'Select User'}];
+    expenseForUsers = [
+      {'id': 0, 'name': 'Select User'}
+    ];
     if (users is List) {
       expenseForUsers.addAll(List<Map<String, dynamic>>.from(users));
     }
@@ -134,9 +148,13 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
   Future<void> _fetchPaymentDetails(int locationId) async {
     if (locationId == 0) {
       setState(() {
-        paymentMethods = [{'name': 'name', 'value': 'Select Method', 'account_id': null}];
+        paymentMethods = [
+          {'name': 'name', 'value': 'Select Method', 'account_id': null}
+        ];
         selectedPaymentMethod = paymentMethods.first;
-        paymentAccounts = [{'id': null, 'name': "None"}];
+        paymentAccounts = [
+          {'id': null, 'name': "None"}
+        ];
         selectedPaymentAccount = paymentAccounts.first;
       });
       return;
@@ -151,12 +169,16 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
         newPaymentMethods.add({
           'name': element['name'],
           'value': element['label'],
-          'account_id': (element['account_id'] != null) ? int.parse(element['account_id'].toString()) : null
+          'account_id': (element['account_id'] != null)
+              ? int.parse(element['account_id'].toString())
+              : null
         });
       }
     }
 
-    var newPaymentAccounts = <Map<String, dynamic>>[{'id': null, 'name': "None"}];
+    var newPaymentAccounts = <Map<String, dynamic>>[
+      {'id': null, 'name': "None"}
+    ];
     List<String> accIds = [];
     for (var element in accounts) {
       if (element is Map) {
@@ -176,7 +198,9 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
       if (paymentMethods.isNotEmpty) {
         selectedPaymentMethod = paymentMethods.first;
       } else {
-        paymentMethods = [{'name': 'name', 'value': 'Select Method', 'account_id': null}];
+        paymentMethods = [
+          {'name': 'name', 'value': 'Select Method', 'account_id': null}
+        ];
         selectedPaymentMethod = paymentMethods.first;
       }
 
@@ -186,13 +210,16 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
             (element) => element['id'] == selectedPaymentMethod['account_id'],
             orElse: () => paymentAccounts.first);
       } else {
-        paymentAccounts = [{'id': null, 'name': "None"}];
+        paymentAccounts = [
+          {'id': null, 'name': "None"}
+        ];
         selectedPaymentAccount = paymentAccounts.first;
       }
     });
   }
 
-  Future<void> _selectDate(BuildContext context, {bool isPaidOn = false}) async {
+  Future<void> _selectDate(BuildContext context,
+      {bool isPaidOn = false}) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: isPaidOn ? paidOnDate : selectedDate,
@@ -213,7 +240,8 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
   void _submit() async {
     if (_formKey.currentState!.validate()) {
       if (selectedLocation['id'] == 0) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please select a business location.')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Please select a business location.')));
         return;
       }
 
@@ -237,7 +265,8 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
         Navigator.of(context).pop(true); // Return true to indicate success
       }).catchError((error) {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to add expense: $error')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to add expense: $error')));
       });
     }
   }
@@ -257,63 +286,97 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildDropdown('Business Location*', locationListMap, selectedLocation, (value) {
+                      _buildDropdown('Business Location*', locationListMap,
+                          selectedLocation, (value) {
                         setState(() {
                           selectedLocation = value!;
                           _fetchPaymentDetails(selectedLocation['id']);
                         });
                       }),
-                      _buildDropdown('Expense Category*', expenseCategories, selectedExpenseCategory, (value) {
+                      _buildDropdown('Expense Category*', expenseCategories,
+                          selectedExpenseCategory, (value) {
                         setState(() {
                           selectedExpenseCategory = value!;
-                          selectedExpenseSubCategory = {'id': 0, 'name': 'Select Sub Category'};
-                          if (value.containsKey('sub_categories') && value['sub_categories'] is List) {
-                            expenseSubCategories = [{'id': 0, 'name': 'Select Sub Category'}];
-                            expenseSubCategories.addAll(List<Map<String, dynamic>>.from(value['sub_categories']));
+                          selectedExpenseSubCategory = {
+                            'id': 0,
+                            'name': 'Select Sub Category'
+                          };
+                          if (value.containsKey('sub_categories') &&
+                              value['sub_categories'] is List) {
+                            expenseSubCategories = [
+                              {'id': 0, 'name': 'Select Sub Category'}
+                            ];
+                            expenseSubCategories.addAll(
+                                List<Map<String, dynamic>>.from(
+                                    value['sub_categories']));
                           } else {
-                            expenseSubCategories = [{'id': 0, 'name': 'Select Sub Category'}];
+                            expenseSubCategories = [
+                              {'id': 0, 'name': 'Select Sub Category'}
+                            ];
                           }
                         });
                       }),
-                      _buildDropdown('Sub Category', expenseSubCategories, selectedExpenseSubCategory, (value) {
+                      _buildDropdown('Sub Category', expenseSubCategories,
+                          selectedExpenseSubCategory, (value) {
                         setState(() {
                           selectedExpenseSubCategory = value!;
                         });
                       }),
-                      _buildTextField(refNoController, 'Reference No', 'Leave empty to auto-generate'),
-                      _buildDateTimePicker('Date*', selectedDate, () => _selectDate(context)),
-                      _buildDropdown('Expense for', expenseForUsers, selectedExpenseFor, (value) {
+                      _buildTextField(refNoController, 'Reference No',
+                          'Leave empty to auto-generate'),
+                      _buildDateTimePicker(
+                          'Date*', selectedDate, () => _selectDate(context)),
+                      _buildDropdown(
+                          'Expense for', expenseForUsers, selectedExpenseFor,
+                          (value) {
                         setState(() {
                           selectedExpenseFor = value!;
                         });
                       }),
-                      _buildDropdown('Applicable Tax', taxListMap, selectedTax, (value) {
+                      _buildDropdown('Applicable Tax', taxListMap, selectedTax,
+                          (value) {
                         setState(() {
                           selectedTax = value!;
                         });
                       }),
-                      _buildTextField(expenseAmountController, 'Total Amount*', null, isNumeric: true),
-                      _buildTextField(expenseNoteController, 'Expense Note', null, maxLines: 3),
+                      _buildTextField(
+                          expenseAmountController, 'Total Amount*', null,
+                          isNumeric: true),
+                      _buildTextField(
+                          expenseNoteController, 'Expense Note', null,
+                          maxLines: 3),
                       const Divider(height: 30, thickness: 1),
-                      const Text('Add Payment', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      _buildTextField(payingAmountController, 'Amount*', null, isNumeric: true),
-                      _buildDateTimePicker('Paid On*', paidOnDate, () => _selectDate(context, isPaidOn: true)),
-                      _buildDropdown('Payment Method*', paymentMethods, selectedPaymentMethod, (value) {
+                      const Text('Add Payment',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      _buildTextField(payingAmountController, 'Amount*', null,
+                          isNumeric: true),
+                      _buildDateTimePicker('Paid On*', paidOnDate,
+                          () => _selectDate(context, isPaidOn: true)),
+                      _buildDropdown('Payment Method*', paymentMethods,
+                          selectedPaymentMethod, (value) {
                         setState(() {
                           selectedPaymentMethod = value!;
                           selectedPaymentAccount = paymentAccounts.firstWhere(
                               (acc) => acc['id'] == value['account_id'],
-                              orElse: () => paymentAccounts.isNotEmpty ? paymentAccounts.first : {'id': null, 'name': 'None'});
+                              orElse: () => paymentAccounts.isNotEmpty
+                                  ? paymentAccounts.first
+                                  : {'id': null, 'name': 'None'});
                         });
                       }, itemValue: 'value'),
-                      _buildDropdown('Payment Account', paymentAccounts, selectedPaymentAccount, (value) {
+                      _buildDropdown('Payment Account', paymentAccounts,
+                          selectedPaymentAccount, (value) {
                         setState(() {
                           selectedPaymentAccount = value!;
                         });
                       }),
-                      _buildTextField(paymentNoteController, 'Payment Note', null, maxLines: 3),
+                      _buildTextField(
+                          paymentNoteController, 'Payment Note', null,
+                          maxLines: 3),
                       const SizedBox(height: 20),
-                      Text('Payment Due: ${totalAmount - paidAmount}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      Text('Payment Due: ${totalAmount - paidAmount}',
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ),
@@ -333,7 +396,12 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
     );
   }
 
-  Widget _buildDropdown(String label, List<Map<String, dynamic>> items, Map<String, dynamic> selectedValue, ValueChanged<Map<String, dynamic>?> onChanged, {String itemValue = 'name'}) {
+  Widget _buildDropdown(
+      String label,
+      List<Map<String, dynamic>> items,
+      Map<String, dynamic> selectedValue,
+      ValueChanged<Map<String, dynamic>?> onChanged,
+      {String itemValue = 'name'}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: DropdownButtonFormField<Map<String, dynamic>>(
@@ -351,7 +419,8 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
         }).toList(),
         onChanged: onChanged,
         validator: (value) {
-          if (label.endsWith('*') && (value == null || value['id'] == 0 || value['id'] == null)) {
+          if (label.endsWith('*') &&
+              (value == null || value['id'] == 0 || value['id'] == null)) {
             return 'This field is required.';
           }
           return null;
@@ -360,7 +429,9 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, String? hint, {bool isNumeric = false, int maxLines = 1}) {
+  Widget _buildTextField(
+      TextEditingController controller, String label, String? hint,
+      {bool isNumeric = false, int maxLines = 1}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
@@ -376,7 +447,10 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
           if (label.endsWith('*') && (value == null || value.isEmpty)) {
             return 'This field is required.';
           }
-          if (isNumeric && value != null && value.isNotEmpty && double.tryParse(value) == null) {
+          if (isNumeric &&
+              value != null &&
+              value.isNotEmpty &&
+              double.tryParse(value) == null) {
             return 'Please enter a valid number.';
           }
           return null;
@@ -385,7 +459,8 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
     );
   }
 
-  Widget _buildDateTimePicker(String label, DateTime date, VoidCallback onPressed) {
+  Widget _buildDateTimePicker(
+      String label, DateTime date, VoidCallback onPressed) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(

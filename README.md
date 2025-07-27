@@ -315,3 +315,9 @@ It's a standard and necessary practice in Dart to keep the two libraries from ge
 
 - by refactoring the \_initializePage method in lib/pages/products.dart to use Future.wait. This will allow the application to fetch all the necessary data concurrently, which should
   dramatically reduce the loading time.
+
+1. sarch functionality comes in main products page -> at statring of app the cursor must present in seearch feild
+2. search feild must automatically add prodducts to cart no manual adding
+3. create a settings section in banner , and adds dropdowwn flags , if the corresponding dropdowwn checked there theen it ll be mounted in product pag othrwwise it ll be unmoiunted from the products page
+4. usee slim -2inch, slim2- 2 and 3 inch, slim3- 2 and 3 inch blad files , to create layout that adapt the size of print sheet
+5. blade files contain the logic and content for the dynamic layout ,
