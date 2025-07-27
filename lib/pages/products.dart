@@ -54,7 +54,7 @@ class Products extends StatefulWidget {
   ProductsState createState() => ProductsState();
 }
 
-class ProductsState extends State<Products> {
+class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
   double _shippingCharges = 0.0;
   final CartProvider _cartProvider = CartProvider();
   List products = [];
@@ -105,6 +105,9 @@ class ProductsState extends State<Products> {
   final _productSearchFocusNode = FocusNode();
   final _productSearchController = TextEditingController();
   List<dynamic> _suggestedProducts = [];
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void dispose() {
@@ -536,6 +539,7 @@ class ProductsState extends State<Products> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     themeData = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
 

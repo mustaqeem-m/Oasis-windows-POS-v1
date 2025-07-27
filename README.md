@@ -321,3 +321,14 @@ It's a standard and necessary practice in Dart to keep the two libraries from ge
 3. create a settings section in banner , and adds dropdowwn flags , if the corresponding dropdowwn checked there theen it ll be mounted in product pag othrwwise it ll be unmoiunted from the products page
 4. usee slim -2inch, slim2- 2 and 3 inch, slim3- 2 and 3 inch blad files , to create layout that adapt the size of print sheet
 5. blade files contain the logic and content for the dynamic layout ,
+
+analyzed products.dart and confirmed that the initState and didChangeDependencies methods are fetching data every time the page loads, causing the 5-10 second delay.
+
+To resolve this, I'll use the AutomaticKeepAliveClientMixin to ensure the Products page state is preserved when switching between tabs. This will prevent the widget from being rebuilt and
+the data from being re-fetched unnecessarily.
+
+Here's my plan:
+
+1.  Modify the ProductsState class to include the AutomaticKeepAliveClientMixin.
+2.  Add the required wantKeepAlive getter, returning true.
+3.  Call super.build(context) at the beginning of the build method, as required by the mixin.
