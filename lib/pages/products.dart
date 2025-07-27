@@ -119,8 +119,13 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
   void initState() {
     super.initState();
     themeData = AppTheme.getThemeFromThemeMode(themeType);
-    _loadSavedLocation();
-    _initializePage();
+    _initializePage().then((_) {
+      _loadSavedLocation().then((_) {
+        if (selectedLocationId != 0) {
+          setInitDetails(selectedLocationId);
+        }
+      });
+    });
     _cartProvider.addListener(_onCartProviderChanged);
     _productSearchFocusNode.requestFocus();
   }
