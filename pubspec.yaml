@@ -108,7 +108,7 @@ dependencies:
   dropdown_search: ^5.0.6
   # share: any
   share_plus: ^7.2.1
-  shared_preferences: any
+  shared_preferences: ^2.5.3
   sqflite: any
   sqflite_common_ffi: ^2.3.5
   syncfusion_flutter_datepicker: any

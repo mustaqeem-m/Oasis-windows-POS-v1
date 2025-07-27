@@ -45,6 +45,8 @@ import 'package:pos_2/models/register_details_models.dart' as register_details;
 import 'package:pos_2/components/home/suspended_sales_modal.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class Products extends StatefulWidget {
   const Products({super.key});
 
@@ -114,9 +116,17 @@ class ProductsState extends State<Products> {
   void initState() {
     super.initState();
     themeData = AppTheme.getThemeFromThemeMode(themeType);
+    _loadSavedLocation();
     _initializePage();
     _cartProvider.addListener(_onCartProviderChanged);
     _productSearchFocusNode.requestFocus();
+  }
+
+  Future<void> _loadSavedLocation() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      selectedLocationId = prefs.getInt('selectedLocationId') ?? 0;
+    });
   }
 
   void _onCartProviderChanged() {
@@ -240,25 +250,30 @@ class ProductsState extends State<Products> {
     }
   }
 
+  bool _isInitialized = false;
+
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
-    final newArguments =
-        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
-    if (argument != newArguments) {
-      argument = newArguments;
-      if (argument != null) {
-        if (mounted) {
-          setState(() {
-            selectedLocationId = argument!['locationId'];
-            canChangeLocation = false;
-          });
+    if (!_isInitialized) {
+      final newArguments =
+          ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+      if (argument != newArguments) {
+        argument = newArguments;
+        if (argument != null) {
+          if (mounted) {
+            setState(() {
+              selectedLocationId = argument!['locationId'];
+              canChangeLocation = false;
+            });
+          }
+        } else {
+          canChangeLocation = true;
         }
-      } else {
-        canChangeLocation = true;
+        if (!mounted) return;
+        await setInitDetails(selectedLocationId);
       }
-      if (!mounted) return;
-      await setInitDetails(selectedLocationId);
+      _isInitialized = true;
     }
   }
 
@@ -1049,6 +1064,8 @@ class ProductsState extends State<Products> {
                       productList(resetOffset: true);
                     }
                   });
+                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                  prefs.setInt('selectedLocationId', selectedLocationId);
                 }
               } else {
                 if (!mounted) return;
