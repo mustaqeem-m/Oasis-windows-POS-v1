@@ -227,7 +227,7 @@ class Helper {
 
     return ReceiptDetailsModel(
       logo: 'assets/images/oasis_pos_logo_.1-1.png',
-      headerText: business['name'],
+      headerText: 'Tax Invoice',
       displayName: business['name'],
       address: business['address'],
       contact: businessContact,

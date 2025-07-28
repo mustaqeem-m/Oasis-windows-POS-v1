@@ -56,6 +56,7 @@ class Products extends StatefulWidget {
 
 class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
   double _shippingCharges = 0.0;
+  double _roundOffAmount = 0.0;
   final CartProvider _cartProvider = CartProvider();
   List products = [];
   List<Map<String, dynamic>> cartLines = [];
@@ -548,6 +549,33 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
     themeData = Theme.of(context);
     final screenWidth = MediaQuery.of(context).size.width;
 
+    // Calculate totals here
+    double _subtotal = cartLines.fold(0.0, (sum, line) {
+      double price = double.parse(line['unit_price']?.toString() ?? '0');
+      double quantity = line['quantity'] ?? 0;
+      return sum + (price * quantity);
+    });
+
+    double discountValue = 0;
+    if (_cartProvider.selectedDiscountType == 'fixed') {
+      discountValue = _cartProvider.discountAmount ?? 0.0;
+    } else if (_cartProvider.selectedDiscountType == 'percentage') {
+      discountValue = (_subtotal * (_cartProvider.discountAmount ?? 0.0)) / 100;
+    }
+
+    double taxAmount = _cartProvider.orderTaxAmount ?? 0.0;
+    double unroundedTotal =
+        _subtotal - discountValue + taxAmount + _shippingCharges;
+    double totalPayable = unroundedTotal.floor().toDouble();
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          _roundOffAmount = unroundedTotal - totalPayable;
+        });
+      }
+    });
+
     return ChangeNotifierProvider.value(
       value: _cartProvider,
       child: Scaffold(
@@ -574,7 +602,7 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
             child: _buildRightPanel(),
           ),
         ),
-        bottomNavigationBar: _buildStickyBottomBar(),
+        bottomNavigationBar: _buildStickyBottomBar(totalPayable),
       ),
     );
   }
@@ -972,8 +1000,11 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
             const SizedBox(width: 16),
 
             // Far Right Buttons
-            _buildTextIconButton(
-                'Repair', Icons.build_outlined, Colors.lightBlue),
+            Visibility(
+              visible: Provider.of<HomeProvider>(context).showRepairButton,
+              child: _buildTextIconButton(
+                  'Repair', Icons.build_outlined, Colors.lightBlue),
+            ),
             const SizedBox(width: 30),
             _buildTextIconButton(
                 'Add Expense', Icons.add_card_outlined, Colors.transparent,
@@ -1074,7 +1105,8 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
                       productList(resetOffset: true);
                     }
                   });
-                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
                   prefs.setInt('selectedLocationId', selectedLocationId);
                 }
               } else {
@@ -1137,13 +1169,17 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: _buildDropdownField(
-                  icon: MdiIcons.tagOutline,
-                  label: 'Price Type',
-                  value: 'Default Selling Price',
-                  onTap: () {
-                    // TODO: Implement price type selection
-                  },
+                child: Visibility(
+                  visible: Provider.of<HomeProvider>(context)
+                      .dropdownVisibilities['showPriceTypeDropdown']!,
+                  child: _buildDropdownField(
+                    icon: MdiIcons.tagOutline,
+                    label: 'Price Type',
+                    value: 'Default Selling Price',
+                    onTap: () {
+                      // TODO: Implement price type selection
+                    },
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -1212,8 +1248,8 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
                       .dropdownVisibilities['showKitchenOrder']!,
                   child: Container(
                     height: 56,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8),
@@ -1294,7 +1330,7 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
               },
               popupProps: PopupProps.menu(
                 showSearchBox: true,
-                constraints: BoxConstraints(maxHeight: 300),
+                constraints: BoxConstraints(maxHeight: 250),
                 searchFieldProps: TextFieldProps(
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
@@ -1797,7 +1833,7 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
               Flexible(
                 child: _buildChargeItem(
                   label: 'Round Off',
-                  value: 0.0.toStringAsFixed(2),
+                  value: '₹${_roundOffAmount.toStringAsFixed(2)}',
                 ),
               ),
             ],
@@ -2082,7 +2118,7 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
           );
   }
 
-  Widget _buildStickyBottomBar() {
+  Widget _buildStickyBottomBar(double totalPayable) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -2141,7 +2177,7 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
                     ),
                   ),
                   TextSpan(
-                    text: '₹ ${_totalPayable.toStringAsFixed(2)}',
+                    text: '₹ ${totalPayable.toStringAsFixed(2)}',
                     style: const TextStyle(
                       color: Colors.green,
                       fontSize: 20,
@@ -2443,7 +2479,8 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
 
     // 5. Print using the new centralized helper
     final saleDetails = (await SellDatabase().getSellBySellId(saleId)).first;
-    await Helper().printDocument(saleId, saleDetails['tax_rate_id'] ?? 0, context);
+    await Helper()
+        .printDocument(saleId, saleDetails['tax_rate_id'] ?? 0, context);
 
     // 6. Reset cart
     Sell().resetCart();

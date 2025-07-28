@@ -80,6 +80,23 @@ class SettingsPage extends StatelessWidget {
                   provider.updateDropdownVisibility('showKitchenOrder', value);
                 },
               ),
+              const Divider(),
+              SwitchListTile(
+                title: const Text('Show Repair Button'),
+                value: provider.showRepairButton,
+                onChanged: (bool value) {
+                  provider.toggleRepairButtonVisibility(value);
+                },
+              ),
+              const Divider(),
+              SwitchListTile(
+                title: const Text('Show Price Type Dropdown'),
+                value: provider.dropdownVisibilities['showPriceTypeDropdown']!,
+                onChanged: (bool value) {
+                  provider.updateDropdownVisibility(
+                      'showPriceTypeDropdown', value);
+                },
+              ),
             ],
           );
         },

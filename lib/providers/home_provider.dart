@@ -66,8 +66,12 @@ class HomeProvider with ChangeNotifier {
     'showServiceStaff': true,
     'showPrinter': true,
     'showKitchenOrder': true,
+    'showPriceTypeDropdown': true,
   };
   Map<String, bool> get dropdownVisibilities => _dropdownVisibilities;
+
+  bool _showRepairButton = true;
+  bool get showRepairButton => _showRepairButton;
 
   String _selectedPaperSize = '3-inch';
   String get selectedPaperSize => _selectedPaperSize;
@@ -79,6 +83,20 @@ class HomeProvider with ChangeNotifier {
     _initializeCustomer();
     _loadDropdownVisibilities();
     _loadPaperSize();
+    _loadRepairButtonVisibility();
+  }
+
+  Future<void> _loadRepairButtonVisibility() async {
+    final prefs = await SharedPreferences.getInstance();
+    _showRepairButton = prefs.getBool('showRepairButton') ?? true;
+    notifyListeners();
+  }
+
+  Future<void> toggleRepairButtonVisibility(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('showRepairButton', value);
+    _showRepairButton = value;
+    notifyListeners();
   }
 
   Future<void> _loadPaperSize() async {
@@ -103,6 +121,7 @@ class HomeProvider with ChangeNotifier {
       'showServiceStaff': prefs.getBool('showServiceStaff') ?? true,
       'showPrinter': prefs.getBool('showPrinter') ?? true,
       'showKitchenOrder': prefs.getBool('showKitchenOrder') ?? true,
+      'showPriceTypeDropdown': prefs.getBool('showPriceTypeDropdown') ?? true,
     };
     notifyListeners();
   }

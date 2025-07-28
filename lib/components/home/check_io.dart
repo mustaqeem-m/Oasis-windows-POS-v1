@@ -51,6 +51,7 @@ class _CheckIOState extends State<CheckIO> {
                     const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
               ),
               onPressed: () async {
+                final scaffoldContext = context;
                 Helper().syncCallLogs();
                 showDialog(
                     barrierDismissible: true,
@@ -118,7 +119,8 @@ class _CheckIOState extends State<CheckIO> {
                                       longitude: (currentLoc != null)
                                           ? currentLoc!.longitude
                                           : '');
-                                  ToastHelper.show(context, checkInMap);
+                                  if (!mounted) return;
+                                  ToastHelper.show(scaffoldContext, checkInMap);
                                   note.clear();
                                 } else {
                                   try {
@@ -140,16 +142,19 @@ class _CheckIOState extends State<CheckIO> {
                                               ? currentLoc!.longitude
                                               : '',
                                           checkOutNote: note.text);
-                                  ToastHelper.show(context, checkOutMap);
+                                  if (!mounted) return;
+                                  ToastHelper.show(scaffoldContext, checkOutMap);
                                   note.clear();
                                 }
                                 widget.onCheckInOut(await Attendance()
                                     .getAttendanceStatus(USERID));
-                              } else
+                              } else {
+                                if (!mounted) return;
                                 ToastHelper.show(
-                                    context,
+                                    scaffoldContext,
                                     AppLocalizations.of(context)
                                         .translate('check_connectivity'));
+                              }
                             },
                             child: Text(
                                 AppLocalizations.of(context).translate('ok'),
