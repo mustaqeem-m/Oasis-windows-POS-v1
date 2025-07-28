@@ -50,6 +50,13 @@ class SettingsPage extends StatelessWidget {
                   provider.updateDropdownVisibility('showPrinter', value);
                 },
               ),
+              SwitchListTile(
+                title: const Text('Show Kitchen Order'),
+                value: provider.dropdownVisibilities['showKitchenOrder']!,
+                onChanged: (bool value) {
+                  provider.updateDropdownVisibility('showKitchenOrder', value);
+                },
+              ),
             ],
           );
         },

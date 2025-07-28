@@ -65,6 +65,7 @@ class HomeProvider with ChangeNotifier {
     'showTable': true,
     'showServiceStaff': true,
     'showPrinter': true,
+    'showKitchenOrder': true,
   };
   Map<String, bool> get dropdownVisibilities => _dropdownVisibilities;
 
@@ -84,6 +85,7 @@ class HomeProvider with ChangeNotifier {
       'showTable': prefs.getBool('showTable') ?? true,
       'showServiceStaff': prefs.getBool('showServiceStaff') ?? true,
       'showPrinter': prefs.getBool('showPrinter') ?? true,
+      'showKitchenOrder': prefs.getBool('showKitchenOrder') ?? true,
     };
     notifyListeners();
   }

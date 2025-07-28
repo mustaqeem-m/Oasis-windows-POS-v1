@@ -1206,28 +1206,32 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: Container(
-                  height: 56,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey[300]!),
-                  ),
-                  child: Row(
-                    children: [
-                      Checkbox(
-                        value: false,
-                        onChanged: (val) {},
-                        activeColor: themeData.primaryColor,
-                      ),
-                      const SizedBox(width: 8),
-                      const Text('Kitchen Order'),
-                      const SizedBox(width: 4),
-                      const Icon(Icons.info_outline,
-                          size: 18, color: Colors.grey),
-                    ],
+                child: Visibility(
+                  visible: Provider.of<HomeProvider>(context)
+                      .dropdownVisibilities['showKitchenOrder']!,
+                  child: Container(
+                    height: 56,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey[300]!),
+                    ),
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: false,
+                          onChanged: (val) {},
+                          activeColor: themeData.primaryColor,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Kitchen Order'),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.info_outline,
+                            size: 18, color: Colors.grey),
+                      ],
+                    ),
                   ),
                 ),
               ),
