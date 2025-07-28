@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import '../components/barcode_scanner.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -15,7 +16,13 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pos_2/models/contact_model.dart';
+import 'package:pos_2/models/paymentDatabase.dart';
+import 'package:pos_2/models/receipt_details_model.dart';
+import 'package:pos_2/models/sellDatabase.dart';
+import 'package:pos_2/providers/home_provider.dart';
 import 'package:printing/printing.dart';
+import 'package:provider/provider.dart';
 // import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -25,6 +32,7 @@ import '../models/invoice.dart';
 import '../models/system.dart';
 import 'AppTheme.dart';
 import 'SizeConfig.dart';
+import 'receipt_builder.dart';
 
 class Helper {
   static int themeType = 1;
@@ -179,21 +187,85 @@ class Helper {
     return result ?? "";
   }
 
+  Future<ReceiptDetailsModel> _mapSellToReceiptDetails(
+      int sellId, BuildContext context) async {
+    final sell = (await SellDatabase().getSellBySellId(sellId)).first;
+    final sellLines = await SellDatabase().getSellLines(sellId);
+    final payments = await PaymentDatabase().get(sellId);
+    final business = (await System().get('business')).first;
+
+    List<ReceiptLine> receiptLines = [];
+    for (var line in sellLines) {
+      final quantity = (line['quantity'] as num?) ?? 0;
+      final unitPrice = (line['unit_price_inc_tax'] as num?) ?? 0;
+      
+      receiptLines.add(ReceiptLine(
+        name: line['product_name'],
+        quantity: quantity.toString(),
+        units: line['unit'] ?? '',
+        unitPriceIncTax: unitPrice.toString(),
+        lineTotal: (quantity * unitPrice).toString(),
+        variation: line['product_variation_name'],
+        unitPriceBeforeDiscount: line['default_sell_price'].toString(),
+        totalLineDiscount: line['line_discount_amount'].toString(),
+      ));
+    }
+
+    List<ReceiptPayment> receiptPayments = [];
+    for (var p in payments) {
+      receiptPayments.add(ReceiptPayment(
+        method: p['method'],
+        date: DateFormat('MM-dd')
+            .format(DateTime.parse(p['paid_on'] ?? DateTime.now().toString())),
+        amount: p['amount'].toString(),
+      ));
+    }
+
+    final contact = await Contact().getCustomerDetailById(sell['contact_id']);
+    final businessContacts = await System().get('contact_no');
+    final businessContact = businessContacts.isNotEmpty ? businessContacts.first : null;
+
+    return ReceiptDetailsModel(
+      logo: 'assets/images/oasis_pos_logo_.1-1.png',
+      headerText: business['name'],
+      displayName: business['name'],
+      address: business['address'],
+      contact: businessContact,
+      invoiceNoPrefix: 'Invoice No:',
+      invoiceNo: sell['invoice_no'],
+      dateLabel: 'Date:',
+      invoiceDate: DateFormat('yyyy-MM-dd HH:mm').format(
+          DateTime.parse(sell['transaction_date'] ?? DateTime.now().toString())),
+      customerLabel: 'Customer:',
+      customerInfo: contact != null ? contact['name'] : 'Walk-in Customer',
+      subtotalLabel: 'Subtotal:',
+      subtotal: (sell['total_before_tax'] ?? 0.0).toString(),
+      taxLabel: 'Tax:',
+      tax: (sell['tax_amount'] ?? 0.0).toString(),
+      discountLabel: 'Discount:',
+      discount: (sell['discount_amount'] ?? 0.0).toString(),
+      totalLabel: 'Total:',
+      total: (sell['invoice_amount'] ?? 0.0).toString(),
+      totalDueLabel: 'Total Due:',
+      totalDue: (sell['pending_amount'] ?? 0.0).toString(),
+      footerText: 'Thank you for your business!',
+      showBarcode: true,
+      lines: receiptLines,
+      payments: receiptPayments,
+    );
+  }
+
   //function for formatting invoice
   Future<void> printDocument(sellId, taxId, context, {invoice}) async {
-    String _invoice = (invoice != null)
-        ? invoice
-        : await InvoiceFormatter().generateInvoice(sellId, taxId, context);
-    Printing.layoutPdf(onLayout: (pageFormat) async {
-      final doc = pw.Document();
-      await Printing.layoutPdf(
-          onLayout: (PdfPageFormat format) async => await Printing.convertHtml(
-                format: format,
-                html: _invoice,
-              ));
+    final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+    final paperSize = homeProvider.selectedPaperSize;
 
-      return doc.save();
-    });
+    final receiptDetails = await _mapSellToReceiptDetails(sellId, context);
+    final receiptBuilder = ReceiptBuilder();
+    final Uint8List pdfBytes =
+        await receiptBuilder.buildReceiptPdf(paperSize, receiptDetails);
+
+    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdfBytes);
   }
 
   // //request permissions

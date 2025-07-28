@@ -69,12 +69,29 @@ class HomeProvider with ChangeNotifier {
   };
   Map<String, bool> get dropdownVisibilities => _dropdownVisibilities;
 
+  String _selectedPaperSize = '3-inch';
+  String get selectedPaperSize => _selectedPaperSize;
+
   HomeProvider() {
     getPermission();
     homepageData();
     Helper().syncCallLogs();
     _initializeCustomer();
     _loadDropdownVisibilities();
+    _loadPaperSize();
+  }
+
+  Future<void> _loadPaperSize() async {
+    final prefs = await SharedPreferences.getInstance();
+    _selectedPaperSize = prefs.getString('selectedPaperSize') ?? '3-inch';
+    notifyListeners();
+  }
+
+  Future<void> updatePaperSize(String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selectedPaperSize', value);
+    _selectedPaperSize = value;
+    notifyListeners();
   }
 
   Future<void> _loadDropdownVisibilities() async {

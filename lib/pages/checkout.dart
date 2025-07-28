@@ -799,7 +799,7 @@ class CheckOutState extends State<CheckOut> {
             : 0.00,
         shippingDetails: shippingDetails.text,
         staffNote: staffNote.text,
-        taxId: argument!['taxId'],
+        tax_rate_id: argument!['taxId'],
         serviceStaffId: argument!['serviceStaff'],
         isQuotation: argument!['is_quotation'] ?? 0);
 

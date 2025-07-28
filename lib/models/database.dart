@@ -52,7 +52,7 @@ class DbProvider {
       " contact_id INTEGER, location_id INTEGER, status TEXT, tax_rate_id INTEGER, discount_amount REAL,"
       " discount_type TEXT, sale_note TEXT, staff_note TEXT, shipping_details TEXT, is_quotation INTEGER DEFAULT 0,"
       " shipping_charges REAL DEFAULT 0.00,invoice_amount REAL, change_return REAL DEFAULT 0.00, pending_amount REAL DEFAULT 0.00,"
-      " is_synced INTEGER, transaction_id INTEGER DEFAULT null, invoice_url TEXT DEFAULT null,res_waiter_id INTEGER DEFAULT null)";
+      " is_synced INTEGER, transaction_id INTEGER DEFAULT null, invoice_url TEXT DEFAULT null,service_staff_id INTEGER DEFAULT null, commission_agent INTEGER DEFAULT null)";
 
 //query to create sale line table in database
   String createSellLineTable =
@@ -65,7 +65,7 @@ class DbProvider {
   String createSellPaymentsTable =
       "CREATE TABLE sell_payments (id INTEGER PRIMARY KEY AUTOINCREMENT, sell_id INTEGER,"
       " payment_id INTEGER DEFAULT null, method TEXT, amount REAL, note TEXT,"
-      " account_id INTEGER DEFAULT null, is_return INTEGER DEFAULT 0)";
+      " account_id INTEGER DEFAULT null, is_return INTEGER DEFAULT 0, paid_on TEXT)";
 
   //get database of type Future<database>
   Future<Database> get database async {
@@ -77,7 +77,7 @@ class DbProvider {
     return _database!;
   }
 
-  int currVersion = 10;
+  int currVersion = 13;
 
   //create tables during the creation of the database itself.
   Future<Database> initializeDatabase(loginUserId) async {
@@ -148,6 +148,18 @@ class DbProvider {
         if (oldVersion < 10) {
           await db.execute(
               "ALTER TABLE sell_lines ADD COLUMN stock_available REAL DEFAULT 0.00;");
+        }
+        
+        if (oldVersion < 11) {
+          await db.execute("ALTER TABLE sell ADD COLUMN service_staff_id INTEGER DEFAULT null;");
+        }
+
+        if (oldVersion < 12) {
+          await db.execute("ALTER TABLE sell ADD COLUMN commission_agent INTEGER DEFAULT null;");
+        }
+
+        if (oldVersion < 13) {
+          await db.execute("ALTER TABLE sell_payments ADD COLUMN paid_on TEXT;");
         }
 
         db.setVersion(currVersion);

@@ -198,7 +198,7 @@ class _CustomerState extends State<Customer> {
         locId: argument!['locationId'],
         saleStatus: 'draft',
         sellId: argument!['sellId'],
-        taxId: argument!['taxId'],
+        tax_rate_id: argument!['taxId'],
         serviceStaffId: argument!['serviceStaff'],
         isQuotation: 1);
     confirmDialog(sell);
@@ -249,7 +249,7 @@ class _CustomerState extends State<Customer> {
                     await Sell().createApiSell(sellId: value);
                   }
                   Helper()
-                      .printDocument(value, argument!['taxId'], context)
+                      .printDocument(value, null, context)
                       .then((value) {
                     Navigator.pushNamedAndRemoveUntil(
                         context, '/products', ModalRoute.withName('/home'));

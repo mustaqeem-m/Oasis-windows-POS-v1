@@ -2395,47 +2395,58 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
             discountAmount: 0));
   }
 
+  Future<Map<String, dynamic>> _prepareSellData(String status) async {
+    final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+    return {
+      'transaction_date': DateTime.now().toIso8601String(),
+      'contact_id': _selectedCustomerId,
+      'invoice_amount': _totalPayable,
+      'pending_amount': _totalPayable,
+      'status': status,
+      'location_id': selectedLocationId,
+      'tax_rate_id': _cartProvider.selectedTaxId,
+      'discount_type': _cartProvider.selectedDiscountType,
+      'discount_amount': _cartProvider.discountAmount,
+      'shipping_charges': _shippingCharges,
+      'service_staff_id': _selectedServiceStaffId,
+      'commission_agent': _selectedCommissionAgentId,
+      'is_quotation': 0,
+    };
+  }
+
   Future<void> _handleCashPayment() async {
     if (cartLines.isEmpty) {
-      ToastHelper.show(
-          context, AppLocalizations.of(context).translate('cart_is_empty'));
+      ToastHelper.show(context, "Cart is empty");
       return;
     }
 
-    // 1. Save the sale
-    final saleId = await _saveSale('final');
-    if (saleId == null) {
-      ToastHelper.show(context, 'Error: Could not save sale.');
-      return;
-    }
+    // 1. Create the sell
+    final sellData = await _prepareSellData('final');
+    final saleId = await SellDatabase().storeSell(sellData);
 
-    // 2. Add payment record
-    await PaymentDatabase().store({
+    // 2. Create payment line
+    final paymentData = {
       'sell_id': saleId,
       'amount': _totalPayable,
       'method': 'cash',
-    });
+      'paid_on': DateTime.now().toIso8601String(),
+    };
+    await PaymentDatabase().store(paymentData);
 
-    // 3. Show success message
-    ToastHelper.showSuccessToast(context, "Sale added successfully");
+    // 3. Update sell line status
+    await SellDatabase().updateSellLine({'sell_id': saleId, 'is_completed': 1});
 
-    // 4. Fetch data for receipt
-    final saleDetailsList = await SellDatabase().getSellBySellId(saleId);
-    if (saleDetailsList.isEmpty) {
-      ToastHelper.show(context, 'Error: Could not retrieve sale details.');
-      return;
+    // 4. Sync with API if connected
+    if (await Helper().checkConnectivity()) {
+      await Sell().createApiSell(sellId: saleId);
     }
-    final saleDetails = saleDetailsList.first;
-    final sellLines = await SellDatabase().getSellLines(saleId);
-    final payment = await PaymentDatabase().get(saleId);
 
-    // 5. Clear cart and reset customer
-    await Sell().resetCart();
-    _getCartLines();
-    Provider.of<HomeProvider>(context, listen: false).resetCustomer();
+    // 5. Print using the new centralized helper
+    final saleDetails = (await SellDatabase().getSellBySellId(saleId)).first;
+    await Helper().printDocument(saleId, saleDetails['tax_rate_id'] ?? 0, context);
 
-    // 6. Show printer dialog
-    _showPrinterDialog(saleId, saleDetails, sellLines, payment);
+    // 6. Reset cart
+    Sell().resetCart();
   }
 
   Future<void> _showPrinterDialog(int sellId, Map<String, dynamic> saleDetails,

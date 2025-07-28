@@ -19,14 +19,16 @@ class SettingsPage extends StatelessWidget {
                 title: const Text('Show Commission Agent'),
                 value: provider.dropdownVisibilities['showCommissionAgent']!,
                 onChanged: (bool value) {
-                  provider.updateDropdownVisibility('showCommissionAgent', value);
+                  provider.updateDropdownVisibility(
+                      'showCommissionAgent', value);
                 },
               ),
               SwitchListTile(
                 title: const Text('Show Types of Service'),
                 value: provider.dropdownVisibilities['showTypesOfService']!,
                 onChanged: (bool value) {
-                  provider.updateDropdownVisibility('showTypesOfService', value);
+                  provider.updateDropdownVisibility(
+                      'showTypesOfService', value);
                 },
               ),
               SwitchListTile(
@@ -50,6 +52,27 @@ class SettingsPage extends StatelessWidget {
                   provider.updateDropdownVisibility('showPrinter', value);
                 },
               ),
+              const Divider(),
+              ListTile(
+                title: const Text('Receipt Paper Size'),
+                trailing: DropdownButton<String>(
+                  dropdownColor: Colors.white,
+                  value: provider.selectedPaperSize,
+                  items: <String>['2-inch', '3-inch', '3-inch-alt']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    if (newValue != null) {
+                      provider.updatePaperSize(newValue);
+                    }
+                  },
+                ),
+              ),
+              const Divider(),
               SwitchListTile(
                 title: const Text('Show Kitchen Order'),
                 value: provider.dropdownVisibilities['showKitchenOrder']!,

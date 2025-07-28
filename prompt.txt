@@ -1,3 +1,6 @@
- in products.dart line 160 await Future.wait<dynamic>([ error is  
+in otherhelpers.dart line 231
 
-│  > HandshakeException (HandshakeException: Connection terminated during handshake) 
+contact: await System().get('contact_no'),
+
+Exception has occurred.
+_TypeError (type 'List<dynamic>' is not a subtype of type 'String?')
