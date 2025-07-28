@@ -833,6 +833,7 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
         setState(() {
           _suggestedProducts = [];
         });
+        _productSearchFocusNode.requestFocus();
       }
     } else {
       if (mounted) {
