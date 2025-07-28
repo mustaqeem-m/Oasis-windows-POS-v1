@@ -59,11 +59,40 @@ class HomeProvider with ChangeNotifier {
   };
   Map<String, dynamic> get selectedCustomer => _selectedCustomer;
 
+  Map<String, bool> _dropdownVisibilities = {
+    'showCommissionAgent': true,
+    'showTypesOfService': true,
+    'showTable': true,
+    'showServiceStaff': true,
+    'showPrinter': true,
+  };
+  Map<String, bool> get dropdownVisibilities => _dropdownVisibilities;
+
   HomeProvider() {
     getPermission();
     homepageData();
     Helper().syncCallLogs();
     _initializeCustomer();
+    _loadDropdownVisibilities();
+  }
+
+  Future<void> _loadDropdownVisibilities() async {
+    final prefs = await SharedPreferences.getInstance();
+    _dropdownVisibilities = {
+      'showCommissionAgent': prefs.getBool('showCommissionAgent') ?? true,
+      'showTypesOfService': prefs.getBool('showTypesOfService') ?? true,
+      'showTable': prefs.getBool('showTable') ?? true,
+      'showServiceStaff': prefs.getBool('showServiceStaff') ?? true,
+      'showPrinter': prefs.getBool('showPrinter') ?? true,
+    };
+    notifyListeners();
+  }
+
+  Future<void> updateDropdownVisibility(String key, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool(key, value);
+    _dropdownVisibilities[key] = value;
+    notifyListeners();
   }
 
   void _initializeCustomer() async {

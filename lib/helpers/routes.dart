@@ -1,3 +1,4 @@
+import '../pages/settings_page.dart';
 import '../pages/cart.dart';
 import '../pages/checkout.dart';
 import '../pages/contact_payment.dart';
@@ -31,7 +32,8 @@ class Routes {
       '/leads': (context) => Contacts(),
       '/followUp': (context) => FollowUp(),
       '/fieldForce': (context) => FieldForce(),
-      '/customer-display': (context) => CustomerDisplayScreen()
+      '/customer-display': (context) => CustomerDisplayScreen(),
+      '/settings': (context) => const SettingsPage(),
     };
   }
 }

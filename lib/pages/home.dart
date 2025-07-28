@@ -71,74 +71,71 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => HomeProvider(),
-      child: Consumer<HomeProvider>(
-        builder: (context, provider, child) {
-          return Scaffold(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            drawer: HomePageDrawer(
-              businessLogo: provider.businessLogo,
-              defaultImage: provider.defaultImage,
-              notPermitted: provider.notPermitted,
-              accessExpenses: provider.accessExpenses,
-              selectedLanguage: provider.selectedLanguage ?? 'en',
-              onLanguageChanged: (newValue) {
-                provider.updateLanguage(newValue);
-              },
-            ),
-            appBar: AppBar(
-              elevation: 0,
-              backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-              title: Text(AppLocalizations.of(context).translate(_pageTitles[_page]),
-                  style: Theme.of(context).textTheme.titleLarge!.copyWith(
+    return Consumer<HomeProvider>(
+      builder: (context, provider, child) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          drawer: HomePageDrawer(
+            businessLogo: provider.businessLogo,
+            defaultImage: provider.defaultImage,
+            notPermitted: provider.notPermitted,
+            accessExpenses: provider.accessExpenses,
+            selectedLanguage: provider.selectedLanguage ?? 'en',
+            onLanguageChanged: (newValue) {
+              provider.updateLanguage(newValue);
+            },
+          ),
+          appBar: AppBar(
+            elevation: 0,
+            backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+            title: Text(AppLocalizations.of(context).translate(_pageTitles[_page]),
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    fontWeight: FontWeight.bold)),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () async {
+                  (await Helper().checkConnectivity())
+                      ? await provider.sync(context)
+                      : ToastHelper.show(
+                          context,
+                          AppLocalizations.of(context)
+                              .translate('check_connectivity'));
+                },
+                child: Text(
+                  AppLocalizations.of(context).translate('sync'),
+                  style: Theme.of(context).textTheme.labelLarge!.copyWith(
                       color: Theme.of(context).colorScheme.onPrimary,
-                      fontWeight: FontWeight.bold)),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () async {
-                    (await Helper().checkConnectivity())
-                        ? await provider.sync(context)
-                        : ToastHelper.show(
-                            context,
-                            AppLocalizations.of(context)
-                                .translate('check_connectivity'));
-                  },
-                  child: Text(
-                    AppLocalizations.of(context).translate('sync'),
-                    style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimary,
-                        fontWeight: FontWeight.bold),
-                  ),
+                      fontWeight: FontWeight.bold),
                 ),
-                TextButton(
-                  onPressed: () async {
-                    SharedPreferences prefs =
-                        await SharedPreferences.getInstance();
-                    prefs.setInt('prevUserId', USERID!);
-                    prefs.remove('userId');
-                    Navigator.pushReplacementNamed(context, '/login');
-                  },
-                  child: Text(
-                    AppLocalizations.of(context).translate('logout'),
-                    style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimary,
-                        fontWeight: FontWeight.bold),
-                  ),
+              ),
+              TextButton(
+                onPressed: () async {
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
+                  prefs.setInt('prevUserId', USERID!);
+                  prefs.remove('userId');
+                  Navigator.pushReplacementNamed(context, '/login');
+                },
+                child: Text(
+                  AppLocalizations.of(context).translate('logout'),
+                  style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontWeight: FontWeight.bold),
                 ),
-              ],
-            ),
-            body: PageView(
-              controller: _pageController,
-              onPageChanged: _onPageChanged,
-              children: _pages,
-              physics: const NeverScrollableScrollPhysics(),
-            ),
-            bottomNavigationBar:
-                posBottomBar(_page, context, _onBottomBarTapped),
-          );
-        },
-      ),
+              ),
+            ],
+          ),
+          body: PageView(
+            controller: _pageController,
+            onPageChanged: _onPageChanged,
+            children: _pages,
+            physics: const NeverScrollableScrollPhysics(),
+          ),
+          bottomNavigationBar:
+              posBottomBar(_page, context, _onBottomBarTapped),
+        );
+      },
     );
   }
 }

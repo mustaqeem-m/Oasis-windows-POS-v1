@@ -1147,7 +1147,11 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: _buildPrinterDropdown(),
+                child: Visibility(
+                  visible: Provider.of<HomeProvider>(context)
+                      .dropdownVisibilities['showPrinter']!,
+                  child: _buildPrinterDropdown(),
+                ),
               ),
             ],
           ),
@@ -1156,11 +1160,19 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: _buildCommissionAgentDropdown(),
+                child: Visibility(
+                  visible: Provider.of<HomeProvider>(context)
+                      .dropdownVisibilities['showCommissionAgent']!,
+                  child: _buildCommissionAgentDropdown(),
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: _buildTypesOfServiceDropdown(),
+                child: Visibility(
+                  visible: Provider.of<HomeProvider>(context)
+                      .dropdownVisibilities['showTypesOfService']!,
+                  child: _buildTypesOfServiceDropdown(),
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -1178,11 +1190,19 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
-                child: _buildTableDropdown(),
+                child: Visibility(
+                  visible: Provider.of<HomeProvider>(context)
+                      .dropdownVisibilities['showTable']!,
+                  child: _buildTableDropdown(),
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
-                child: _buildServiceStaffDropdown(),
+                child: Visibility(
+                  visible: Provider.of<HomeProvider>(context)
+                      .dropdownVisibilities['showServiceStaff']!,
+                  child: _buildServiceStaffDropdown(),
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(

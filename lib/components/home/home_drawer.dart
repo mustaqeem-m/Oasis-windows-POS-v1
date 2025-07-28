@@ -85,6 +85,21 @@ class _HomePageDrawerState extends State<HomePageDrawer> {
                     ),
                     title: _changeAppLanguage(),
                   ),
+                  ListTile(
+                    leading: Icon(
+                      Icons.settings,
+                      color: Theme.of(context).iconTheme.color,
+                    ),
+                    title: Text(
+                      "Settings",
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    onTap: () {
+                      Navigator.pushNamed(context, '/settings');
+                    },
+                  ),
                   Visibility(
                     visible: widget.accessExpenses,
                     child: ListTile(
