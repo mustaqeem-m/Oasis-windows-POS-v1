@@ -1,6 +1,5 @@
-name = business[0]['name'],
-
-Exception has occurred.
-NoSuchMethodError (NoSuchMethodError: The method '[]' was called on null.
-Receiver: null
-Tried calling: []("name"))
+════════ Exception caught by widgets library ═══════════════════════════════════
+The following assertion was thrown while finalizing the widget tree:
+Duplicate GlobalKey detected in widget tree.
+The following GlobalKey was specified multiple times in the widget tree. This will lead to parts of the widget tree being truncated unexpectedly, because the second time a key is seen, the previous instance is moved to the new location. The key was:
+- [LabeledGlobalKey<SelectionWidgetState<int>>#8f3f3]

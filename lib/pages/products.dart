@@ -1307,7 +1307,6 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
           const SizedBox(width: 12),
           Expanded(
             child: DropdownSearch<int>(
-              key: UniqueKey(),
               items: _customers.map((customer) {
                 return customer['id'] as int;
               }).toList(),
