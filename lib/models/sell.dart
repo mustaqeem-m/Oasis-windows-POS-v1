@@ -25,8 +25,7 @@ class Sell {
           'is_quotation': element['is_quotation'],
           'tax_rate_id':
               (element['tax_rate_id'] == 0) ? null : element['tax_rate_id'],
-          'res_waiter_id':
-              (element['res_waiter_id'] == 0) ? null : element['res_waiter_id'],
+          'res_waiter_id': element['service_staff_id'],
           'discount_amount': element['discount_amount'],
           'discount_type': element['discount_type'],
           'change_return': element['change_return'],
@@ -94,7 +93,7 @@ class Sell {
             });
           }
         } else {
-          var sell = jsonEncode({'sells': sale});
+          var sell = jsonEncode(sale[0]);
           var result = await SellApi().create(sell);
           if (result.isNotEmpty) {
             await SellDatabase().updateSells(element['id'], {

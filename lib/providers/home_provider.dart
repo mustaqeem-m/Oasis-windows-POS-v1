@@ -90,33 +90,32 @@ class HomeProvider with ChangeNotifier {
     _loadDropdownVisibilities();
     _loadPaperSize();
     _loadRepairButtonVisibility();
-    _loadPrinters();
-    _loadSelectedPrinter();
+    _initializePrinters();
   }
 
-  Future<void> _loadPrinters() async {
+  Future<void> _initializePrinters() async {
     _printers = await Printing.listPrinters();
+    final prefs = await SharedPreferences.getInstance();
+    final selectedPrinterName = prefs.getString('selectedPrinter');
+
+    if (_printers.isNotEmpty) {
+      _selectedPrinter = _printers.firstWhere(
+        (p) => p.name == selectedPrinterName,
+        orElse: () => _printers.first,
+      );
+    } else {
+      _selectedPrinter = null;
+    }
     notifyListeners();
   }
 
-  Future<void> _loadSelectedPrinter() async {
+  Future<void> updateSelectedPrinter(Printer? printer) async {
     final prefs = await SharedPreferences.getInstance();
-    final selectedPrinterName = prefs.getString('selectedPrinter');
-    if (selectedPrinterName != null) {
-      final availablePrinters = await Printing.listPrinters();
-      try {
-        _selectedPrinter =
-            availablePrinters.firstWhere((p) => p.name == selectedPrinterName);
-      } catch (e) {
-        _selectedPrinter = null;
-      }
-      notifyListeners();
+    if (printer != null) {
+      await prefs.setString('selectedPrinter', printer.name);
+    } else {
+      await prefs.remove('selectedPrinter');
     }
-  }
-
-  Future<void> updateSelectedPrinter(Printer printer) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('selectedPrinter', printer.name);
     _selectedPrinter = printer;
     notifyListeners();
   }
