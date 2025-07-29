@@ -1,6 +1,6 @@
-var response = await db.insert('sell', value);
+name = business[0]['name'],
 
 Exception has occurred.
-SqfliteFfiException (SqfliteFfiException(sqlite_error: 1, , SqliteException(1): while preparing statement, table sell has no column named total_before_tax, SQL logic error (code 1)
-Causing statement: INSERT INTO sell (transaction_date, contact_id, invoice_amount, pending_amount, status, location_id, tax_rate_id, discount_type, discount_amount, total_before_tax, tax_amount, shipping_charges, service_staff_id, commission_agent, is_quotation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?)}) DatabaseException(SqliteException(1): while preparing statement, table sell has no column named total_before_tax, SQL logic error (code 1)
-Causing statement: INSERT INTO sell (transaction_date, contact_id, invoice_amount, pending_amount, status, location_id, tax_rate_id, discount_type, discount_amount, total_before_tax, tax_amount, shipping_charges, service_staff_id, commission_agent, is_quotation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?)) sql 'INSERT INTO sell (transaction_date, contact_id, invoice_amount, pending_amount, status, location_id, tax_rate_id, discount_type, discount_amount, total_before_tax, tax_amount, shipping_charges, service_staff_id, commission_agent, is_quotation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?)' args [2025-07-29T15:25:38.258441, 1777, 272.0, 0.0, final, 30, 45, percentage, 36.45, 182.25, 26.244, 100.0, 0] {details: {database: {path: C:\Users\Admin\DocumentsPosDemo117.db, id: 1, readOnly: false, singleInstance: true}}})
+NoSuchMethodError (NoSuchMethodError: The method '[]' was called on null.
+Receiver: null
+Tried calling: []("name"))

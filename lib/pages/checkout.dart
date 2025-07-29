@@ -788,6 +788,7 @@ class CheckOutState extends State<CheckOut> {
         contactId: argument!['customerId'],
         discountAmount: argument!['discountAmount'],
         discountType: argument!['discountType'],
+        totalBeforeTax: argument!['subTotal'],
         invoiceAmount: invoiceAmount,
         locId: argument!['locationId'],
         pending: pendingAmount,
@@ -874,20 +875,20 @@ class CheckOutState extends State<CheckOut> {
                 .printDocument(sellId, argument!['taxId'], context,
                     invoice: response.body)
                 .then((value) {
-              Navigator.popUntil(context, ModalRoute.withName('/home'));
+              Navigator.pop(context, 'sale_completed');
             });
           } else {
             await Helper()
                 .printDocument(sellId, argument!['taxId'], context)
                 .then((value) {
-              Navigator.popUntil(context, ModalRoute.withName('/home'));
+              Navigator.pop(context, 'sale_completed');
             });
           }
         } else {
           Helper()
               .printDocument(sellId, argument!['taxId'], context)
               .then((value) {
-            Navigator.popUntil(context, ModalRoute.withName('/home'));
+            Navigator.pop(context, 'sale_completed');
           });
         }
       } else {
@@ -898,20 +899,20 @@ class CheckOutState extends State<CheckOut> {
                 .savePdf(sellId, argument!['taxId'], context, invoiceNo,
                     invoice: response.body)
                 .then((value) {
-              Navigator.popUntil(context, ModalRoute.withName('/home'));
+              Navigator.pop(context, 'sale_completed');
             });
           } else {
             await Helper()
                 .savePdf(sellId, argument!['taxId'], context, invoiceNo)
                 .then((value) {
-              Navigator.popUntil(context, ModalRoute.withName('/home'));
+             Navigator.pop(context, 'sale_completed');
             });
           }
         } else {
           Helper()
               .savePdf(sellId, argument!['taxId'], context, invoiceNo)
               .then((value) {
-            Navigator.popUntil(context, ModalRoute.withName('/home'));
+            Navigator.pop(context, 'sale_completed');
           });
         }
       }

@@ -92,6 +92,7 @@ class Helper {
       String? discountType,
       double? discountAmount,
       double? invoiceAmount,
+      double? subTotal,
       int? customerId,
       int? isQuotation,
       int? serviceStaff}) {
@@ -102,6 +103,7 @@ class Helper {
       'discountType': discountType,
       'discountAmount': discountAmount,
       'invoiceAmount': invoiceAmount,
+      'subTotal': subTotal,
       'customerId': customerId,
       'is_quotation': isQuotation,
       'serviceStaff': serviceStaff
@@ -225,16 +227,32 @@ class Helper {
       ));
     }
 
+    final allPaymentMethodsRaw =
+        await System().get('payment_method', sell['location_id']);
+    final paymentMethodLabels = <String, String>{};
+    for (var method in allPaymentMethodsRaw) {
+      if (method['name'] != null && method['label'] != null) {
+        paymentMethodLabels[method['name']] = method['label'];
+      }
+    }
+
     List<ReceiptPayment> receiptPayments = [];
     double totalPaid = 0;
     for (var p in payments) {
       final amount = (p['amount'] as num?) ?? 0;
       totalPaid += amount;
+
+      String rawMethod = p['method'] ?? 'unknown';
+      String finalMethodLabel = paymentMethodLabels[rawMethod] ?? rawMethod;
+      finalMethodLabel = finalMethodLabel.replaceAll('_', ' ');
+      finalMethodLabel = finalMethodLabel[0].toUpperCase() +
+          finalMethodLabel.substring(1);
+
       receiptPayments.add(ReceiptPayment(
-        method: p['method'],
+        method: finalMethodLabel,
         date: DateFormat('MM-dd')
             .format(DateTime.parse(p['paid_on'] ?? DateTime.now().toString())),
-        amount: amount.toString(),
+        amount: formatCurrency(amount),
       ));
     }
 
@@ -457,7 +475,7 @@ class Helper {
   //fetch formatted business details
   Future<Map<String, dynamic>> getFormattedBusinessDetails() async {
     List business = await System().get('business');
-    if (business.isEmpty) {
+    if (business.isEmpty || business[0] == null) {
       return {
         'symbol': '₹',
         'name': 'Business Name',

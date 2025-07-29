@@ -2414,21 +2414,28 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
     return total;
   }
 
-  void _goToCheckout(String paymentMethod) {
+  void _goToCheckout(String paymentMethod) async {
     if (cartLines.isEmpty) {
       ToastHelper.show(
           context, AppLocalizations.of(context).translate('cart_is_empty'));
       return;
     }
-    Navigator.pushNamed(context, '/checkout',
+    final result = await Navigator.pushNamed(context, '/checkout',
         arguments: Helper().argument(
             invoiceAmount: _totalPayable,
+            subTotal: _subtotal,
             locId: selectedLocationId,
             customerId: Provider.of<HomeProvider>(context, listen: false)
                 .selectedCustomer['id'],
             taxId: 0, //TODO: get tax id
             discountType: 'fixed',
             discountAmount: 0));
+
+    if (result == 'sale_completed') {
+      await _getCartLines();
+      Provider.of<HomeProvider>(context, listen: false).resetCustomer();
+      ToastHelper.show(context, "Sale completed successfully");
+    }
   }
 
   Future<Map<String, dynamic>> _prepareSellData(String status) async {
