@@ -255,17 +255,21 @@ class Helper {
     );
   }
 
-  //function for formatting invoice
   Future<void> printDocument(sellId, taxId, context, {invoice}) async {
     final homeProvider = Provider.of<HomeProvider>(context, listen: false);
     final paperSize = homeProvider.selectedPaperSize;
+    final printer = homeProvider.selectedPrinter;
 
     final receiptDetails = await _mapSellToReceiptDetails(sellId, context);
     final receiptBuilder = ReceiptBuilder();
     final Uint8List pdfBytes =
         await receiptBuilder.buildReceiptPdf(paperSize, receiptDetails);
 
-    await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdfBytes);
+    if (printer != null) {
+      await Printing.directPrintPdf(printer: printer, onLayout: (PdfPageFormat format) async => pdfBytes);
+    } else {
+      await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdfBytes);
+    }
   }
 
   // //request permissions

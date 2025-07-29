@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import '../providers/home_provider.dart';
 
@@ -68,6 +69,26 @@ class SettingsPage extends StatelessWidget {
                   onChanged: (String? newValue) {
                     if (newValue != null) {
                       provider.updatePaperSize(newValue);
+                    }
+                  },
+                ),
+              ),
+              const Divider(),
+              ListTile(
+                title: const Text('Default Printer'),
+                trailing: DropdownButton<Printer>(
+                  dropdownColor: Colors.white,
+                  value: provider.selectedPrinter,
+                  items: provider.printers
+                      .map<DropdownMenuItem<Printer>>((Printer printer) {
+                    return DropdownMenuItem<Printer>(
+                      value: printer,
+                      child: Text(printer.name),
+                    );
+                  }).toList(),
+                  onChanged: (Printer? newPrinter) {
+                    if (newPrinter != null) {
+                      provider.updateSelectedPrinter(newPrinter);
                     }
                   },
                 ),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pos_2/models/contact_model.dart';
 import 'package:pos_2/pages/login.dart';
+import 'package:printing/printing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../config.dart';
@@ -76,6 +76,12 @@ class HomeProvider with ChangeNotifier {
   String _selectedPaperSize = '3-inch';
   String get selectedPaperSize => _selectedPaperSize;
 
+  List<Printer> _printers = [];
+  List<Printer> get printers => _printers;
+
+  Printer? _selectedPrinter;
+  Printer? get selectedPrinter => _selectedPrinter;
+
   HomeProvider() {
     getPermission();
     homepageData();
@@ -84,6 +90,35 @@ class HomeProvider with ChangeNotifier {
     _loadDropdownVisibilities();
     _loadPaperSize();
     _loadRepairButtonVisibility();
+    _loadPrinters();
+    _loadSelectedPrinter();
+  }
+
+  Future<void> _loadPrinters() async {
+    _printers = await Printing.listPrinters();
+    notifyListeners();
+  }
+
+  Future<void> _loadSelectedPrinter() async {
+    final prefs = await SharedPreferences.getInstance();
+    final selectedPrinterName = prefs.getString('selectedPrinter');
+    if (selectedPrinterName != null) {
+      final availablePrinters = await Printing.listPrinters();
+      try {
+        _selectedPrinter =
+            availablePrinters.firstWhere((p) => p.name == selectedPrinterName);
+      } catch (e) {
+        _selectedPrinter = null;
+      }
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateSelectedPrinter(Printer printer) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selectedPrinter', printer.name);
+    _selectedPrinter = printer;
+    notifyListeners();
   }
 
   Future<void> _loadRepairButtonVisibility() async {
