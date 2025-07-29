@@ -2477,6 +2477,7 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
 
     // 1. Create the sell
     final sellData = await _prepareSellData('final');
+    sellData['invoice_no'] = 'cash-sale-${DateTime.now().millisecondsSinceEpoch}';
     sellData['pending_amount'] = 0.0;
     final saleId = await SellDatabase().storeSell(sellData);
 
