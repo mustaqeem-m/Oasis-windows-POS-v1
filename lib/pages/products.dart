@@ -2458,6 +2458,7 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
 
     // 1. Create the sell
     final sellData = await _prepareSellData('final');
+    sellData['pending_amount'] = 0.0;
     final saleId = await SellDatabase().storeSell(sellData);
 
     // 2. Create payment line
@@ -2483,7 +2484,8 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
         .printDocument(saleId, saleDetails['tax_rate_id'] ?? 0, context);
 
     // 6. Reset cart
-    Sell().resetCart();
+    await Sell().resetCart();
+    await _getCartLines();
   }
 
   Future<void> _showPrinterDialog(int sellId, Map<String, dynamic> saleDetails,
