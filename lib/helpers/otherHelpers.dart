@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:pos_2/apis/user.dart';
+
 import '../components/barcode_scanner.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -193,37 +195,56 @@ class Helper {
     final sellLines = await SellDatabase().getSellLines(sellId);
     final payments = await PaymentDatabase().get(sellId);
     final business = (await System().get('business')).first;
+    final user = sell['service_staff_id'] != null
+        ? await User().get(sell['service_staff_id'])
+        : null;
 
+    double totalQuantity = 0;
     List<ReceiptLine> receiptLines = [];
     for (var line in sellLines) {
       final quantity = (line['quantity'] as num?) ?? 0;
-      final unitPrice = (line['unit_price_inc_tax'] as num?) ?? 0;
-      
+      final unitPrice = (line['unit_price'] as num?) ?? 0;
+      final unitPriceIncTax = (line['unit_price_inc_tax'] as num?) ?? 0;
+      final taxAmount = (line['tax_amount'] as num?) ?? 0;
+      final discountAmount = (line['line_discount_amount'] as num?) ?? 0;
+
+      totalQuantity += quantity;
       receiptLines.add(ReceiptLine(
         name: line['product_name'],
+        subSku: line['sub_sku'],
         quantity: quantity.toString(),
         units: line['unit'] ?? '',
-        unitPriceIncTax: unitPrice.toString(),
-        lineTotal: (quantity * unitPrice).toString(),
+        unitPrice: unitPrice.toString(),
+        unitPriceIncTax: unitPriceIncTax.toString(),
+        discount: discountAmount.toString(),
+        tax: taxAmount.toString(),
         variation: line['product_variation_name'],
         unitPriceBeforeDiscount: line['default_sell_price'].toString(),
         totalLineDiscount: line['line_discount_amount'].toString(),
+        mrp: line['mrp'].toString(),
       ));
     }
 
     List<ReceiptPayment> receiptPayments = [];
+    double totalPaid = 0;
     for (var p in payments) {
+      final amount = (p['amount'] as num?) ?? 0;
+      totalPaid += amount;
       receiptPayments.add(ReceiptPayment(
         method: p['method'],
         date: DateFormat('MM-dd')
             .format(DateTime.parse(p['paid_on'] ?? DateTime.now().toString())),
-        amount: p['amount'].toString(),
+        amount: amount.toString(),
       ));
     }
 
     final contact = await Contact().getCustomerDetailById(sell['contact_id']);
+    final commissionAgent = sell['commission_agent'] != null
+        ? await User().get(sell['commission_agent'])
+        : null;
     final businessContacts = await System().get('contact_no');
-    final businessContact = businessContacts.isNotEmpty ? businessContacts.first : null;
+    final businessContact =
+        businessContacts.isNotEmpty ? businessContacts.first : null;
 
     return ReceiptDetailsModel(
       logo: 'assets/images/oasis_pos_logo_.1-1.png',
@@ -231,6 +252,10 @@ class Helper {
       displayName: business['name'],
       address: business['address'],
       contact: businessContact,
+      taxId: business['tax_number_1'],
+      taxLabel1: business['tax_label_1'],
+      website: business['website'],
+      email: business['email'],
       invoiceNoPrefix: 'Invoice No:',
       invoiceNo: sell['invoice_no'],
       dateLabel: 'Date:',
@@ -238,16 +263,33 @@ class Helper {
           DateTime.parse(sell['transaction_date'] ?? DateTime.now().toString())),
       customerLabel: 'Customer:',
       customerInfo: contact != null ? contact['name'] : 'Walk-in Customer',
+      salesPersonLabel: 'Sales Man:',
+      salesPerson:
+          user != null ? '${user['first_name']} ${user['last_name']}' : '',
+      commissionAgentLabel: 'Commission Agent:',
+      commissionAgent: commissionAgent != null
+          ? '${commissionAgent['first_name']} ${commissionAgent['last_name']}'
+          : '',
+      totalItemsLabel: 'Total Items:',
+      totalItems: sellLines.length.toString(),
+      totalQuantityLabel: 'Total Quantity:',
+      totalQuantity: totalQuantity.toString(),
       subtotalLabel: 'Subtotal:',
-      subtotal: (sell['total_before_tax'] ?? 0.0).toString(),
+      subtotal: formatCurrency(sell['total_before_tax'] ?? 0.0),
       taxLabel: 'Tax:',
-      tax: (sell['tax_amount'] ?? 0.0).toString(),
+      tax: formatCurrency(sell['tax_amount'] ?? 0.0),
       discountLabel: 'Discount:',
-      discount: (sell['discount_amount'] ?? 0.0).toString(),
+      discount: formatCurrency(sell['discount_amount'] ?? 0.0),
+      shippingChargesLabel: 'Shipping Charges:',
+      shippingCharges: formatCurrency(sell['shipping_charges'] ?? 0.0),
       totalLabel: 'Total:',
-      total: (sell['invoice_amount'] ?? 0.0).toString(),
+      total: formatCurrency(sell['invoice_amount'] ?? 0.0),
       totalDueLabel: 'Total Due:',
-      totalDue: (sell['pending_amount'] ?? 0.0).toString(),
+      totalDue: formatCurrency(sell['pending_amount'] ?? 0.0),
+      totalPaidLabel: 'Paid Amount:',
+      totalPaid: formatCurrency(totalPaid),
+      changeTenderedLabel: 'Change Tendered:',
+      changeTendered: formatCurrency(sell['change_return'] ?? 0.0),
       footerText: 'Thank you for your business!',
       showBarcode: true,
       lines: receiptLines,
@@ -266,9 +308,11 @@ class Helper {
         await receiptBuilder.buildReceiptPdf(paperSize, receiptDetails);
 
     if (printer != null) {
-      await Printing.directPrintPdf(printer: printer, onLayout: (PdfPageFormat format) async => pdfBytes);
+      await Printing.directPrintPdf(
+          printer: printer, onLayout: (PdfPageFormat format) async => pdfBytes);
     } else {
-      await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => pdfBytes);
+      await Printing.layoutPdf(
+          onLayout: (PdfPageFormat format) async => pdfBytes);
     }
   }
 

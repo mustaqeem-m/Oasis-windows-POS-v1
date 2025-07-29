@@ -52,7 +52,8 @@ class DbProvider {
       " contact_id INTEGER, location_id INTEGER, status TEXT, tax_rate_id INTEGER, discount_amount REAL,"
       " discount_type TEXT, sale_note TEXT, staff_note TEXT, shipping_details TEXT, is_quotation INTEGER DEFAULT 0,"
       " shipping_charges REAL DEFAULT 0.00,invoice_amount REAL, change_return REAL DEFAULT 0.00, pending_amount REAL DEFAULT 0.00,"
-      " is_synced INTEGER, transaction_id INTEGER DEFAULT null, invoice_url TEXT DEFAULT null,service_staff_id INTEGER DEFAULT null, commission_agent INTEGER DEFAULT null)";
+      " is_synced INTEGER, transaction_id INTEGER DEFAULT null, invoice_url TEXT DEFAULT null,service_staff_id INTEGER DEFAULT null, commission_agent INTEGER DEFAULT null,"
+      " total_before_tax REAL DEFAULT 0.00, tax_amount REAL DEFAULT 0.00)";
 
 //query to create sale line table in database
   String createSellLineTable =
@@ -77,7 +78,7 @@ class DbProvider {
     return _database!;
   }
 
-  int currVersion = 13;
+  int currVersion = 14;
 
   //create tables during the creation of the database itself.
   Future<Database> initializeDatabase(loginUserId) async {
@@ -160,6 +161,11 @@ class DbProvider {
 
         if (oldVersion < 13) {
           await db.execute("ALTER TABLE sell_payments ADD COLUMN paid_on TEXT;");
+        }
+
+        if (oldVersion < 14) {
+          await db.execute("ALTER TABLE sell ADD COLUMN total_before_tax REAL DEFAULT 0.00;");
+          await db.execute("ALTER TABLE sell ADD COLUMN tax_amount REAL DEFAULT 0.00;");
         }
 
         db.setVersion(currVersion);

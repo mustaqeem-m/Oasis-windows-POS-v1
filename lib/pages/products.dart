@@ -2432,17 +2432,36 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
   }
 
   Future<Map<String, dynamic>> _prepareSellData(String status) async {
+    // Recalculate totals to ensure they are saved correctly
+    double subtotal = cartLines.fold(0.0, (sum, line) {
+      double price = double.parse(line['unit_price']?.toString() ?? '0');
+      double quantity = line['quantity'] ?? 0;
+      return sum + (price * quantity);
+    });
+
+    double discountValue = 0;
+    if (_cartProvider.selectedDiscountType == 'fixed') {
+      discountValue = _cartProvider.discountAmount ?? 0.0;
+    } else if (_cartProvider.selectedDiscountType == 'percentage') {
+      discountValue = (subtotal * (_cartProvider.discountAmount ?? 0.0)) / 100;
+    }
+
+    double taxAmount = _cartProvider.orderTaxAmount ?? 0.0;
+    double totalPayable = subtotal - discountValue + taxAmount + _shippingCharges;
+
     final homeProvider = Provider.of<HomeProvider>(context, listen: false);
     return {
       'transaction_date': DateTime.now().toIso8601String(),
       'contact_id': _selectedCustomerId,
-      'invoice_amount': _totalPayable,
-      'pending_amount': _totalPayable,
+      'invoice_amount': totalPayable.floor().toDouble(),
+      'pending_amount': totalPayable.floor().toDouble(),
       'status': status,
       'location_id': selectedLocationId,
       'tax_rate_id': _cartProvider.selectedTaxId,
       'discount_type': _cartProvider.selectedDiscountType,
-      'discount_amount': _cartProvider.discountAmount,
+      'discount_amount': discountValue, // Use calculated value
+      'total_before_tax': subtotal, // Add subtotal
+      'tax_amount': taxAmount, // Add tax amount
       'shipping_charges': _shippingCharges,
       'service_staff_id': _selectedServiceStaffId,
       'commission_agent': _selectedCommissionAgentId,
