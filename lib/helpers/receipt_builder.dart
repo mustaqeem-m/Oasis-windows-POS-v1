@@ -134,7 +134,8 @@ class ReceiptBuilder {
 
         // Item Table
         pw.Table.fromTextArray(
-          headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8),
+          headerStyle:
+              pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8),
           cellStyle: const pw.TextStyle(fontSize: 7),
           cellAlignment: pw.Alignment.centerLeft,
           headerDecoration: const pw.BoxDecoration(
@@ -160,7 +161,7 @@ class ReceiptBuilder {
             },
           ),
         ),
-        pw.Divider(height: 1),
+        // pw.Divider(height: 1),
         pw.SizedBox(height: 3),
 
         // Totals
@@ -543,11 +544,13 @@ class ReceiptBuilder {
 
         // Item Table
         pw.Table.fromTextArray(
-          headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8),
+          headerStyle:
+              pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 8),
           cellStyle: const pw.TextStyle(fontSize: 7.5),
           cellPadding: pw.EdgeInsets.symmetric(vertical: 2),
           headerDecoration: const pw.BoxDecoration(
-              border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey600))),
+              border:
+                  pw.Border(bottom: pw.BorderSide(color: PdfColors.grey600))),
           columnWidths: {
             0: const pw.FlexColumnWidth(7), // Description
             1: const pw.FlexColumnWidth(2), // Qty
@@ -566,7 +569,7 @@ class ReceiptBuilder {
             },
           ),
         ),
-        pw.Divider(height: 1),
+        // pw.Divider(height: 1),
         pw.SizedBox(height: 5),
 
         // Totals
