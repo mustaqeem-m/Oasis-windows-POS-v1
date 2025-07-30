@@ -1,5 +1,2 @@
-════════ Exception caught by widgets library ═══════════════════════════════════
-The following assertion was thrown while finalizing the widget tree:
-Duplicate GlobalKey detected in widget tree.
-The following GlobalKey was specified multiple times in the widget tree. This will lead to parts of the widget tree being truncated unexpectedly, because the second time a key is seen, the previous instance is moved to the new location. The key was:
-- [LabeledGlobalKey<SelectionWidgetState<int>>#8f3f3]
+LINK : fatal error LNK1168: cannot open C:\Users\Admin\Documents\Mustaqeem_git\oasis_windows_pos_v1\build\windows\x64\runner\Debug\oasis_windows_pos.exe for writing [C:\Users\Admin\Documents\Mustaqeem_git\oasis_windows_pos_v1\build\windows\x64\runner\oasis_windows_pos.vcxproj]
+Error: Build process failed.

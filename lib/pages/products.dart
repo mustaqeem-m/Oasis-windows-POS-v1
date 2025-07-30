@@ -106,6 +106,7 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
   final _productSearchFocusNode = FocusNode();
   final _productSearchController = TextEditingController();
   List<dynamic> _suggestedProducts = [];
+  DateTime _selectedDate = DateTime.now();
 
   @override
   bool get wantKeepAlive => true;
@@ -1125,23 +1126,40 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
   }
 
   Widget _buildDateTimePicker() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.calendar_today_outlined, size: 20),
-          const SizedBox(width: 8),
-          Text(
-            DateFormat('dd MMM, yyyy').format(DateTime.now()),
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-          ),
-        ],
+    return InkWell(
+      onTap: _selectDate,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.calendar_today_outlined, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              DateFormat('dd MMM, yyyy').format(_selectedDate),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> _selectDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
   }
 
   Widget _buildLeftPanel() {
@@ -1216,8 +1234,8 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
                 child: _buildDropdownField(
                   icon: MdiIcons.calendarBlankOutline,
                   label: 'Date',
-                  value: DateFormat('dd MMM, yyyy').format(DateTime.now()),
-                  onTap: () {},
+                  value: DateFormat('dd MMM, yyyy').format(_selectedDate),
+                  onTap: _selectDate,
                 ),
               ),
             ],
