@@ -1018,16 +1018,18 @@ class _SalesState extends State<Sales> {
                                   sellList[index]['id'],
                                   sellList[index]['tax_rate_id'],
                                   context,
+                                  DateTime.now(),
                                   invoice: response.body);
                             } else {
                               await Helper().printDocument(
                                   sellList[index]['id'],
                                   sellList[index]['tax_rate_id'],
-                                  context);
+                                  context,
+                                  DateTime.now());
                             }
                           } else {
                             await Helper().printDocument(sellList[index]['id'],
-                                sellList[index]['tax_rate_id'], context);
+                                sellList[index]['tax_rate_id'], context, DateTime.now());
                           }
                         }),
                     IconButton(
@@ -1351,7 +1353,7 @@ class _SalesState extends State<Sales> {
                                       Uri.parse(allSalesListMap[index]
                                           ['invoice_url']));
                                   if (response.statusCode == 200) {
-                                    await Helper().printDocument(0, 0, context,
+                                    await Helper().printDocument(0, 0, context, DateTime.now(),
                                         invoice: response.body);
                                   } else {
                                     Fluttertoast.showToast(

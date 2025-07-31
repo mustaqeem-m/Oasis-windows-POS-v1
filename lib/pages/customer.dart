@@ -249,7 +249,7 @@ class _CustomerState extends State<Customer> {
                     await Sell().createApiSell(sellId: value);
                   }
                   Helper()
-                      .printDocument(value, null, context)
+                      .printDocument(value, 0, context, DateTime.now())
                       .then((value) {
                     Navigator.pushNamedAndRemoveUntil(
                         context, '/products', ModalRoute.withName('/home'));

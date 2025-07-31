@@ -11,15 +11,17 @@ class PrintReceiptDialog extends StatefulWidget {
   final Map<String, dynamic> saleDetails;
   final List<Map<String, dynamic>> sellLines;
   final List<dynamic> payment;
+  final DateTime selectedDate;
 
   const PrintReceiptDialog({
     super.key,
     required this.sellId,
     required this.printers,
-    this.selectedPrinterId,
+    required this.selectedPrinterId,
     required this.saleDetails,
     required this.sellLines,
     required this.payment,
+    required this.selectedDate,
   });
 
   @override

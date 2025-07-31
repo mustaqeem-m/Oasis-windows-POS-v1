@@ -2510,7 +2510,7 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
       'sell_id': saleId,
       'amount': _totalPayable,
       'method': 'cash',
-      'paid_on': DateTime.now().toIso8601String(),
+      'paid_on': _selectedDate.toIso8601String(),
     };
     await PaymentDatabase().store(paymentData);
 
@@ -2524,8 +2524,8 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
 
     // 5. Print using the new centralized helper
     final saleDetails = (await SellDatabase().getSellBySellId(saleId)).first;
-    await Helper()
-        .printDocument(saleId, saleDetails['tax_rate_id'] ?? 0, context);
+    await Helper().printDocument(
+        saleId, saleDetails['tax_rate_id'] ?? 0, context, _selectedDate);
 
     // 6. Reset cart
     await Sell().resetCart();
@@ -2544,6 +2544,7 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
           saleDetails: saleDetails,
           sellLines: sellLines,
           payment: payment,
+          selectedDate: _selectedDate,
         );
       },
     );
@@ -2603,7 +2604,7 @@ class ProductsState extends State<Products> with AutomaticKeepAliveClientMixin {
 
     Map<String, dynamic> sale = await Sell().createSell(
       invoiceNo: '$status-${DateTime.now().millisecondsSinceEpoch}',
-      transactionDate: DateTime.now().toIso8601String(),
+      transactionDate: _selectedDate.toIso8601String(),
       contactId: Provider.of<HomeProvider>(context, listen: false)
           .selectedCustomer['id'],
       locId: selectedLocationId,

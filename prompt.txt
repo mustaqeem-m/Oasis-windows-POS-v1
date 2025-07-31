@@ -1,2 +1,0 @@
-LINK : fatal error LNK1168: cannot open C:\Users\Admin\Documents\Mustaqeem_git\oasis_windows_pos_v1\build\windows\x64\runner\Debug\oasis_windows_pos.exe for writing [C:\Users\Admin\Documents\Mustaqeem_git\oasis_windows_pos_v1\build\windows\x64\runner\oasis_windows_pos.vcxproj]
-Error: Build process failed.

@@ -872,21 +872,21 @@ class CheckOutState extends State<CheckOut> {
           final response = await http.Client().get(Uri.parse(invoice));
           if (response.statusCode == 200) {
             await Helper()
-                .printDocument(sellId, argument!['taxId'], context,
+                .printDocument(sellId, argument!['taxId'], context, DateTime.now(),
                     invoice: response.body)
                 .then((value) {
               Navigator.pop(context, 'sale_completed');
             });
           } else {
             await Helper()
-                .printDocument(sellId, argument!['taxId'], context)
+                .printDocument(sellId, argument!['taxId'], context, DateTime.now())
                 .then((value) {
               Navigator.pop(context, 'sale_completed');
             });
           }
         } else {
           Helper()
-              .printDocument(sellId, argument!['taxId'], context)
+              .printDocument(sellId, argument!['taxId'], context, DateTime.now())
               .then((value) {
             Navigator.pop(context, 'sale_completed');
           });

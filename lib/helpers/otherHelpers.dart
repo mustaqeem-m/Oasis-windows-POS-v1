@@ -192,7 +192,7 @@ class Helper {
   }
 
   Future<ReceiptDetailsModel> _mapSellToReceiptDetails(
-      int sellId, BuildContext context) async {
+      int sellId, BuildContext context, DateTime selectedDate) async {
     final sell = (await SellDatabase().getSellBySellId(sellId)).first;
     final sellLines = await SellDatabase().getSellLines(sellId);
     final payments = await PaymentDatabase().get(sellId);
@@ -277,8 +277,7 @@ class Helper {
       invoiceNoPrefix: 'Invoice No:',
       invoiceNo: sell['invoice_no'],
       dateLabel: 'Date:',
-      invoiceDate: DateFormat('yyyy-MM-dd HH:mm').format(
-          DateTime.parse(sell['transaction_date'] ?? DateTime.now().toString())),
+      invoiceDate: DateFormat('yyyy-MM-dd HH:mm').format(selectedDate),
       customerLabel: 'Customer:',
       customerInfo: contact != null ? contact['name'] : 'Walk-in Customer',
       salesPersonLabel: 'Sales Man:',
@@ -315,12 +314,15 @@ class Helper {
     );
   }
 
-  Future<void> printDocument(sellId, taxId, context, {invoice}) async {
+  Future<void> printDocument(
+      int sellId, int taxId, BuildContext context, DateTime selectedDate,
+      {dynamic invoice}) async {
     final homeProvider = Provider.of<HomeProvider>(context, listen: false);
     final paperSize = homeProvider.selectedPaperSize;
     final printer = homeProvider.selectedPrinter;
 
-    final receiptDetails = await _mapSellToReceiptDetails(sellId, context);
+    final receiptDetails =
+        await _mapSellToReceiptDetails(sellId, context, selectedDate);
     final receiptBuilder = ReceiptBuilder();
     final Uint8List pdfBytes =
         await receiptBuilder.buildReceiptPdf(paperSize, receiptDetails);
