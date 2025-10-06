@@ -23,7 +23,7 @@
 - [About The Project](#-about-the-project)
 - [✨ Key Features](#-key-features)
 - [🛠️ Technology Stack](#-technology-stack)
-- [📸 Screenshots](#-screenshots)
+- [📸 Application Showcase](#-application-showcase)
 - [🚀 Getting Started](#-getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation & Setup](#installation--setup)
@@ -72,17 +72,33 @@ This project is built with a modern and robust stack:
 
 ---
 
-## 📸 Screenshots
+## 📸 Application Showcase
 
-_(Add screenshots of your application here to showcase its beautiful UI.)_
+Here is a glimpse of the Oasis POS application in action.
 
-| Login Screen                                  | Home Screen                             | Cart Screen                             |
-| --------------------------------------------- | --------------------------------------- | --------------------------------------- |
-| ![Login Screen](/assets/images/LoignPage.jpg) | ![Home Screen](/assets/images/Home.png) | ![Cart Screen](/assets/images/cart.png) |
+| Login & Dashboard |
+| :---: |
+| ![Login Screen](assets/images/LoignPage.jpg) |
+| **Login Screen** |
+| ![Dashboard](assets/images/DashBoard.png) |
+| **Dashboard** |
 
-| DashBoard Screen                           | Product Screen                             | Sales Screen                             |
-| ------------------------------------------ | ------------------------------------------ | ---------------------------------------- |
-| ![Dashboard](/assets/images/DashBoard.png) | ![Home Screen](/assets/images/Product.png) | ![Cart Screen](/assets/images/sales.png) |
+| Core POS Features |
+| :---: |
+| ![Home Screen](assets/images/Home.png) |
+| **Home / Billing Screen** |
+| ![Cart Screen](assets/images/cart.png) |
+| **Cart Management** |
+
+| Product & Sales Management |
+| :---: |
+| ![Product Screen](assets/images/Product.png) |
+| **Product View** |
+| ![Sales Screen](assets/images/sales.png) |
+| **Sales History** |
+
+
+---
 
 ## 🚀 Getting Started
 
@@ -97,21 +113,18 @@ Ensure you have the Flutter SDK installed and configured on your machine.
 ### Installation & Setup
 
 1.  **Clone the repository:**
-
     ```sh
     git clone https://github.com/your_username/Oasis-windows-POS-v1.git
     cd Oasis-windows-POS-v1
     ```
 
 2.  **Install dependencies:**
-
     ```sh
     flutter pub get
     ```
 
 3.  **Configure the backend:**
     The application connects to a backend server. Update the API endpoint in `lib/config.dart`:
-
     ```dart
     class Config {
       static String baseUrl = "https://your-backend-url.com/";
@@ -136,13 +149,11 @@ Ensure you have the Flutter SDK installed and configured on your machine.
 To create a release build for your desired platform, use the following commands:
 
 - **Windows:**
-
   ```sh
   flutter build windows
   ```
 
 - **Android (App Bundle):**
-
   ```sh
   flutter build appbundle
   ```
