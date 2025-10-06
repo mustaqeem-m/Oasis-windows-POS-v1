@@ -76,9 +76,9 @@ This project is built with a modern and robust stack:
 
 _(Add screenshots of your application here to showcase its beautiful UI.)_
 
-| Login Screen                                 | Home Screen                            | Cart Screen                            |
-| -------------------------------------------- | -------------------------------------- | -------------------------------------- |
-| ![Login Screen](assets\images\LoignPage.jpg) | ![Home Screen](assets\images\Home.png) | ![Cart Screen](assets\images\cart.png) |
+| Login Screen                                  | Home Screen                             | Cart Screen                             |
+| --------------------------------------------- | --------------------------------------- | --------------------------------------- |
+| ![Login Screen](/assets/images/LoignPage.jpg) | ![Home Screen](/assets/images/Home.png) | ![Cart Screen](/assets/images/cart.png) |
 
 ---
 
@@ -172,6 +172,6 @@ Distributed under the MIT License. See `LICENSE` file for more information.
 
 ## 📞 Contact
 
-Your Name - your.email@example.com
+Your Name - mmmustaqeem1910@gmail.com
 
 Project Link: [https://github.com/your_username/Oasis-windows-POS-v1](https://github.com/your_username/Oasis-windows-POS-v1)
