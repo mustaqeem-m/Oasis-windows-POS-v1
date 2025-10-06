@@ -80,7 +80,9 @@ _(Add screenshots of your application here to showcase its beautiful UI.)_
 | --------------------------------------------- | --------------------------------------- | --------------------------------------- |
 | ![Login Screen](/assets/images/LoignPage.jpg) | ![Home Screen](/assets/images/Home.png) | ![Cart Screen](/assets/images/cart.png) |
 
----
+| DashBoard Screen                           | Product Screen                             | Sales Screen                             |
+| ------------------------------------------ | ------------------------------------------ | ---------------------------------------- |
+| ![Dashboard](/assets/images/DashBoard.png) | ![Home Screen](/assets/images/Product.png) | ![Cart Screen](/assets/images/sales.png) |
 
 ## 🚀 Getting Started
 
