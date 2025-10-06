@@ -74,11 +74,11 @@ This project is built with a modern and robust stack:
 
 ## 📸 Screenshots
 
-*(Add screenshots of your application here to showcase its beautiful UI.)*
+_(Add screenshots of your application here to showcase its beautiful UI.)_
 
-| Login Screen                                       | Home Screen                                      | Cart Screen                                        |
-| -------------------------------------------------- | ------------------------------------------------ | -------------------------------------------------- |
-| ![Login Screen](link_to_your_login_screenshot.png) | ![Home Screen](link_to_your_home_screenshot.png) | ![Cart Screen](link_to_your_cart_screenshot.png) |
+| Login Screen                                 | Home Screen                            | Cart Screen                            |
+| -------------------------------------------- | -------------------------------------- | -------------------------------------- |
+| ![Login Screen](assets\images\LoignPage.jpg) | ![Home Screen](assets\images\Home.png) | ![Cart Screen](assets\images\cart.png) |
 
 ---
 
@@ -89,23 +89,27 @@ Follow these instructions to get a copy of the project up and running on your lo
 ### Prerequisites
 
 Ensure you have the Flutter SDK installed and configured on your machine.
+
 - [Flutter Installation Guide](https://flutter.dev/docs/get-started/install)
 
 ### Installation & Setup
 
 1.  **Clone the repository:**
+
     ```sh
     git clone https://github.com/your_username/Oasis-windows-POS-v1.git
     cd Oasis-windows-POS-v1
     ```
 
 2.  **Install dependencies:**
+
     ```sh
     flutter pub get
     ```
 
 3.  **Configure the backend:**
     The application connects to a backend server. Update the API endpoint in `lib/config.dart`:
+
     ```dart
     class Config {
       static String baseUrl = "https://your-backend-url.com/";
@@ -130,11 +134,13 @@ Ensure you have the Flutter SDK installed and configured on your machine.
 To create a release build for your desired platform, use the following commands:
 
 - **Windows:**
+
   ```sh
   flutter build windows
   ```
 
 - **Android (App Bundle):**
+
   ```sh
   flutter build appbundle
   ```
