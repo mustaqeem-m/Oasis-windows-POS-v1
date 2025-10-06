@@ -76,27 +76,26 @@ This project is built with a modern and robust stack:
 
 Here is a glimpse of the Oasis POS application in action.
 
-| Login & Dashboard |
-| :---: |
+|              Login & Dashboard               |
+| :------------------------------------------: |
 | ![Login Screen](assets/images/LoignPage.jpg) |
-| **Login Screen** |
-| ![Dashboard](assets/images/DashBoard.png) |
-| **Dashboard** |
+|               **Login Screen**               |
+|  ![Dashboard](assets/images/DashBoard.png)   |
+|                **Dashboard**                 |
 
-| Core POS Features |
-| :---: |
+|           Core POS Features            |
+| :------------------------------------: |
 | ![Home Screen](assets/images/Home.png) |
-| **Home / Billing Screen** |
+|       **Home / Billing Screen**        |
 | ![Cart Screen](assets/images/cart.png) |
-| **Cart Management** |
+|          **Cart Management**           |
 
-| Product & Sales Management |
-| :---: |
+|          Product & Sales Management          |
+| :------------------------------------------: |
 | ![Product Screen](assets/images/Product.png) |
-| **Product View** |
-| ![Sales Screen](assets/images/sales.png) |
-| **Sales History** |
-
+|               **Product View**               |
+|   ![Sales Screen](assets/images/sales.png)   |
+|              **Sales History**               |
 
 ---
 
@@ -113,18 +112,21 @@ Ensure you have the Flutter SDK installed and configured on your machine.
 ### Installation & Setup
 
 1.  **Clone the repository:**
+
     ```sh
     git clone https://github.com/your_username/Oasis-windows-POS-v1.git
     cd Oasis-windows-POS-v1
     ```
 
 2.  **Install dependencies:**
+
     ```sh
     flutter pub get
     ```
 
 3.  **Configure the backend:**
     The application connects to a backend server. Update the API endpoint in `lib/config.dart`:
+
     ```dart
     class Config {
       static String baseUrl = "https://your-backend-url.com/";
@@ -149,11 +151,13 @@ Ensure you have the Flutter SDK installed and configured on your machine.
 To create a release build for your desired platform, use the following commands:
 
 - **Windows:**
+
   ```sh
   flutter build windows
   ```
 
 - **Android (App Bundle):**
+
   ```sh
   flutter build appbundle
   ```
@@ -185,6 +189,6 @@ Distributed under the MIT License. See `LICENSE` file for more information.
 
 ## 📞 Contact
 
-Your Name - mmmustaqeem1910@gmail.com
+Email : mmmustaqeem1910@gmail.com
 
 Project Link: [https://github.com/your_username/Oasis-windows-POS-v1](https://github.com/your_username/Oasis-windows-POS-v1)
