@@ -189,6 +189,6 @@ Distributed under the MIT License. See `LICENSE` file for more information.
 
 ## 📞 Contact
 
-Email : mmmustaqeem1910@gmail.com
+Email - mmmustaqeem1910@gmail.com
 
 Project Link: [https://github.com/your_username/Oasis-windows-POS-v1](https://github.com/your_username/Oasis-windows-POS-v1)
