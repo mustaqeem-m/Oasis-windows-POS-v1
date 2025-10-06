@@ -200,7 +200,7 @@ class AppTheme {
       actionsIconTheme: const IconThemeData(
         color: Color(0xff495057),
       ),
-      color: const Color(0xffffffff),
+      backgroundColor: const Color(0xffffffff),
       iconTheme: const IconThemeData(color: Color(0xff495057), size: 24),
       toolbarTextStyle: lightAppBarTextTheme.bodyMedium,
       titleTextStyle: lightAppBarTextTheme.titleLarge,
@@ -257,7 +257,7 @@ class AppTheme {
           .merge(const TextStyle(color: Color(0xff495057))),
     ),
     bottomAppBarTheme:
-        const BottomAppBarTheme(color: Color(0xffffffff), elevation: 2),
+        BottomAppBarThemeData(color: Color(0xffffffff), elevation: 2),
     tabBarTheme: const TabBarThemeData(
       unselectedLabelColor: Color(0xff495057),
       labelColor: Color(0xFF004080),
@@ -302,7 +302,8 @@ class AppTheme {
         actionsIconTheme: const IconThemeData(
           color: Color(0xffffffff),
         ),
-        color: const Color(0xFF2C3E50), // Matching scaffold background
+        backgroundColor:
+            const Color(0xFF2C3E50), // Matching scaffold background
         iconTheme: const IconThemeData(color: Color(0xffffffff), size: 24),
         toolbarTextStyle: darkAppBarTextTheme.bodyMedium,
         titleTextStyle: darkAppBarTextTheme.titleLarge,
@@ -348,7 +349,7 @@ class AppTheme {
         textStyle: darkTextTheme.bodyMedium!
             .merge(const TextStyle(color: Colors.white)),
       ),
-      bottomAppBarTheme: const BottomAppBarTheme(
+      bottomAppBarTheme: const BottomAppBarThemeData(
           color: Color(0xFF2C3E50),
           elevation: 2), // Matching scaffold background
       tabBarTheme: const TabBarThemeData(
